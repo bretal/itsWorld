@@ -1,0 +1,14 @@
+# 复制为 application-local.yml 后填入真实值（该文件已被 .gitignore 忽略）
+spring:
+  datasource:
+    password: change-me
+  data:
+    redis:
+      password: change-me
+
+minio:
+  access-key: change-me
+  secret-key: change-me
+
+jwt:
+  secret: change-me-to-a-long-random-string-at-least-256-bits

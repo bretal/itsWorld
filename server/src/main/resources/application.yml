@@ -1,0 +1,133 @@
+spring:
+  application:
+    name: itsworld
+
+  config:
+    import: optional:file:./application-local.yml,optional:file:./server/application-local.yml
+
+  profiles:
+    active: dev
+
+  # DataSource - MySQL
+  datasource:
+    url: jdbc:mysql://mysql:3306/its_world?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:itsworld}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # 文件上传限制
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  # Redis Cache
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000
+      jedis:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 2
+          max-wait: -1ms
+
+  # Jackson 配置
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: false
+
+# Server 配置
+server:
+  port: 8080
+
+# MyBatis-Plus
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deletedAt
+      logic-delete-value: "NOW()"
+      logic-not-delete-value: "NULL"
+      table-underline: true
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.itsworld: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# MinIO 对象存储配置
+minio:
+  endpoint: http://minio:9000
+  access-key: ${MINIO_ACCESS_KEY:}
+  secret-key: ${MINIO_SECRET_KEY:}
+  bucket:
+    avatars: itsworld-avatars
+    diary: itsworld-diary
+    community: itsworld-community
+    temp: itsworld-temp
+  enable-ssl: false
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:}
+  expiration: 86400  # 24 小时（秒）
+  refresh-expiration: 604800  # 7 天（秒）
+
+# AI / LLM 配置（待填入）
+ai:
+  # DashScope (通义千问) - 用于日记生成、建议等
+  dashscope:
+    enabled: false
+    api-key: ${AI_DASHSCOPE_KEY:}  # 从环境变量读取
+    base-url: https://dashscope.aliyuncs.com/api/v1
+    model: qwen-plus  # 或 qwen-turbo, qwen-max
+    timeout: 30
+
+  # DeepSeek - 备选 LLM
+  deepseek:
+    enabled: false
+    api-key: ${AI_DEEPSEEK_KEY:}  # 从环境变量读取
+    base-url: https://api.deepseek.com
+    model: deepseek-chat
+    timeout: 30
+
+  # 计算机视觉 API - 用于情绪识别
+  vision:
+    enabled: false
+    provider: baidu  # baidu, aliyun, or custom
+    api-key: ${AI_VISION_KEY:}  # 从环境变量读取
+
+# 功能开关
+feature:
+  ai-emotion-recognition: false  # AI 情绪识别（需要配置 API）
+  daily-greeting: true            # 每日问候唤醒
+  community-recommend: true       # 社区推荐
+
+# 应用配置
+app:
+  upload:
+    max-file-size: 52428800  # 50MB
+    max-photos-per-upload: 10
+    allowed-extensions: jpg,jpeg,png,gif,webp
+  security:
+    cors-allowed-origins: http://localhost:3000,http://localhost:5173
+    cors-allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    cors-max-age: 3600

@@ -1,0 +1,60 @@
+# 开发环境配置覆盖 (application.yml)
+# 此文件使用 spring.profiles.active=dev 或 -Dspring.profiles.active=dev 激活
+
+spring:
+  datasource:
+    # 开发环境 MySQL（Docker）
+    url: jdbc:mysql://localhost:13306/its_world?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+
+  data:
+    redis:
+      # 开发环境 Redis（Docker）
+      host: localhost
+      port: 16379
+
+logging:
+  level:
+    root: INFO
+    com.itsworld: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+  file:
+    name: logs/itsworld-dev.log
+    max-size: 10MB
+    max-history: 7
+
+# MinIO 开发环境
+minio:
+  endpoint: http://localhost:9000
+  access-key: ${MINIO_ACCESS_KEY:}
+  secret-key: ${MINIO_SECRET_KEY:}
+
+# AI/LLM 密钥 - 开发环境配置
+# 方式1：直接在此文件中设置（不安全，仅用于开发）
+# 方式2：设置环境变量，然后使用 ${ENV_VAR_NAME:}
+# 方式3：使用 .env 文件（见下）
+
+ai:
+  dashscope:
+    enabled: false
+    # api-key: sk-xxxxxx  # 不要硬编码在代码中！
+    api-key: ${AI_DASHSCOPE_KEY:}
+
+  deepseek:
+    enabled: false
+    api-key: ${AI_DEEPSEEK_KEY:}
+
+  vision:
+    enabled: false
+    api-key: ${AI_VISION_KEY:}
+
+# 功能开关：开发环境全部打开便于调试
+feature:
+  ai-emotion-recognition: false  # 仍需配置 API 才能启用
+  daily-greeting: true
+  community-recommend: true
+
+# CORS 配置：开发环境允许所有本地前端
+app:
+  security:
+    cors-allowed-origins: http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173

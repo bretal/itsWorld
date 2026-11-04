@@ -1,0 +1,33 @@
+{
+  "name": "itsworld-miniprogram",
+  "version": "1.0.0",
+  "description": "它的世界 - 宠物社交应用微信小程序版",
+  "main": "index.js",
+  "scripts": {
+    "dev": "taro build --type weapp --watch",
+    "build": "taro build --type weapp",
+    "build:h5": "taro build --type h5",
+    "build:alipay": "taro build --type alipay"
+  },
+  "keywords": [
+    "taro",
+    "weapp",
+    "miniprogram"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tarojs/components": "^4.3.1",
+    "@tarojs/react": "^4.3.1",
+    "@tarojs/runtime": "^4.3.1",
+    "@tarojs/taro": "^4.3.1",
+    "@tarojs/vite-runner": "^4.3.1",
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.31",
+    "axios": "^1.21.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^7.0.2",
+    "zustand": "^5.0.16"
+  }
+}
