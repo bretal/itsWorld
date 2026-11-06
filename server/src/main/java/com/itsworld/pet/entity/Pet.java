@@ -77,6 +77,12 @@ public class Pet implements Serializable {
     private BigDecimal weight;
 
     /**
+     * 当前身高（cm）
+     */
+    @TableField("height_cm")
+    private BigDecimal height;
+
+    /**
      * 宠物描述
      */
     @TableField("bio")

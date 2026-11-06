@@ -1,0 +1,38 @@
+<view class="onboarding">
+  <view class="topbar">
+    <view class="step">{{current + 1}}/{{slides.length}}</view>
+    <view class="skip" bindtap="onSkip">跳过</view>
+  </view>
+
+  <swiper
+    class="swiper"
+    current="{{current}}"
+    bindchange="onSwiperChange"
+    duration="300"
+  >
+    <swiper-item wx:for="{{slides}}" wx:key="title">
+      <view class="slide">
+        <view class="illustration" style="background: {{item.tint}}">
+          <view class="blob blob-a"></view>
+          <view class="blob blob-b"></view>
+          <text class="emoji">{{item.emoji}}</text>
+        </view>
+        <view class="slide-title">{{item.title}}</view>
+        <view class="slide-desc">{{item.desc}}</view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="bottom">
+    <view class="dots">
+      <view
+        wx:for="{{slides}}"
+        wx:key="title"
+        class="dot {{current === index ? 'active' : ''}}"
+      ></view>
+    </view>
+    <button class="btn-primary next" bindtap="onNext">
+      {{current === slides.length - 1 ? '开始使用' : '下一步'}}
+    </button>
+  </view>
+</view>

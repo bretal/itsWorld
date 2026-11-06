@@ -1,0 +1,92 @@
+<view class="community-page">
+  <view class="community-head">
+    <view>
+      <view class="community-title">宠友圈</view>
+      <view class="community-sub">和同频的宠友分享养宠日常</view>
+    </view>
+    <view class="head-paw">🐾</view>
+  </view>
+
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab {{activeTab === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="feed">
+    <block wx:if="{{posts.length}}">
+      <view
+        wx:for="{{posts}}"
+        wx:key="id"
+        class="post-card"
+        data-id="{{item.id}}"
+        bindtap="goPostDetail"
+      >
+        <view class="post-head">
+          <image
+            class="post-avatar"
+            src="{{item.avatarSrc || item.userAvatar || '/assets/avatar-placeholder.png'}}"
+            mode="aspectFill"
+          />
+          <view class="post-author">
+            <view class="author-name">{{item.username || '宠友'}}</view>
+            <view class="post-time">{{item.timeText}}</view>
+          </view>
+          <view class="post-more">···</view>
+        </view>
+
+        <view wx:if="{{item.title}}" class="post-title">{{item.title}}</view>
+        <view class="post-content">{{item.content}}</view>
+
+        <view wx:if="{{item.photos.length}}" class="post-photos">
+          <image
+            wx:for="{{item.photos}}"
+            wx:for-item="photo"
+            wx:key="*this"
+            class="post-photo"
+            src="{{photo}}"
+            mode="aspectFill"
+          />
+        </view>
+
+        <view class="post-actions">
+          <view
+            class="action"
+            catchtap="like"
+            data-index="{{index}}"
+          >
+            <text class="action-icon {{item.liked ? 'liked' : ''}}">
+              {{item.liked ? '♥' : '♡'}}
+            </text>
+            <text>{{item.likeCount || 0}}</text>
+          </view>
+          <view class="action">
+            <text class="action-icon">💬</text>
+            <text>{{item.commentCount || 0}}</text>
+          </view>
+          <view class="action">
+            <text class="action-icon">↗</text>
+            <text>分享</text>
+          </view>
+        </view>
+      </view>
+
+    </block>
+
+    <view wx:if="{{!loading && !posts.length}}" class="empty follow-empty">
+      <view class="empty-emoji">🐾</view>
+      <view class="empty-title">{{emptyText}}</view>
+      <view wx:if="{{activeTab === 'follow'}}" class="empty-btn" bindtap="goRecommend">看推荐</view>
+      <view wx:else class="empty-btn" bindtap="goCreatePost">去发帖</view>
+    </view>
+
+    <view wx:if="{{loadingMore}}" class="list-footer">加载中…</view>
+    <view wx:elif="{{!hasMore && posts.length}}" class="list-footer">没有更多了</view>
+  </view>
+</view>

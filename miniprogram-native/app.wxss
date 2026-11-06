@@ -1,0 +1,137 @@
+page {
+  --brand: #2f80ed;
+  --brand-deep: #1f6fe0;
+  --brand-soft: #eaf2ff;
+  --text: #1f2329;
+  --muted: #8a8f99;
+  --line: #eef0f3;
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --yellow: #ffc94a;
+  --pink: #ff8fb1;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+view,
+text,
+image,
+button,
+input,
+textarea,
+scroll-view,
+swiper,
+swiper-item {
+  box-sizing: border-box;
+}
+
+image {
+  display: block;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  line-height: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button::after {
+  border: none;
+}
+
+.container {
+  padding: 24rpx 32rpx 180rpx;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 28rpx;
+  padding: 28rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.brand {
+  color: var(--brand);
+}
+
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 92rpx;
+  border-radius: 46rpx;
+  background: linear-gradient(135deg, #5aa9f8 0%, var(--brand) 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 12rpx 28rpx rgba(47, 128, 237, 0.28);
+}
+
+.btn-primary[disabled] {
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 84rpx;
+  border-radius: 42rpx;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 32rpx;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-emoji {
+  font-size: 72rpx;
+  margin-bottom: 16rpx;
+}
+
+.safe-bottom {
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}

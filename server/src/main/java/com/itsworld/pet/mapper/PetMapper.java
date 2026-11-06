@@ -23,7 +23,7 @@ public interface PetMapper extends BaseMapper<Pet> {
      * @param userId 用户ID
      * @return 宠物列表
      */
-    @Select("SELECT id, user_id, pet_name, pet_type, breed, birth_date, gender, weight_kg AS weight, avatar_url, bio AS description, is_active AS isActive, care_notes, created_at, updated_at, deleted_at FROM pet_profile WHERE user_id = #{userId} AND deleted_at IS NULL ORDER BY created_at DESC")
+    @Select("SELECT id, user_id, pet_name, pet_type, breed, birth_date, gender, weight_kg AS weight, height_cm AS height, avatar_url, bio AS description, is_active AS isActive, care_notes, created_at, updated_at, deleted_at FROM pet_profile WHERE user_id = #{userId} AND deleted_at IS NULL ORDER BY created_at DESC")
     List<Pet> selectByUserId(Long userId);
 
     /**
@@ -33,7 +33,7 @@ public interface PetMapper extends BaseMapper<Pet> {
      * @param petId 宠物ID
      * @return 宠物对象
      */
-    @Select("SELECT id, user_id, pet_name, pet_type, breed, birth_date, gender, weight_kg AS weight, avatar_url, bio AS description, is_active AS isActive, care_notes, created_at, updated_at, deleted_at FROM pet_profile WHERE user_id = #{userId} AND id = #{petId} AND deleted_at IS NULL LIMIT 1")
+    @Select("SELECT id, user_id, pet_name, pet_type, breed, birth_date, gender, weight_kg AS weight, height_cm AS height, avatar_url, bio AS description, is_active AS isActive, care_notes, created_at, updated_at, deleted_at FROM pet_profile WHERE user_id = #{userId} AND id = #{petId} AND deleted_at IS NULL LIMIT 1")
     Pet selectByUserIdAndPetId(Long userId, Long petId);
 
     /**
@@ -43,7 +43,7 @@ public interface PetMapper extends BaseMapper<Pet> {
      * @param petName 宠物名称
      * @return 宠物对象
      */
-    @Select("SELECT id, user_id, pet_name, pet_type, breed, birth_date, gender, weight_kg AS weight, avatar_url, bio AS description, is_active AS isActive, care_notes, created_at, updated_at, deleted_at FROM pet_profile WHERE user_id = #{userId} AND pet_name = #{petName} AND deleted_at IS NULL LIMIT 1")
+    @Select("SELECT id, user_id, pet_name, pet_type, breed, birth_date, gender, weight_kg AS weight, height_cm AS height, avatar_url, bio AS description, is_active AS isActive, care_notes, created_at, updated_at, deleted_at FROM pet_profile WHERE user_id = #{userId} AND pet_name = #{petName} AND deleted_at IS NULL LIMIT 1")
     Pet selectByUserIdAndPetName(Long userId, String petName);
 
 }

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Form, Input, InputNumber, Select, Button, Avatar, message, Spin, Row, Col, Tabs, Upload, List } from 'antd';
+import { Card, Form, Input, InputNumber, Select, Button, Avatar, message, Spin, Row, Col, Tabs, Upload, List, DatePicker } from 'antd';
 import { ArrowLeftOutlined, CameraOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
+import dayjs from 'dayjs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import * as petService from '@/services/petService';
 import * as diaryService from '@/services/diaryService';
@@ -32,7 +33,10 @@ const PetDetailPage: React.FC = () => {
           const data = await petService.getPet(id);
           setPet(data);
           setAvatarUrl(data.avatarUrl || '');
-          form.setFieldsValue(data);
+          form.setFieldsValue({
+            ...data,
+            birthDate: data.birthDate ? dayjs(data.birthDate) : undefined,
+          });
           const diaryList = await diaryService.listDiaries(id);
           setDiaries(diaryList || []);
         }
@@ -68,6 +72,7 @@ const PetDetailPage: React.FC = () => {
       if (petId) {
         const updated = await petService.updatePet(parseInt(petId), {
           ...values,
+          birthDate: values.birthDate ? values.birthDate.format('YYYY-MM-DD') : undefined,
           avatarUrl,
         });
         setPet(updated);
@@ -163,7 +168,11 @@ const PetDetailPage: React.FC = () => {
                           label="出生日期"
                           name="birthDate"
                         >
-                          <Input type="date" />
+                          <DatePicker
+                            format="YYYY-MM-DD"
+                            placeholder="选择出生日期"
+                            style={{ width: '100%' }}
+                          />
                         </Form.Item>
 
                         <Form.Item

@@ -1,5 +1,6 @@
 package com.itsworld.pet.service;
 
+import com.itsworld.common.result.PageResult;
 import com.itsworld.pet.dto.PetCreateRequest;
 import com.itsworld.pet.dto.PetResponse;
 import com.itsworld.pet.dto.PetUpdateRequest;
@@ -31,6 +32,17 @@ public interface PetService {
      * @return 宠物列表
      */
     List<PetResponse> getPetListByUserId(Long userId);
+
+    /**
+     * 分页查询宠物列表
+     *
+     * @param userId 用户ID
+     * @param pageNum 页码
+     * @param pageSize 每页条数
+     * @param keyword 名称/品种关键字
+     * @return 分页结果
+     */
+    PageResult<PetResponse> getPetPage(Long userId, long pageNum, long pageSize, String keyword);
 
     /**
      * 获取单个宠物信息

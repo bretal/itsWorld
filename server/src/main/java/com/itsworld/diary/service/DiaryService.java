@@ -1,5 +1,6 @@
 package com.itsworld.diary.service;
 
+import com.itsworld.common.result.PageResult;
 import com.itsworld.diary.dto.DiaryCreateRequest;
 import com.itsworld.diary.dto.DiaryResponse;
 import com.itsworld.diary.entity.Diary;
@@ -31,6 +32,19 @@ public interface DiaryService {
      * @return 日记列表
      */
     List<DiaryResponse> getDiaryList(Long userId, Long petId);
+
+    /**
+     * 分页查询宠物日记
+     *
+     * @param userId 用户ID
+     * @param petId 宠物ID
+     * @param pageNum 页码
+     * @param pageSize 每页条数
+     * @param category 分类（daily/food/health），可为空
+     * @return 分页结果
+     */
+    PageResult<DiaryResponse> getDiaryPage(Long userId, Long petId, long pageNum,
+                                           long pageSize, String category);
 
     /**
      * 获取单条日记

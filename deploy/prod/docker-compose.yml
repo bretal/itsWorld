@@ -1,0 +1,148 @@
+name: itsworld
+
+services:
+  mysql:
+    image: mysql:8.0.42
+    container_name: itsworld-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?required}
+      MYSQL_DATABASE: its_world
+      MYSQL_USER: ${MYSQL_USER:-itsworld}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?required}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=128M
+      - --performance-schema=OFF
+      - --max-connections=80
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts/mysql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - itsworld-net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  redis:
+    image: redis:7.2.8
+    container_name: itsworld-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?required}
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:?required}
+      - --maxmemory
+      - 64mb
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - itsworld-net
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a $$REDIS_PASSWORD ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: itsworld-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?required}
+      TZ: Asia/Shanghai
+    command: server /data --certs-dir /certs --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+      - ./certs:/certs
+    networks:
+      - itsworld-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSk https://localhost:9000/minio/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  server:
+    image: eclipse-temurin:17-jre-jammy
+    container_name: itsworld-server
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./app.jar:/app/app.jar:ro
+    command:
+      - java
+      - -Xms128m
+      - -Xmx320m
+      - -XX:+UseSerialGC
+      - -Duser.timezone=Asia/Shanghai
+      - -Dminio.endpoint=${MINIO_PUBLIC_ENDPOINT:-https://lvhaorankk.top:9000}
+      - -Dminio.public-endpoint=${MINIO_FILE_BASE_URL:-https://lvhaorankk.top/files}
+      - -jar
+      - /app/app.jar
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/its_world?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-itsworld}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:?required}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:?required}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:?required}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?required}
+      JWT_SECRET: ${JWT_SECRET:?required}
+      LOGGING_LEVEL_COM_ITSWORLD: INFO
+      TZ: Asia/Shanghai
+    extra_hosts:
+      # MinIO 以 HTTPS 对外，容器内通过宿主机网关回到 9000，避免 EIP 回环问题
+      - "lvhaorankk.top:host-gateway"
+    networks:
+      - itsworld-net
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: itsworld-web
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot-webroot:/var/www/certbot:ro
+    networks:
+      - itsworld-net
+
+networks:
+  itsworld-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:

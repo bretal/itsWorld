@@ -41,6 +41,11 @@ public class DiaryResponse {
     private String diaryDate;
 
     /**
+     * 日记分类
+     */
+    private String category;
+
+    /**
      * 问候标题
      */
     private String greeting;

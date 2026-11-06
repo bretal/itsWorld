@@ -1,7 +1,10 @@
 package com.itsworld.community.controller;
 
+import com.itsworld.common.result.PageResult;
 import com.itsworld.common.result.Result;
+import com.itsworld.common.util.PageUtils;
 import com.itsworld.community.dto.CommentRequest;
+import com.itsworld.community.dto.CommentResponse;
 import com.itsworld.community.dto.PostCreateRequest;
 import com.itsworld.community.dto.PostResponse;
 import com.itsworld.community.service.CommunityService;
@@ -119,6 +122,49 @@ public class CommunityController {
     }
 
     /**
+     * 获取关注流帖子
+     * GET /api/community/following/feed
+     *
+     * @return 关注流帖子列表
+     */
+    @GetMapping("/following/feed")
+    public Result<List<PostResponse>> getFollowingFeed() {
+        log.info("获取关注流帖子");
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+
+        List<PostResponse> posts = communityService.getFollowingFeed(user.getId());
+        return Result.success(posts);
+    }
+
+    /**
+     * 分页查询社区帖子
+     * GET /api/community/page?type=recommend&page=1&size=20
+     *
+     * @param type hot / recommend / following
+     * @param page 页码
+     * @param size 每页条数
+     * @return 分页结果
+     */
+    @GetMapping("/page")
+    public Result<PageResult<PostResponse>> getPostPage(
+            @RequestParam(defaultValue = "recommend") String type,
+            @RequestParam(required = false) Long page,
+            @RequestParam(required = false) Long size) {
+        log.info("分页查询社区帖子: type={}, page={}, size={}", type, page, size);
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+
+        PageResult<PostResponse> result = communityService.getPostPage(
+                user.getId(), type,
+                PageUtils.normalizePageNum(page),
+                PageUtils.normalizePageSize(size));
+        return Result.success(result);
+    }
+
+    /**
      * 删除帖子
      * DELETE /api/community/{postId}
      *
@@ -170,6 +216,41 @@ public class CommunityController {
 
         communityService.unlikePost(user.getId(), postId);
         return Result.success(null, "取消点赞成功");
+    }
+
+    /**
+     * 查询帖子评论列表
+     * GET /api/community/{postId}/comments
+     *
+     * @param postId 帖子ID
+     * @return 评论列表
+     */
+    @GetMapping("/{postId}/comments")
+    public Result<List<CommentResponse>> getComments(@PathVariable Long postId) {
+        log.info("查询帖子评论: postId={}", postId);
+        return Result.success(communityService.getComments(postId));
+    }
+
+    /**
+     * 分页查询帖子评论
+     * GET /api/community/{postId}/comments/page?page=1&size=20
+     *
+     * @param postId 帖子ID
+     * @param page 页码
+     * @param size 每页条数
+     * @return 分页结果
+     */
+    @GetMapping("/{postId}/comments/page")
+    public Result<PageResult<CommentResponse>> getCommentPage(
+            @PathVariable Long postId,
+            @RequestParam(required = false) Long page,
+            @RequestParam(required = false) Long size) {
+        log.info("分页查询帖子评论: postId={}, page={}, size={}", postId, page, size);
+        PageResult<CommentResponse> result = communityService.getCommentPage(
+                postId,
+                PageUtils.normalizePageNum(page),
+                PageUtils.normalizePageSize(size));
+        return Result.success(result);
     }
 
     /**

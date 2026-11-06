@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS pet_profile (
   birth_date DATE COMMENT '出生日期',
   gender TINYINT COMMENT '性别 (0-未知 1-公 2-母)',
   weight_kg DECIMAL(5,2) COMMENT '当前体重(kg)',
+  height_cm DECIMAL(5,2) COMMENT '身高(cm)',
   avatar_url VARCHAR(500) COMMENT '宠物头像(MinIO)',
   bio TEXT COMMENT '宠物简介',
   is_active TINYINT DEFAULT 1 COMMENT '是否为活跃宠物(用户正在记录的)',
@@ -163,6 +164,7 @@ CREATE TABLE IF NOT EXISTS pet_diary (
   pet_id BIGINT NOT NULL COMMENT '宠物ID',
   user_id BIGINT NOT NULL COMMENT '主人ID',
   diary_date DATE NOT NULL COMMENT '日记日期',
+  category VARCHAR(20) COMMENT '日记分类 (daily-日常, food-饮食, health-健康)',
 
   -- 6步唤醒问候数据
   morning_mood VARCHAR(50) COMMENT '早晨心情 (happy,sad,neutral...)',
@@ -300,6 +302,19 @@ CREATE TABLE IF NOT EXISTS community_comment (
   FOREIGN KEY (user_id) REFERENCES sys_user(id) ON DELETE CASCADE,
   FOREIGN KEY (parent_comment_id) REFERENCES community_comment(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社区评论表';
+
+-- 社区帖子点赞表
+CREATE TABLE IF NOT EXISTS community_like (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '点赞ID',
+  post_id BIGINT NOT NULL COMMENT '帖子ID',
+  user_id BIGINT NOT NULL COMMENT '点赞用户ID',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_post_user (post_id, user_id),
+  KEY idx_user_id (user_id),
+  FOREIGN KEY (post_id) REFERENCES community_post(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES sys_user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社区帖子点赞表';
 
 -- 用户关注表
 CREATE TABLE IF NOT EXISTS user_follow (

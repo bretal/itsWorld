@@ -36,6 +36,7 @@ public enum ErrorCode {
     // 用户相关 (1000-1099)
     USER_NOT_FOUND(1001, "用户不存在"),
     USER_ALREADY_EXISTS(1002, "用户已存在"),
+    PHONE_ALREADY_EXISTS(1006, "手机号已注册"),
     PASSWORD_ERROR(1003, "密码错误"),
     PASSWORD_TOO_SHORT(1004, "密码长度不能少于8个字符"),
     USER_DISABLED(1005, "用户已禁用"),
@@ -56,6 +57,9 @@ public enum ErrorCode {
     // JWT相关 (1400-1499)
     TOKEN_INVALID(1401, "Token无效"),
     TOKEN_EXPIRED(1402, "Token已过期"),
+
+    // 健康管理相关 (1600-1699)
+    HEALTH_RECORD_NOT_FOUND(1601, "健康记录不存在"),
 
     // 其他业务错误 (1500+)
     BUSINESS_ERROR(1500, "业务异常"),

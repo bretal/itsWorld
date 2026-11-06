@@ -33,6 +33,11 @@ public class UserResponse {
     private String email;
 
     /**
+     * 手机号
+     */
+    private String phone;
+
+    /**
      * 昵称
      */
     private String nickName;

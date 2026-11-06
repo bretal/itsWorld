@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, message, Spin } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useAuth } from '@/hooks/useAuth';
 import styles from './Auth.module.css';
 
 interface RegisterFormValues {
   username: string;
+  phone: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -24,7 +25,7 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      await register(values.username, values.email, values.password, values.confirmPassword);
+      await register(values.username, values.phone, values.email, values.password, values.confirmPassword);
       message.success('注册成功，请登录');
       navigate('/login');
     } catch (error: any) {
@@ -54,6 +55,22 @@ const RegisterPage: React.FC = () => {
                 prefix={<UserOutlined />}
                 placeholder="输入用户名"
                 size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="phone"
+              label="手机号"
+              rules={[
+                { required: true, message: '请输入手机号' },
+                { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确' },
+              ]}
+            >
+              <Input
+                prefix={<PhoneOutlined />}
+                placeholder="输入手机号"
+                size="large"
+                maxLength={11}
               />
             </Form.Item>
 

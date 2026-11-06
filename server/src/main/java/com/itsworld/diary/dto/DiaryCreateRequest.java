@@ -2,6 +2,7 @@ package com.itsworld.diary.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,12 @@ public class DiaryCreateRequest {
      */
     @NotBlank(message = "日期不能为空")
     private String diaryDate;
+
+    /**
+     * 日记分类（daily-日常, food-饮食, health-健康）
+     */
+    @Pattern(regexp = "daily|food|health", message = "日记分类不合法")
+    private String category;
 
     /**
      * 位置

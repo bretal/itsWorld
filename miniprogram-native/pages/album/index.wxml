@@ -1,0 +1,93 @@
+<view class="album-page">
+  <view class="album-header">
+    <view class="header-circle circle-a"></view>
+    <view class="header-circle circle-b"></view>
+
+    <view wx:if="{{currentPet}}" class="pet-summary">
+      <image
+        class="summary-avatar"
+        src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        mode="aspectFill"
+      />
+      <view class="summary-info">
+        <view class="summary-name">{{currentPet.petName}}</view>
+        <view class="summary-meta">{{currentPet.metaText}}</view>
+        <view class="summary-bio ellipsis">
+          {{currentPet.description || '活泼开朗，喜欢玩球和吃零食~'}}
+        </view>
+      </view>
+      <view class="record-btn" bindtap="goRecord">记录</view>
+    </view>
+
+    <view wx:else class="empty-pet" bindtap="goCreatePet">
+      <view class="empty-pet-title">还没有宠物档案</view>
+      <view class="empty-pet-desc">添加宠物后，这里会出现它的成长日记</view>
+      <view class="empty-pet-btn">添加宠物</view>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab {{activeTab === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="diary-list">
+    <view
+      wx:for="{{diaries}}"
+      wx:key="id"
+      class="diary-item"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="diary-head">
+        <view class="diary-date">{{item.dateText}}</view>
+        <view class="diary-time">{{item.timeText}}</view>
+        <view class="diary-tag">{{item.greeting || '今日记录'}}</view>
+      </view>
+
+      <view class="diary-text">
+        {{item.content || '今天也留下了可爱的记录~'}}
+      </view>
+
+      <view wx:if="{{item.photos.length}}" class="photo-grid">
+        <image
+          wx:for="{{item.photos}}"
+          wx:for-item="photo"
+          wx:key="*this"
+          class="photo"
+          src="{{photo}}"
+          mode="aspectFill"
+        />
+      </view>
+
+      <view class="diary-actions">
+        <view class="action" catchtap="like" data-index="{{index}}">
+          <text class="action-icon {{item.liked ? 'liked' : ''}}">
+            {{item.liked ? '♥' : '♡'}}
+          </text>
+          <text>{{item.likeCount || 0}}</text>
+        </view>
+        <view class="action">
+          <text class="action-icon">💬</text>
+          <text>{{item.commentCount || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && currentPet && !diaries.length}}" class="empty">
+      <view class="empty-emoji">📖</view>
+      <view class="empty-title">{{emptyHint || '还没有日记，记录今天的小美好吧'}}</view>
+      <view wx:if="{{!emptyHint}}" class="empty-btn" bindtap="goRecord">去记录</view>
+    </view>
+
+    <view wx:if="{{loadingMore}}" class="list-footer">加载中…</view>
+    <view wx:elif="{{!hasMore && diaries.length}}" class="list-footer">没有更多了</view>
+  </view>
+</view>

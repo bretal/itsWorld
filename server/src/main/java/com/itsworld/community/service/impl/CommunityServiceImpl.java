@@ -1,17 +1,23 @@
 package com.itsworld.community.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itsworld.common.result.ErrorCode;
+import com.itsworld.common.result.PageResult;
 import com.itsworld.common.exception.BusinessException;
 import com.itsworld.community.dto.CommentRequest;
+import com.itsworld.community.dto.CommentResponse;
 import com.itsworld.community.dto.PostCreateRequest;
 import com.itsworld.community.dto.PostResponse;
 import com.itsworld.community.entity.Follow;
 import com.itsworld.community.entity.Post;
 import com.itsworld.community.entity.PostComment;
+import com.itsworld.community.entity.PostLike;
 import com.itsworld.community.mapper.CommentMapper;
 import com.itsworld.community.mapper.FollowMapper;
+import com.itsworld.community.mapper.PostLikeMapper;
 import com.itsworld.community.mapper.PostMapper;
 import com.itsworld.community.service.CommunityService;
 import com.itsworld.user.entity.User;
@@ -39,6 +45,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final PostMapper postMapper;
     private final CommentMapper commentMapper;
     private final FollowMapper followMapper;
+    private final PostLikeMapper postLikeMapper;
     private final UserService userService;
     private final ObjectMapper objectMapper;
 
@@ -139,6 +146,69 @@ public class CommunityServiceImpl implements CommunityService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<PostResponse> getFollowingFeed(Long currentUserId) {
+        List<Follow> follows = followMapper.selectFollowing(currentUserId);
+        if (follows.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> followingIds = follows.stream()
+                .map(Follow::getFollowingId)
+                .collect(Collectors.toList());
+
+        List<Post> posts = postMapper.selectList(new LambdaQueryWrapper<Post>()
+                .in(Post::getUserId, followingIds)
+                .eq(Post::getStatus, 1)
+                .isNull(Post::getDeletedAt)
+                .orderByDesc(Post::getCreatedAt)
+                .last("LIMIT 20"));
+
+        return posts.stream()
+                .map(post -> {
+                    User user = userService.getUserById(post.getUserId());
+                    return convertToPostResponse(post, user, currentUserId);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<PostResponse> getPostPage(Long currentUserId, String type,
+                                                long pageNum, long pageSize) {
+        Page<Post> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<Post>()
+                .eq(Post::getStatus, 1)
+                .isNull(Post::getDeletedAt);
+
+        if ("following".equals(type)) {
+            List<Follow> follows = followMapper.selectFollowing(currentUserId);
+            if (follows.isEmpty()) {
+                return PageResult.of(List.of(), 0L, pageNum, pageSize);
+            }
+            List<Long> followingIds = follows.stream()
+                    .map(Follow::getFollowingId)
+                    .collect(Collectors.toList());
+            wrapper.in(Post::getUserId, followingIds)
+                    .orderByDesc(Post::getCreatedAt)
+                    .orderByDesc(Post::getId);
+        } else {
+            // hot 与 recommend 当前排序相同，后续可接入推荐策略
+            wrapper.orderByDesc(Post::getLikeCount)
+                    .orderByDesc(Post::getCreatedAt)
+                    .orderByDesc(Post::getId);
+        }
+
+        Page<Post> resultPage = postMapper.selectPage(page, wrapper);
+        List<PostResponse> records = resultPage.getRecords().stream()
+                .map(post -> {
+                    User user = userService.getUserById(post.getUserId());
+                    return convertToPostResponse(post, user, currentUserId);
+                })
+                .collect(Collectors.toList());
+        return PageResult.of(records, resultPage.getTotal(),
+                resultPage.getCurrent(), resultPage.getSize());
+    }
+
     /**
      * 删除帖子
      */
@@ -167,7 +237,23 @@ public class CommunityServiceImpl implements CommunityService {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
-        // TODO: 需要创建post_like表来记录用户点赞记录
+        Long existingCount = postLikeMapper.selectCount(new LambdaQueryWrapper<PostLike>()
+                .eq(PostLike::getPostId, postId)
+                .eq(PostLike::getUserId, userId));
+        if (existingCount != null && existingCount > 0) {
+            log.info("用户已点赞，忽略重复请求: userId={}, postId={}", userId, postId);
+            return;
+        }
+
+        PostLike postLike = PostLike.builder()
+                .postId(postId)
+                .userId(userId)
+                .createdAt(LocalDateTime.now())
+                .build();
+        if (postLikeMapper.insert(postLike) <= 0) {
+            throw new BusinessException(ErrorCode.SERVER_ERROR);
+        }
+
         post.setLikeCount((post.getLikeCount() != null ? post.getLikeCount() : 0) + 1);
         postMapper.updateById(post);
 
@@ -185,7 +271,14 @@ public class CommunityServiceImpl implements CommunityService {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
-        // TODO: 检查用户是否已点赞，取消点赞
+        int deleted = postLikeMapper.delete(new LambdaQueryWrapper<PostLike>()
+                .eq(PostLike::getPostId, postId)
+                .eq(PostLike::getUserId, userId));
+        if (deleted <= 0) {
+            log.info("用户未点赞，忽略取消请求: userId={}, postId={}", userId, postId);
+            return;
+        }
+
         if (post.getLikeCount() != null && post.getLikeCount() > 0) {
             post.setLikeCount(post.getLikeCount() - 1);
             postMapper.updateById(post);
@@ -226,6 +319,69 @@ public class CommunityServiceImpl implements CommunityService {
 
         log.info("评论发表成功: userId={}, postId={}, commentId={}", userId, postId, comment.getId());
         return comment.getId();
+    }
+
+    @Override
+    public List<CommentResponse> getComments(Long postId) {
+        Post post = postMapper.selectById(postId);
+        if (post == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+
+        List<PostComment> comments = commentMapper.selectByPostId(postId);
+        return comments.stream()
+                .map(this::convertToCommentResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<CommentResponse> getCommentPage(Long postId, long pageNum, long pageSize) {
+        Post post = postMapper.selectById(postId);
+        if (post == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+
+        Page<PostComment> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<PostComment> wrapper = new LambdaQueryWrapper<PostComment>()
+                .eq(PostComment::getPostId, postId)
+                .isNull(PostComment::getDeletedAt)
+                .orderByDesc(PostComment::getCreatedAt)
+                .orderByDesc(PostComment::getId);
+        Page<PostComment> resultPage = commentMapper.selectPage(page, wrapper);
+
+        List<CommentResponse> records = resultPage.getRecords().stream()
+                .map(this::convertToCommentResponse)
+                .collect(Collectors.toList());
+        return PageResult.of(records, resultPage.getTotal(),
+                resultPage.getCurrent(), resultPage.getSize());
+    }
+
+    private CommentResponse convertToCommentResponse(PostComment comment) {
+        User user = userService.getUserById(comment.getUserId());
+        String replyToUsername = null;
+        if (comment.getReplyToCommentId() != null) {
+            PostComment parentComment = commentMapper.selectById(comment.getReplyToCommentId());
+            if (parentComment != null) {
+                User parentUser = userService.getUserById(parentComment.getUserId());
+                if (parentUser != null) {
+                    replyToUsername = parentUser.getUsername();
+                }
+            }
+        }
+
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .postId(comment.getPostId())
+                .userId(comment.getUserId())
+                .username(user != null ? user.getUsername() : null)
+                .userAvatar(user != null ? user.getAvatarUrl() : null)
+                .content(comment.getContent())
+                .replyToCommentId(comment.getReplyToCommentId())
+                .replyToUsername(replyToUsername)
+                .likeCount(comment.getLikeCount())
+                .isLiked(false)
+                .createdAt(comment.getCreatedAt())
+                .build();
     }
 
     /**
@@ -354,8 +510,13 @@ public class CommunityServiceImpl implements CommunityService {
             }
         }
 
-        // TODO: 检查当前用户是否点赞了该帖子
         Boolean isLiked = false;
+        if (currentUserId != null) {
+            Long likeCount = postLikeMapper.selectCount(new LambdaQueryWrapper<PostLike>()
+                    .eq(PostLike::getPostId, post.getId())
+                    .eq(PostLike::getUserId, currentUserId));
+            isLiked = likeCount != null && likeCount > 0;
+        }
 
         return PostResponse.builder()
                 .id(post.getId())

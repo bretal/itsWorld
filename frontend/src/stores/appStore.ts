@@ -34,7 +34,10 @@ export const useAppStore = create<AppStore>((set) => ({
     } else {
       localStorage.removeItem(STORAGE_CURRENT_PET_KEY);
     }
-    set({ currentPetId: petId });
+    set((state) => ({
+      currentPetId: petId,
+      currentPet: petId ? state.pets.find((pet) => pet.id === petId) || null : null,
+    }));
   },
 
   setCurrentPet: (pet: Pet | null) => {
@@ -42,7 +45,23 @@ export const useAppStore = create<AppStore>((set) => ({
   },
 
   setPets: (pets: Pet[]) => {
-    set({ pets });
+    set((state) => {
+      let currentPetId = state.currentPetId;
+      let currentPet = pets.find((pet) => pet.id === currentPetId) || null;
+
+      if (!currentPet && pets.length > 0) {
+        currentPet = pets[0];
+        currentPetId = pets[0].id;
+        localStorage.setItem(STORAGE_CURRENT_PET_KEY, currentPetId.toString());
+      }
+      if (pets.length === 0) {
+        currentPetId = null;
+        currentPet = null;
+        localStorage.removeItem(STORAGE_CURRENT_PET_KEY);
+      }
+
+      return { pets, currentPetId, currentPet };
+    });
   },
 
   setLoading: (loading: boolean) => {

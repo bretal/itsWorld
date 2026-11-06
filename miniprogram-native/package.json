@@ -1,0 +1,12 @@
+{
+  "name": "itsworld-miniprogram-native",
+  "version": "0.1.0",
+  "private": true,
+  "description": "它的世界 - 微信原生小程序",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~7.0.2"
+  }
+}

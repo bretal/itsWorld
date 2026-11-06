@@ -1,0 +1,131 @@
+.post-create-page {
+  min-height: 100vh;
+  padding: 32rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
+  background: #f7f8fa;
+}
+
+.post-card {
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 10rpx 26rpx rgba(31, 35, 41, 0.04);
+}
+
+.pet-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 18rpx 8rpx 8rpx;
+  border-radius: 28rpx;
+  background: #eaf2ff;
+  margin-bottom: 20rpx;
+}
+
+.pet-chip-avatar {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+}
+
+.pet-chip-name {
+  font-size: 23rpx;
+  color: #2f80ed;
+  font-weight: 600;
+}
+
+.pet-chip-tip {
+  margin-left: 8rpx;
+  font-size: 20rpx;
+  color: #7aa7e8;
+}
+
+.title-input {
+  width: 100%;
+  height: 88rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2329;
+  border-bottom: 1rpx solid #f3f5f8;
+}
+
+.content-input {
+  width: 100%;
+  min-height: 260rpx;
+  padding-top: 22rpx;
+  font-size: 28rpx;
+  color: #1f2329;
+  line-height: 1.7;
+}
+
+.placeholder {
+  color: #c5c9cf;
+  font-weight: 400;
+}
+
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+
+.photo-wrap {
+  position: relative;
+  width: 190rpx;
+  height: 190rpx;
+  margin: 0 14rpx 14rpx 0;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 18rpx;
+  background: #f0f2f5;
+}
+
+.photo-remove {
+  position: absolute;
+  right: -8rpx;
+  top: -8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: rgba(31, 35, 41, 0.7);
+  color: #ffffff;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  text-align: center;
+}
+
+.photo-add {
+  width: 190rpx;
+  height: 190rpx;
+  border-radius: 18rpx;
+  border: 2rpx dashed #d5dbe4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #a3a8b0;
+}
+
+.photo-add-icon {
+  font-size: 48rpx;
+  line-height: 1;
+}
+
+.photo-add-text {
+  margin-top: 8rpx;
+  font-size: 21rpx;
+}
+
+.tips {
+  margin: 24rpx 8rpx 0;
+  font-size: 21rpx;
+  color: #a3a8b0;
+  text-align: center;
+}
+
+.publish-btn {
+  width: 100%;
+  margin-top: 28rpx;
+}

@@ -1,7 +1,10 @@
 package com.itsworld.diary.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itsworld.common.result.PageResult;
 import com.itsworld.common.exception.BusinessException;
 import com.itsworld.common.result.ErrorCode;
 import com.itsworld.diary.dto.DiaryCreateRequest;
@@ -58,6 +61,7 @@ public class DiaryServiceImpl implements DiaryService {
                 .userId(userId)
                 .petId(createRequest.getPetId())
                 .diaryDate(createRequest.getDiaryDate())
+                .category(createRequest.getCategory())
                 .morningMood(createRequest.getMood())
                 .question1(createRequest.getLocation())
                 .question2(joinActivities(createRequest.getActivities()))
@@ -94,6 +98,31 @@ public class DiaryServiceImpl implements DiaryService {
         return diaries.stream()
                 .map(this::convertToDiaryResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<DiaryResponse> getDiaryPage(Long userId, Long petId, long pageNum,
+                                                  long pageSize, String category) {
+        petService.getPetInfo(userId, petId);
+
+        Page<Diary> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Diary> wrapper = new LambdaQueryWrapper<Diary>()
+                .eq(Diary::getUserId, userId)
+                .eq(Diary::getPetId, petId)
+                .orderByDesc(Diary::getDiaryDate)
+                .orderByDesc(Diary::getId);
+        if (category != null && !category.isBlank()
+                && !"undefined".equalsIgnoreCase(category)
+                && !"null".equalsIgnoreCase(category)) {
+            wrapper.eq(Diary::getCategory, category);
+        }
+
+        Page<Diary> resultPage = diaryMapper.selectPage(page, wrapper);
+        List<DiaryResponse> records = resultPage.getRecords().stream()
+                .map(this::convertToDiaryResponse)
+                .collect(Collectors.toList());
+        return PageResult.of(records, resultPage.getTotal(),
+                resultPage.getCurrent(), resultPage.getSize());
     }
 
     /**
@@ -136,6 +165,9 @@ public class DiaryServiceImpl implements DiaryService {
 
         if (createRequest.getContent() != null) {
             diary.setContent(createRequest.getContent());
+        }
+        if (createRequest.getCategory() != null) {
+            diary.setCategory(createRequest.getCategory());
         }
         if (createRequest.getMood() != null) {
             diary.setMorningMood(createRequest.getMood());
@@ -262,6 +294,7 @@ public class DiaryServiceImpl implements DiaryService {
                 .userId(diary.getUserId())
                 .petId(diary.getPetId())
                 .diaryDate(diary.getDiaryDate())
+                .category(diary.getCategory())
                 .greeting(buildGreeting(diary))
                 .healthScore(parseHealthScore(diary.getQuestion3()))
                 .content(diary.getContent())

@@ -1,0 +1,167 @@
+<view class="home">
+  <view class="header" style="padding-top: {{statusBarHeight}}px">
+    <view class="header-glow glow-a"></view>
+    <view class="header-glow glow-b"></view>
+
+    <view class="nav-row">
+      <view class="nav-title" bindtap="togglePetPicker">
+        <text>我的宠物</text>
+        <text class="chevron">⌄</text>
+      </view>
+      <view class="camera-btn" bindtap="onTapCamera">
+        <text class="camera-icon">◉</text>
+      </view>
+    </view>
+
+    <view wx:if="{{loading}}" class="pet-card pet-card-loading">
+      <view class="skeleton skeleton-avatar"></view>
+      <view class="skeleton-lines">
+        <view class="skeleton skeleton-line"></view>
+        <view class="skeleton skeleton-line short"></view>
+      </view>
+    </view>
+
+    <view
+      wx:elif="{{currentPet}}"
+      class="pet-card"
+      bindtap="goPetDetail"
+    >
+      <view class="pet-avatar-wrap">
+        <image
+          class="pet-avatar"
+          src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+          mode="aspectFill"
+        />
+        <view class="heart">♥</view>
+      </view>
+
+      <view class="pet-info">
+        <view class="pet-name">{{currentPet.petName}}</view>
+        <view class="pet-meta">{{currentPet.metaText}}</view>
+        <view class="mood-bubble">
+          <text class="mood-emoji">☺</text>
+          <text class="mood-text ellipsis">
+            {{todayDiary && todayDiary.greeting ? todayDiary.greeting : '今天也要好好陪伴TA哦'}}
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="pet-card empty-pet-card" bindtap="goCreatePet">
+      <view class="empty-pet-icon">🐾</view>
+      <view class="empty-pet-info">
+        <view class="empty-pet-title">还没有宠物档案</view>
+        <view class="empty-pet-desc">添加第一只宠物，开始记录吧</view>
+      </view>
+      <view class="empty-pet-add">+</view>
+    </view>
+  </view>
+
+  <view class="body">
+    <view class="feature-grid">
+      <view class="feature" data-key="ai" bindtap="onTapFeature">
+        <view class="feature-icon ai">📷</view>
+        <text class="feature-name">拍照识情绪</text>
+        <text class="feature-tag">即将上线</text>
+      </view>
+      <view class="feature" data-key="diary" bindtap="onTapFeature">
+        <view class="feature-icon diary">📔</view>
+        <text class="feature-name">宠物日记</text>
+      </view>
+      <view class="feature" data-key="health" bindtap="onTapFeature">
+        <view class="feature-icon health">💗</view>
+        <text class="feature-name">健康管理</text>
+      </view>
+      <view class="feature" data-key="album" bindtap="onTapFeature">
+        <view class="feature-icon album">🖼️</view>
+        <text class="feature-name">成长相册</text>
+      </view>
+    </view>
+
+    <view class="section-head">
+      <view class="section-title">今日动态</view>
+      <view class="section-more" bindtap="goAlbum">
+        <text>更多</text>
+        <text class="more-arrow">›</text>
+      </view>
+    </view>
+
+    <view wx:if="{{todayDiary}}" class="diary-card" bindtap="goTodayDiary">
+      <view class="diary-top">
+        <image
+          class="diary-avatar"
+          src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+          mode="aspectFill"
+        />
+        <view class="diary-meta">
+          <view class="diary-name">{{currentPet.petName}}</view>
+          <view class="diary-time">{{todayDiaryTime}}</view>
+        </view>
+        <view class="diary-badge">今日打卡</view>
+      </view>
+
+      <view class="diary-content">
+        {{todayDiary.content || todayDiary.greeting || '今天也留下了可爱的记录~'}}
+      </view>
+
+      <view wx:if="{{todayPhotos.length}}" class="diary-photos">
+        <image
+          wx:for="{{todayPhotos}}"
+          wx:key="*this"
+          class="diary-photo"
+          src="{{item}}"
+          mode="aspectFill"
+        />
+      </view>
+
+      <view class="diary-foot">
+        <text class="diary-health" wx:if="{{todayDiary.healthScore}}">
+          健康评分 {{todayDiary.healthScore}}
+        </text>
+        <view class="diary-like">
+          <text class="like-icon">♡</text>
+          <text>{{todayDiary.likeCount || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="empty-diary card" bindtap="goRecordDiary">
+      <view class="empty-diary-emoji">🌤️</view>
+      <view class="empty-diary-title">今天还没有记录</view>
+      <view class="empty-diary-desc">拍张照片，记下TA今天的小情绪吧</view>
+      <view class="empty-diary-btn">去记录</view>
+    </view>
+  </view>
+
+  <view wx:if="{{petPickerVisible}}" class="sheet-mask" bindtap="closePetPicker"></view>
+  <view
+    wx:if="{{petPickerVisible}}"
+    class="pet-sheet"
+    catchtap="noop"
+  >
+    <view class="sheet-handle"></view>
+    <view class="sheet-title">切换宠物</view>
+    <view class="sheet-list">
+      <view
+        wx:for="{{pets}}"
+        wx:key="id"
+        class="sheet-item {{currentPet.id === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="selectPet"
+      >
+        <image
+          class="sheet-avatar"
+          src="{{item.avatarSrc || item.avatarUrl || '/assets/pet-placeholder.png'}}"
+          mode="aspectFill"
+        />
+        <view class="sheet-info">
+          <view class="sheet-name">{{item.petName}}</view>
+          <view class="sheet-meta">{{item.metaText}}</view>
+        </view>
+        <text wx:if="{{currentPet.id === item.id}}" class="sheet-check">✓</text>
+      </view>
+    </view>
+    <view class="sheet-manage" bindtap="goManagePets">管理宠物</view>
+    <view class="sheet-cancel" bindtap="closePetPicker">取消</view>
+  </view>
+</view>

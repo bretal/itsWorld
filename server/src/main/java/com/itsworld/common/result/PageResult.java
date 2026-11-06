@@ -1,45 +1,30 @@
 package com.itsworld.common.result;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 /**
- * 分页返回结果
- * 包含分页相关信息和数据列表
+ * 分页数据载荷
+ * 由 Result 包装后返回，例如 Result&lt;PageResult&lt;PetResponse&gt;&gt;
  *
  * @param <T> 列表元素类型
  * @author Claude
- * @date 2026-10-30
+ * @date 2026-11-05
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class PageResult<T> {
 
     /**
-     * 响应码
+     * 当前页数据
      */
-    private Integer code;
-
-    /**
-     * 响应消息
-     */
-    private String message;
-
-    /**
-     * 数据列表
-     */
-    private List<T> data;
-
-    /**
-     * 时间戳
-     */
-    private Long timestamp;
+    private List<T> records;
 
     /**
      * 总记录数
@@ -47,14 +32,14 @@ public class PageResult<T> {
     private Long total;
 
     /**
-     * 当前页码
+     * 当前页码（从 1 开始）
      */
     private Long pageNum;
 
     /**
      * 每页条数
      */
-    private Long pageSize = 20L;
+    private Long pageSize;
 
     /**
      * 总页数
@@ -62,31 +47,24 @@ public class PageResult<T> {
     private Long totalPages;
 
     /**
-     * 构造函数：成功的分页响应
+     * 构造分页结果
+     *
+     * @param records 当前页数据
+     * @param total 总记录数
+     * @param pageNum 当前页码
+     * @param pageSize 每页条数
+     * @return 分页结果
      */
-    public static <T> PageResult<T> success(List<T> data, Long total, Long pageNum, Long pageSize) {
-        long totalPages = (total + pageSize - 1) / pageSize;
-        PageResult<T> result = new PageResult<>();
-        result.setCode(0);
-        result.setMessage("success");
-        result.setData(data);
-        result.setTimestamp(System.currentTimeMillis());
-        result.setTotal(total);
-        result.setPageNum(pageNum);
-        result.setPageSize(pageSize);
-        result.setTotalPages(totalPages);
-        return result;
-    }
-
-    /**
-     * 构造函数：失败的分页响应
-     */
-    public static <T> PageResult<T> fail(Integer code, String message) {
-        PageResult<T> result = new PageResult<>();
-        result.setCode(code);
-        result.setMessage(message);
-        result.setTimestamp(System.currentTimeMillis());
-        return result;
+    public static <T> PageResult<T> of(List<T> records, long total, long pageNum, long pageSize) {
+        long safePageSize = pageSize <= 0 ? 20L : pageSize;
+        long totalPages = (total + safePageSize - 1) / safePageSize;
+        return PageResult.<T>builder()
+                .records(records)
+                .total(total)
+                .pageNum(pageNum)
+                .pageSize(safePageSize)
+                .totalPages(totalPages)
+                .build();
     }
 
 }

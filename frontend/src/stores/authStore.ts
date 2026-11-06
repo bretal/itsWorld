@@ -12,7 +12,7 @@ interface AuthStore {
 
   // Actions
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, confirmPassword: string) => Promise<void>;
+  register: (username: string, phone: string, email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
   setToken: (token: string) => void;
   clearAuth: () => void;
@@ -60,10 +60,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  register: async (username: string, email: string, password: string, confirmPassword: string) => {
+  register: async (username: string, phone: string, email: string, password: string, confirmPassword: string) => {
     try {
       set({ loading: true, error: null });
-      await userService.register({ username, email, password, confirmPassword });
+      await userService.register({ username, phone, email, password, confirmPassword });
       set({ loading: false });
     } catch (error: any) {
       const errorMessage = error.message || '注册失败';

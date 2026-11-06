@@ -65,6 +65,11 @@ public class PetResponse {
     private BigDecimal weight;
 
     /**
+     * 当前身高（cm）
+     */
+    private BigDecimal height;
+
+    /**
      * 宠物描述
      */
     private String description;

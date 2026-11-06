@@ -59,6 +59,11 @@ public class PetCreateRequest {
     private BigDecimal weight;
 
     /**
+     * 身高（cm）
+     */
+    private BigDecimal height;
+
+    /**
      * 宠物描述
      */
     private String description;

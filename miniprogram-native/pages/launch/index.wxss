@@ -1,0 +1,44 @@
+.launch {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #5aa9f8;
+}
+
+.launch-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.launch-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(80rpx + env(safe-area-inset-bottom));
+  z-index: 2;
+  padding: 0 64rpx;
+}
+
+.start-btn {
+  width: 100%;
+  height: 100rpx;
+  border-radius: 50rpx;
+  background: #ffffff;
+  color: #2f80ed;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18rpx 40rpx rgba(23, 78, 166, 0.2);
+}
+
+.arrow {
+  margin-left: 12rpx;
+  font-size: 42rpx;
+  margin-top: -4rpx;
+}

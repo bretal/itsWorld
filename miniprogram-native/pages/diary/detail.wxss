@@ -1,0 +1,125 @@
+.diary-detail-page {
+  min-height: 100vh;
+  padding: 28rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
+  background: #f7f8fa;
+}
+
+.detail-card {
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 10rpx 26rpx rgba(31, 35, 41, 0.04);
+}
+
+.detail-head {
+  display: flex;
+  align-items: center;
+}
+
+.pet-avatar {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  background: #eaf2ff;
+}
+
+.head-info {
+  flex: 1;
+  min-width: 0;
+  padding-left: 18rpx;
+}
+
+.pet-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+
+.detail-date {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #a3a8b0;
+}
+
+.greeting-chip {
+  max-width: 240rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 18rpx;
+  background: #fff6dc;
+  color: #a17d3b;
+  font-size: 20rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.detail-content {
+  margin-top: 24rpx;
+  font-size: 29rpx;
+  line-height: 1.8;
+  color: #3a3f46;
+}
+
+.photo-list {
+  margin-top: 20rpx;
+}
+
+.detail-photo {
+  width: 100%;
+  border-radius: 20rpx;
+  margin-bottom: 14rpx;
+  background: #f0f2f5;
+}
+
+.detail-foot {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f3f5f8;
+}
+
+.foot-action {
+  display: flex;
+  align-items: center;
+  margin-right: 42rpx;
+  font-size: 24rpx;
+  color: #8a8f99;
+}
+
+.foot-icon {
+  margin-right: 6rpx;
+  font-size: 30rpx;
+}
+
+.foot-icon.liked {
+  color: #ff7a9e;
+}
+
+.health-chip {
+  margin-left: auto;
+  padding: 8rpx 16rpx;
+  border-radius: 18rpx;
+  background: #f2f8ef;
+  color: #5b8d4a;
+  font-size: 21rpx;
+}
+
+.delete-btn {
+  margin-top: 28rpx;
+  height: 88rpx;
+  border-radius: 44rpx;
+  background: #ffffff;
+  color: #e05b6f;
+  font-size: 27rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 24rpx rgba(31, 35, 41, 0.04);
+}
+
+.empty-title {
+  margin-top: 4rpx;
+  font-size: 27rpx;
+  color: #8a8f99;
+}

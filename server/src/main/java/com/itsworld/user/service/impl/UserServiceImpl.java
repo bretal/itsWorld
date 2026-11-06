@@ -58,13 +58,20 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
-        // 4. 邮箱空串归一为 null，避免唯一索引冲突
+        // 4. 校验手机号唯一（手机号必填，为微信一键登录预留）
+        String phone = registerRequest.getPhone().trim();
+        User existingUserByPhone = userMapper.selectByPhone(phone);
+        if (existingUserByPhone != null) {
+            throw new BusinessException(ErrorCode.PHONE_ALREADY_EXISTS);
+        }
+
+        // 5. 邮箱空串归一为 null，避免唯一索引冲突
         String email = registerRequest.getEmail();
         if (email != null && email.isBlank()) {
             email = null;
         }
 
-        // 5. 检查邮箱是否已存在（如果提供了邮箱）
+        // 6. 检查邮箱是否已存在（如果提供了邮箱）
         if (email != null) {
             User existingUserByEmail = userMapper.selectByEmail(email);
             if (existingUserByEmail != null) {
@@ -72,9 +79,10 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // 6. 创建新用户
+        // 7. 创建新用户
         User user = User.builder()
                 .username(registerRequest.getUsername())
+                .phone(phone)
                 .email(email)
                 .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
                 .nickName(registerRequest.getUsername())  // 默认昵称为用户名
@@ -83,7 +91,7 @@ public class UserServiceImpl implements UserService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        // 7. 保存到数据库
+        // 8. 保存到数据库
         int result = userMapper.insert(user);
         if (result <= 0) {
             throw new BusinessException(ErrorCode.SERVER_ERROR);
@@ -256,6 +264,7 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .phone(user.getPhone())
                 .nickName(user.getNickName())
                 .avatarUrl(user.getAvatarUrl())
                 .bio(user.getBio())

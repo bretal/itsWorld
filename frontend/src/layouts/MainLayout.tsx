@@ -125,7 +125,8 @@ const MainLayout: React.FC = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed} width={200}>
         <div className={styles.logo}>
-          <span>它的世界</span>
+          <img src="/logo.png" alt="它的世界" className={styles.logoIcon} />
+          <span className={styles.logoText}>它的世界</span>
         </div>
         <Menu
           theme="dark"

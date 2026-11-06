@@ -61,6 +61,8 @@ server/.env
 server/.env.local
 application-local.yml
 server/application-local.yml
+server/src/main/resources/application-local.yml
+miniprogram-native/project.private.config.json
 *.pem
 *.key
 *.jks

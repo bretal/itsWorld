@@ -1,0 +1,54 @@
+<view class="login-page">
+  <view class="hero">
+    <view class="logo-wrap">
+      <image class="logo" src="/assets/logo.jpg" mode="aspectFit" />
+    </view>
+    <view class="hero-title">欢迎回来</view>
+    <view class="hero-desc">和TA一起，记录每一个可爱的瞬间</view>
+  </view>
+
+  <view class="form-card">
+    <view class="field">
+      <text class="field-label">账号</text>
+      <input
+        class="field-input"
+        type="text"
+        placeholder="用户名 / 手机号 / 邮箱"
+        placeholder-class="placeholder"
+        value="{{username}}"
+        bindinput="onUsernameInput"
+      />
+    </view>
+
+    <view class="field">
+      <text class="field-label">密码</text>
+      <view class="password-row">
+        <input
+          class="field-input password-input"
+          type="text"
+          password="{{!showPassword}}"
+          placeholder="请输入密码"
+          placeholder-class="placeholder"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+        <text class="toggle" bindtap="togglePassword">
+          {{showPassword ? '隐藏' : '显示'}}
+        </text>
+      </view>
+    </view>
+
+    <button
+      class="btn-primary login-btn"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="onSubmit"
+    >
+      登录
+    </button>
+
+    <view class="hint">
+      当前版本使用账号密码登录；微信一键登录暂未开放
+    </view>
+  </view>
+</view>

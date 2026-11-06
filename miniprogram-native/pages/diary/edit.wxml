@@ -1,0 +1,133 @@
+<view class="diary-edit-page">
+  <view wx:if="{{noPets}}" class="empty-pet card">
+    <view class="empty-emoji">🐾</view>
+    <view class="empty-title">还没有宠物档案</view>
+    <view class="empty-desc">先添加一只宠物，再记录它的日常吧</view>
+    <view class="empty-btn" bindtap="goCreatePet">添加宠物</view>
+  </view>
+
+  <block wx:else>
+    <view class="form-card">
+      <view class="form-item">
+        <text class="form-label">宠物</text>
+        <picker
+          class="form-picker"
+          range="{{petNames}}"
+          value="{{currentPetIndex}}"
+          bindchange="onPetChange"
+        >
+          <view class="picker-value">
+            {{petNames[currentPetIndex]}}
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">日期</text>
+        <picker
+          class="form-picker"
+          mode="date"
+          value="{{diaryDate}}"
+          end="{{today}}"
+          bindchange="onDateChange"
+        >
+          <view class="picker-value">
+            {{diaryDate}}
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-block">
+        <text class="form-label block-label">今天的心情</text>
+        <view class="mood-row">
+          <view
+            wx:for="{{moods}}"
+            wx:key="value"
+            class="mood-item {{moodIndex === index ? 'active' : ''}}"
+            data-index="{{index}}"
+            bindtap="onMoodTap"
+          >
+            <text class="mood-emoji">{{item.emoji}}</text>
+            <text class="mood-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-block">
+        <text class="form-label block-label">日记分类</text>
+        <view class="category-row">
+          <view
+            wx:for="{{categories}}"
+            wx:key="value"
+            class="category-item {{categoryIndex === index ? 'active' : ''}}"
+            data-index="{{index}}"
+            bindtap="onCategoryTap"
+          >
+            {{item.label}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-card content-card">
+      <text class="form-label block-label">今天发生了什么？</text>
+      <textarea
+        class="content-input"
+        value="{{content}}"
+        placeholder="记录TA今天的可爱瞬间、小情绪或小进步…"
+        placeholder-class="placeholder"
+        maxlength="1000"
+        auto-height
+        bindinput="onContentInput"
+      />
+
+      <view class="photo-grid">
+        <view
+          wx:for="{{photoPreviews}}"
+          wx:key="*this"
+          class="photo-wrap"
+        >
+          <image class="photo" src="{{item}}" mode="aspectFill" />
+          <view
+            class="photo-remove"
+            data-index="{{index}}"
+            catchtap="removePhoto"
+          >×</view>
+        </view>
+        <view
+          wx:if="{{photos.length < 9}}"
+          class="photo-add"
+          bindtap="choosePhotos"
+        >
+          <text class="photo-add-icon">{{uploading ? '…' : '+'}}</text>
+          <text class="photo-add-text">{{uploading ? '上传中' : '添加照片'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-card switch-card">
+      <view class="switch-row">
+        <view>
+          <view class="switch-title">公开这篇日记</view>
+          <view class="switch-desc">公开后宠友圈可以看见TA的日常</view>
+        </view>
+        <switch
+          checked="{{isPublic}}"
+          color="#2f80ed"
+          bindchange="onPublicChange"
+        />
+      </view>
+    </view>
+
+    <button
+      class="btn-primary save-btn"
+      loading="{{saving}}"
+      disabled="{{saving}}"
+      bindtap="onSave"
+    >
+      保存日记
+    </button>
+  </block>
+</view>

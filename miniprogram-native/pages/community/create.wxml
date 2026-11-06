@@ -1,0 +1,56 @@
+<view class="post-create-page">
+  <view class="post-card">
+    <view wx:if="{{currentPet}}" class="pet-chip">
+      <image
+        class="pet-chip-avatar"
+        src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        mode="aspectFill"
+      />
+      <text class="pet-chip-name">{{currentPet.petName}}</text>
+      <text class="pet-chip-tip">关联宠物</text>
+    </view>
+
+    <input
+      class="title-input"
+      value="{{title}}"
+      placeholder="给这篇帖子起个标题"
+      placeholder-class="placeholder"
+      maxlength="60"
+      bindinput="onTitleInput"
+    />
+
+    <textarea
+      class="content-input"
+      value="{{content}}"
+      placeholder="分享你和TA的养宠日常…"
+      placeholder-class="placeholder"
+      maxlength="2000"
+      auto-height
+      bindinput="onContentInput"
+    />
+
+    <view class="photo-grid">
+      <view wx:for="{{photoPreviews}}" wx:key="*this" class="photo-wrap">
+        <image class="photo" src="{{item}}" mode="aspectFill" />
+        <view class="photo-remove" data-index="{{index}}" catchtap="removePhoto">×</view>
+      </view>
+      <view wx:if="{{photos.length < 9}}" class="photo-add" bindtap="choosePhotos">
+        <text class="photo-add-icon">{{uploading ? '…' : '+'}}</text>
+        <text class="photo-add-text">{{uploading ? '上传中' : '添加照片'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tips">
+    <text>请友善分享，尊重每一位宠友和TA的毛孩子</text>
+  </view>
+
+  <button
+    class="btn-primary publish-btn"
+    loading="{{saving}}"
+    disabled="{{saving}}"
+    bindtap="onPublish"
+  >
+    发布
+  </button>
+</view>

@@ -30,6 +30,23 @@ import GreetingFlowPage from '@/pages/diary/GreetingFlowPage';
 // Community Pages
 import CommunityPage from '@/pages/community/CommunityPage';
 
+const theme = {
+  token: {
+    colorPrimary: '#1677ff',
+    borderRadius: 8,
+    colorBgLayout: '#f5f7fa',
+  },
+  components: {
+    Layout: {
+      headerBg: '#001529',
+      siderBg: '#001529',
+    },
+    Card: {
+      borderRadiusLG: 12,
+    },
+  },
+};
+
 const App: React.FC = () => {
   const { isAuthenticated, fetchUserInfo } = useAuth();
 
@@ -41,7 +58,7 @@ const App: React.FC = () => {
   }, [isAuthenticated, fetchUserInfo]);
 
   return (
-    <ConfigProvider locale={zhCN}>
+    <ConfigProvider locale={zhCN} theme={theme}>
       <Router>
         <Routes>
           {/* 公开路由 */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, InputNumber, Select, Button, Upload, Avatar, message, Spin, Row, Col } from 'antd';
+import { Card, Form, Input, InputNumber, Select, Button, Upload, Avatar, message, Spin, Row, Col, DatePicker } from 'antd';
 import { CameraOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { UploadFile } from 'antd/es/upload/interface';
@@ -50,6 +50,7 @@ const PetCreatePage: React.FC = () => {
       setLoading(true);
       const petData: PetCreateRequest = {
         ...values,
+        birthDate: values.birthDate ? values.birthDate.format('YYYY-MM-DD') : undefined,
         avatarUrl,
       };
       const newPetId = await petService.createPet(petData);
@@ -138,7 +139,12 @@ const PetCreatePage: React.FC = () => {
                   label="出生日期"
                   name="birthDate"
                 >
-                  <Input type="date" size="large" />
+                  <DatePicker
+                    size="large"
+                    format="YYYY-MM-DD"
+                    placeholder="选择出生日期"
+                    style={{ width: '100%' }}
+                  />
                 </Form.Item>
 
                 <Form.Item

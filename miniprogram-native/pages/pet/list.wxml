@@ -1,0 +1,68 @@
+<view class="pet-list-page">
+  <view class="list-head">
+    <view>
+      <view class="list-title">我的宠物</view>
+      <view class="list-sub">共 {{total}} 只毛孩子</view>
+    </view>
+    <view class="add-btn" bindtap="goAdd">+ 添加</view>
+  </view>
+
+  <view class="search-bar">
+    <input
+      class="search-input"
+      value="{{keyword}}"
+      placeholder="搜索宠物名字或品种"
+      placeholder-class="search-placeholder"
+      confirm-type="search"
+      bindinput="onKeywordInput"
+      bindconfirm="onSearch"
+    />
+    <view wx:if="{{keyword}}" class="search-clear" bindtap="onClearSearch">×</view>
+    <view class="search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <view class="pet-list">
+    <view
+      wx:for="{{pets}}"
+      wx:key="id"
+      class="pet-item"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <image
+        class="pet-avatar"
+        src="{{item.avatarSrc || item.avatarUrl || '/assets/pet-placeholder.png'}}"
+        mode="aspectFill"
+      />
+      <view class="pet-main">
+        <view class="pet-line">
+          <text class="pet-name">{{item.petName}}</text>
+          <text wx:if="{{item.current}}" class="current-badge">当前宠物</text>
+        </view>
+        <view class="pet-meta">{{item.metaText}}</view>
+        <view class="pet-weight">体重 {{item.weight || '--'}} kg</view>
+      </view>
+      <view class="pet-actions">
+        <view class="mini-btn" catchtap="goEdit" data-id="{{item.id}}">编辑</view>
+        <view
+          wx:if="{{!item.current}}"
+          class="mini-btn primary"
+          catchtap="setCurrent"
+          data-id="{{item.id}}"
+        >
+          设为当前
+        </view>
+        <view class="mini-btn danger" catchtap="remove" data-id="{{item.id}}">删除</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && !pets.length}}" class="empty">
+      <view class="empty-emoji">🐾</view>
+      <view class="empty-title">{{keyword ? '没有找到相关宠物' : '还没有宠物档案'}}</view>
+      <view wx:if="{{!keyword}}" class="empty-btn" bindtap="goAdd">添加第一只宠物</view>
+    </view>
+
+    <view wx:if="{{loadingMore}}" class="list-footer">加载中…</view>
+    <view wx:elif="{{!hasMore && pets.length}}" class="list-footer">没有更多了</view>
+  </view>
+</view>

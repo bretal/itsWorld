@@ -1,6 +1,8 @@
 package com.itsworld.community.service;
 
+import com.itsworld.common.result.PageResult;
 import com.itsworld.community.dto.CommentRequest;
+import com.itsworld.community.dto.CommentResponse;
 import com.itsworld.community.dto.PostCreateRequest;
 import com.itsworld.community.dto.PostResponse;
 
@@ -57,6 +59,26 @@ public interface CommunityService {
     List<PostResponse> getRecommendPosts(Long currentUserId);
 
     /**
+     * 获取关注流帖子（当前用户关注的人发布的帖子）
+     *
+     * @param currentUserId 当前用户ID
+     * @return 关注流帖子列表
+     */
+    List<PostResponse> getFollowingFeed(Long currentUserId);
+
+    /**
+     * 分页查询社区帖子
+     *
+     * @param currentUserId 当前用户ID
+     * @param type 列表类型：hot / recommend / following
+     * @param pageNum 页码
+     * @param pageSize 每页条数
+     * @return 分页结果
+     */
+    PageResult<PostResponse> getPostPage(Long currentUserId, String type,
+                                         long pageNum, long pageSize);
+
+    /**
      * 删除帖子
      *
      * @param userId 用户ID
@@ -89,6 +111,24 @@ public interface CommunityService {
      * @return 评论ID
      */
     Long createComment(Long userId, Long postId, CommentRequest commentRequest);
+
+    /**
+     * 查询帖子评论列表
+     *
+     * @param postId 帖子ID
+     * @return 评论列表
+     */
+    List<CommentResponse> getComments(Long postId);
+
+    /**
+     * 分页查询帖子评论
+     *
+     * @param postId 帖子ID
+     * @param pageNum 页码
+     * @param pageSize 每页条数
+     * @return 分页结果
+     */
+    PageResult<CommentResponse> getCommentPage(Long postId, long pageNum, long pageSize);
 
     /**
      * 删除评论

@@ -17,6 +17,7 @@ const UserProfilePage: React.FC = () => {
       form.setFieldsValue({
         username: user.username,
         email: user.email,
+        phone: user.phone,
         nickName: user.nickName,
         bio: user.bio,
         region: user.region,
@@ -95,6 +96,13 @@ const UserProfilePage: React.FC = () => {
                 <Form.Item
                   label="邮箱"
                   name="email"
+                >
+                  <Input disabled />
+                </Form.Item>
+
+                <Form.Item
+                  label="手机号"
+                  name="phone"
                 >
                   <Input disabled />
                 </Form.Item>

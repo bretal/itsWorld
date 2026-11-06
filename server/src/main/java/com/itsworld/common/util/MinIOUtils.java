@@ -29,6 +29,13 @@ public class MinIOUtils {
     private String endpoint;
 
     /**
+     * 对外访问图片的根地址（生产为 https://lvhaorankk.top/files）。
+     * 未配置时回退到 minio.endpoint，保证本地开发行为不变。
+     */
+    @Value("${minio.public-endpoint:${minio.endpoint}}")
+    private String publicEndpoint;
+
+    /**
      * MinIO访问密钥（从application.yml读取）
      */
     @Value("${minio.access-key}")
@@ -173,7 +180,10 @@ public class MinIOUtils {
      * @return 文件URL
      */
     private String getFileUrl(String bucketName, String objectName) {
-        return endpoint + "/" + bucketName + "/" + objectName;
+        String baseUrl = publicEndpoint == null || publicEndpoint.isBlank()
+                ? endpoint
+                : publicEndpoint;
+        return baseUrl + "/" + bucketName + "/" + objectName;
     }
 
     /**

@@ -1,0 +1,152 @@
+<view class="pet-detail-page">
+  <view wx:if="{{pet}}" class="pet-hero">
+    <view class="hero-circle circle-a"></view>
+    <view class="hero-circle circle-b"></view>
+    <view class="hero-top">
+      <image
+        class="hero-avatar"
+        src="{{petAvatarSrc || pet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        mode="aspectFill"
+      />
+      <view class="hero-edit" bindtap="goEdit">编辑档案</view>
+    </view>
+    <view class="hero-name">{{pet.petName}}</view>
+    <view class="hero-meta">
+      {{ageText}} · {{pet.breed || '品种待补充'}} · {{genderLabel}}
+    </view>
+    <view class="hero-bio">{{pet.description || '还没有简介，去档案里补充吧~'}}</view>
+
+    <view class="stat-row">
+      <view class="stat">
+        <view class="stat-value">{{pet.weight || '--'}}<text class="stat-unit">kg</text></view>
+        <view class="stat-label">体重</view>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat">
+        <view class="stat-value">{{pet.height || '--'}}<text class="stat-unit">cm</text></view>
+        <view class="stat-label">身高</view>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat">
+        <view class="stat-value">{{pet.breed || '--'}}</view>
+        <view class="stat-label">品种</view>
+      </view>
+    </view>
+  </view>
+
+  <block wx:if="{{pet}}">
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab {{activeTab === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="tab-content">
+    <block wx:if="{{activeTab === 'growth'}}">
+      <view class="section-head">
+        <view class="section-title">成长记录</view>
+        <view class="record-link" bindtap="goRecord">+ 记录</view>
+      </view>
+
+      <view class="timeline">
+        <view
+          wx:for="{{diaries}}"
+          wx:key="id"
+          class="timeline-item"
+          data-id="{{item.id}}"
+          bindtap="goDiaryDetail"
+        >
+          <view class="timeline-dot"></view>
+          <view class="timeline-card">
+            <view class="timeline-date">{{item.dateText}}</view>
+            <view class="timeline-text">
+              {{item.content || item.greeting || '今天也留下了可爱的记录~'}}
+            </view>
+            <view wx:if="{{item.photos.length}}" class="timeline-photos">
+              <image
+                wx:for="{{item.photos}}"
+                wx:for-item="photo"
+                wx:key="*this"
+                class="timeline-photo"
+                src="{{photo}}"
+                mode="aspectFill"
+              />
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{!loading && !diaries.length}}" class="empty">
+          <view class="empty-emoji">🌱</view>
+          <view class="empty-title">还没有成长记录</view>
+          <view class="empty-btn" bindtap="goRecord">记录第一条</view>
+        </view>
+
+        <view wx:if="{{loadingMore}}" class="list-footer">加载中…</view>
+        <view wx:elif="{{!diaryHasMore && diaries.length}}" class="list-footer">没有更多了</view>
+      </view>
+    </block>
+
+    <block wx:elif="{{activeTab === 'health'}}">
+      <view class="health-card">
+        <view class="health-head">
+          <view>
+            <view class="health-title">当前体重</view>
+            <view class="health-value">{{pet.weight || '--'}}<text class="health-unit">kg</text></view>
+          </view>
+          <view class="health-icon">💗</view>
+        </view>
+        <view class="health-tip">体重记录、喂食、疫苗与体检将在健康管理模块中展示</view>
+        <view class="health-btn" bindtap="goHealth">打开健康管理</view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="info-card">
+        <view class="info-row">
+          <text class="info-label">名字</text>
+          <text class="info-value">{{pet.petName}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">类型</text>
+          <text class="info-value">{{petTypeLabel}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">品种</text>
+          <text class="info-value">{{pet.breed || '--'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">性别</text>
+          <text class="info-value">{{genderLabel}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">生日</text>
+          <text class="info-value">{{pet.birthDate || '--'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">体重</text>
+          <text class="info-value">{{pet.weight || '--'}} kg</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">身高</text>
+          <text class="info-value">{{pet.height || '--'}} cm</text>
+        </view>
+        <view class="info-row info-row-column">
+          <text class="info-label">简介</text>
+          <text class="info-value info-bio">{{pet.description || '暂无简介'}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+  </block>
+
+  <view wx:if="{{!pet && !loading}}" class="empty">
+    <view class="empty-emoji">🐾</view>
+    <view class="empty-title">没有找到这只宠物的档案</view>
+  </view>
+</view>

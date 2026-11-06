@@ -1,0 +1,57 @@
+<view class="diary-detail-page">
+  <block wx:if="{{diary}}">
+    <view class="detail-card">
+      <view class="detail-head">
+        <image
+          class="pet-avatar"
+          src="{{petAvatarSrc || pet.avatarUrl || '/assets/pet-placeholder.png'}}"
+          mode="aspectFill"
+        />
+        <view class="head-info">
+          <view class="pet-name">{{pet.petName || '我的宠物'}}</view>
+          <view class="detail-date">
+            {{dateText}} · {{timeText}}{{categoryLabel ? ' · ' + categoryLabel : ''}}
+          </view>
+        </view>
+        <view wx:if="{{diary.greeting}}" class="greeting-chip">{{diary.greeting}}</view>
+      </view>
+
+      <view class="detail-content">
+        {{diary.content || '今天也留下了可爱的记录~'}}
+      </view>
+
+      <view wx:if="{{photos.length}}" class="photo-list">
+        <image
+          wx:for="{{photos}}"
+          wx:key="*this"
+          class="detail-photo"
+          src="{{item}}"
+          mode="widthFix"
+        />
+      </view>
+
+      <view class="detail-foot">
+        <view class="foot-action" bindtap="like">
+          <text class="foot-icon {{liked ? 'liked' : ''}}">
+            {{liked ? '♥' : '♡'}}
+          </text>
+          <text>{{diary.likeCount || 0}}</text>
+        </view>
+        <view class="foot-action">
+          <text class="foot-icon">💬</text>
+          <text>{{diary.commentCount || 0}}</text>
+        </view>
+        <view wx:if="{{diary.healthScore}}" class="health-chip">
+          健康评分 {{diary.healthScore}}
+        </view>
+      </view>
+    </view>
+
+    <view class="delete-btn" bindtap="remove">删除这篇日记</view>
+  </block>
+
+  <view wx:if="{{!loading && !diary}}" class="empty">
+    <view class="empty-emoji">📖</view>
+    <view class="empty-title">日记不存在或已被删除</view>
+  </view>
+</view>

@@ -1,6 +1,8 @@
 package com.itsworld.diary.controller;
 
+import com.itsworld.common.result.PageResult;
 import com.itsworld.common.result.Result;
+import com.itsworld.common.util.PageUtils;
 import com.itsworld.diary.dto.DiaryCreateRequest;
 import com.itsworld.diary.dto.DiaryResponse;
 import com.itsworld.diary.service.DiaryService;
@@ -66,6 +68,36 @@ public class DiaryController {
 
         List<DiaryResponse> diaries = diaryService.getDiaryList(user.getId(), petId);
         return Result.success(diaries);
+    }
+
+    /**
+     * 分页查询宠物日记
+     * GET /api/diary/page?petId=&page=1&size=20&category=
+     *
+     * @param petId 宠物ID
+     * @param page 页码
+     * @param size 每页条数
+     * @param category 分类
+     * @return 分页结果
+     */
+    @GetMapping("/page")
+    public Result<PageResult<DiaryResponse>> getDiaryPage(
+            @RequestParam Long petId,
+            @RequestParam(required = false) Long page,
+            @RequestParam(required = false) Long size,
+            @RequestParam(required = false) String category) {
+        log.info("分页查询宠物日记: petId={}, page={}, size={}, category={}",
+                petId, page, size, category);
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+
+        PageResult<DiaryResponse> result = diaryService.getDiaryPage(
+                user.getId(), petId,
+                PageUtils.normalizePageNum(page),
+                PageUtils.normalizePageSize(size),
+                category);
+        return Result.success(result);
     }
 
     /**

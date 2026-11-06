@@ -1,7 +1,8 @@
 package com.itsworld.pet.controller;
 
-import com.itsworld.common.result.Result;
 import com.itsworld.common.result.PageResult;
+import com.itsworld.common.result.Result;
+import com.itsworld.common.util.PageUtils;
 import com.itsworld.pet.dto.PetCreateRequest;
 import com.itsworld.pet.dto.PetResponse;
 import com.itsworld.pet.dto.PetUpdateRequest;
@@ -67,6 +68,33 @@ public class PetController {
 
         List<PetResponse> pets = petService.getPetListByUserId(user.getId());
         return Result.success(pets);
+    }
+
+    /**
+     * 分页查询宠物列表
+     * GET /api/pet/page?page=1&size=20&keyword=
+     *
+     * @param page 页码
+     * @param size 每页条数
+     * @param keyword 名称/品种关键字
+     * @return 分页结果
+     */
+    @GetMapping("/page")
+    public Result<PageResult<PetResponse>> getPetPage(
+            @RequestParam(required = false) Long page,
+            @RequestParam(required = false) Long size,
+            @RequestParam(required = false) String keyword) {
+        log.info("分页查询宠物列表: page={}, size={}, keyword={}", page, size, keyword);
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+
+        PageResult<PetResponse> result = petService.getPetPage(
+                user.getId(),
+                PageUtils.normalizePageNum(page),
+                PageUtils.normalizePageSize(size),
+                keyword);
+        return Result.success(result);
     }
 
     /**

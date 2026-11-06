@@ -1,6 +1,9 @@
 package com.itsworld.pet.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itsworld.common.result.ErrorCode;
+import com.itsworld.common.result.PageResult;
 import com.itsworld.common.exception.BusinessException;
 import com.itsworld.pet.dto.PetCreateRequest;
 import com.itsworld.pet.dto.PetResponse;
@@ -52,6 +55,7 @@ public class PetServiceImpl implements PetService {
                 .gender(createRequest.getGender())
                 .birthDate(createRequest.getBirthDate())
                 .weight(createRequest.getWeight())
+                .height(createRequest.getHeight())
                 .description(createRequest.getDescription())
                 .isActive(1)
                 .createdAt(LocalDateTime.now())
@@ -77,6 +81,32 @@ public class PetServiceImpl implements PetService {
         return pets.stream()
                 .map(this::convertToPetResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<PetResponse> getPetPage(Long userId, long pageNum, long pageSize, String keyword) {
+        Page<Pet> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Pet> wrapper = new LambdaQueryWrapper<Pet>()
+                .eq(Pet::getUserId, userId)
+                .isNull(Pet::getDeletedAt)
+                .orderByDesc(Pet::getCreatedAt)
+                .orderByDesc(Pet::getId);
+        if (keyword != null && !keyword.isBlank()
+                && !"undefined".equalsIgnoreCase(keyword)
+                && !"null".equalsIgnoreCase(keyword)) {
+            String trimmedKeyword = keyword.trim();
+            wrapper.and(condition -> condition
+                    .like(Pet::getPetName, trimmedKeyword)
+                    .or()
+                    .like(Pet::getBreed, trimmedKeyword));
+        }
+
+        Page<Pet> resultPage = petMapper.selectPage(page, wrapper);
+        List<PetResponse> records = resultPage.getRecords().stream()
+                .map(this::convertToPetResponse)
+                .collect(Collectors.toList());
+        return PageResult.of(records, resultPage.getTotal(),
+                resultPage.getCurrent(), resultPage.getSize());
     }
 
     /**
@@ -121,6 +151,9 @@ public class PetServiceImpl implements PetService {
         if (updateRequest.getWeight() != null) {
             pet.setWeight(updateRequest.getWeight());
         }
+        if (updateRequest.getHeight() != null) {
+            pet.setHeight(updateRequest.getHeight());
+        }
         if (updateRequest.getDescription() != null) {
             pet.setDescription(updateRequest.getDescription());
         }
@@ -143,9 +176,8 @@ public class PetServiceImpl implements PetService {
             throw new BusinessException(ErrorCode.PET_NOT_FOUND);
         }
 
-        // 软删除
-        pet.setDeletedAt(LocalDateTime.now());
-        petMapper.updateById(pet);
+        // 逻辑删除（deleted_at）
+        petMapper.deleteById(petId);
 
         log.info("宠物删除成功: userId={}, petId={}", userId, petId);
     }
@@ -176,6 +208,7 @@ public class PetServiceImpl implements PetService {
                 .gender(pet.getGender())
                 .birthDate(pet.getBirthDate())
                 .weight(pet.getWeight())
+                .height(pet.getHeight())
                 .description(pet.getDescription())
                 .build();
     }

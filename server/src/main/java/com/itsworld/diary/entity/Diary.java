@@ -50,6 +50,11 @@ public class Diary implements Serializable {
     private String diaryDate;
 
     /**
+     * 日记分类（daily-日常, food-饮食, health-健康）
+     */
+    private String category;
+
+    /**
      * 早晨心情
      */
     private String morningMood;

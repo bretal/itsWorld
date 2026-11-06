@@ -1,0 +1,55 @@
+{
+  "pages": [
+    "pages/launch/index",
+    "pages/onboarding/index",
+    "pages/auth/login",
+    "pages/home/index",
+    "pages/album/index",
+    "pages/community/index",
+    "pages/profile/index",
+    "pages/pet/list",
+    "pages/pet/edit",
+    "pages/pet/detail",
+    "pages/health/index",
+    "pages/diary/edit",
+    "pages/diary/detail",
+    "pages/community/create",
+    "pages/community/detail",
+    "pages/profile/edit"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F7F8FA",
+    "navigationBarTitleText": "它的世界",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F7F8FA"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9A9A9A",
+    "selectedColor": "#2F80ED",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/album/index",
+        "text": "相册"
+      },
+      {
+        "pagePath": "pages/community/index",
+        "text": "社区"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

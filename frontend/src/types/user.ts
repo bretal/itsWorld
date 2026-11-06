@@ -4,6 +4,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  phone?: string;
   nickName?: string;
   avatarUrl?: string;
   bio?: string;
@@ -25,6 +26,7 @@ export interface UserLoginResponse {
 
 export interface UserRegisterRequest {
   username: string;
+  phone: string;
   email: string;
   password: string;
   confirmPassword: string;

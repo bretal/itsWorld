@@ -1,0 +1,80 @@
+<view class="profile-edit-page">
+  <view class="avatar-section">
+    <view class="avatar-picker" bindtap="chooseAvatar">
+      <image
+        class="avatar-image"
+        src="{{avatarPreviewSrc || avatarUrl || '/assets/avatar-placeholder.png'}}"
+        mode="aspectFill"
+      />
+      <view class="avatar-mask">
+        <text>{{uploading ? '上传中…' : '更换头像'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-item">
+      <text class="form-label">昵称</text>
+      <input
+        class="form-input"
+        data-field="nickName"
+        value="{{nickName}}"
+        placeholder="给自己起个昵称"
+        placeholder-class="placeholder"
+        maxlength="50"
+        bindinput="onInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">性别</text>
+      <picker
+        class="form-picker"
+        range="{{genders}}"
+        value="{{genderIndex}}"
+        bindchange="onGenderChange"
+      >
+        <view class="picker-value">
+          {{genders[genderIndex]}}
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">地区</text>
+      <input
+        class="form-input"
+        data-field="region"
+        value="{{region}}"
+        placeholder="如：上海"
+        placeholder-class="placeholder"
+        maxlength="100"
+        bindinput="onInput"
+      />
+    </view>
+
+    <view class="form-item form-item-textarea">
+      <text class="form-label">简介</text>
+      <textarea
+        class="form-textarea"
+        data-field="bio"
+        value="{{bio}}"
+        placeholder="介绍一下你自己吧"
+        placeholder-class="placeholder"
+        maxlength="200"
+        auto-height
+        bindinput="onInput"
+      />
+    </view>
+  </view>
+
+  <button
+    class="btn-primary save-btn"
+    loading="{{saving}}"
+    disabled="{{saving}}"
+    bindtap="onSave"
+  >
+    保存
+  </button>
+</view>
