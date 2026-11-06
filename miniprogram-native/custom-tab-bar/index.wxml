@@ -1,22 +1,69 @@
 <view class="tabbar">
   <view class="tabbar-inner">
     <view
-      wx:for="{{list}}"
-      wx:key="pagePath"
-      class="tab-item {{selected === index ? 'active' : ''}}"
-      data-path="{{item.pagePath}}"
-      data-index="{{index}}"
+      class="tab-item {{selected === 0 ? 'active' : ''}}"
+      data-path="{{list[0].pagePath}}"
+      data-index="0"
       bindtap="switchTab"
     >
       <image
-        class="tab-icon"
-        src="{{selected === index ? item.selectedIconPath : item.iconPath}}"
+        class="tab-icon {{selected === 0 ? '' : 'dim'}}"
+        src="{{resolvedIcons[0] || list[0].iconPath}}"
         mode="aspectFit"
       />
-      <text class="tab-text">{{item.text}}</text>
+      <text class="tab-text">{{list[0].text}}</text>
     </view>
-    <view class="publish" bindtap="onPublish">
-      <text class="plus">+</text>
+
+    <view
+      class="tab-item {{selected === 1 ? 'active' : ''}}"
+      data-path="{{list[1].pagePath}}"
+      data-index="1"
+      bindtap="switchTab"
+    >
+      <image
+        class="tab-icon {{selected === 1 ? '' : 'dim'}}"
+        src="{{resolvedIcons[1] || list[1].iconPath}}"
+        mode="aspectFit"
+      />
+      <text class="tab-text">{{list[1].text}}</text>
+    </view>
+
+    <view class="tab-center">
+      <view class="publish-button" bindtap="onPublish">
+        <image
+          class="publish-image"
+          src="{{publishIconSrc || publishIcon}}"
+          mode="aspectFit"
+        />
+      </view>
+    </view>
+
+    <view
+      class="tab-item {{selected === 2 ? 'active' : ''}}"
+      data-path="{{list[2].pagePath}}"
+      data-index="2"
+      bindtap="switchTab"
+    >
+      <image
+        class="tab-icon {{selected === 2 ? '' : 'dim'}}"
+        src="{{resolvedIcons[2] || list[2].iconPath}}"
+        mode="aspectFit"
+      />
+      <text class="tab-text">{{list[2].text}}</text>
+    </view>
+
+    <view
+      class="tab-item {{selected === 3 ? 'active' : ''}}"
+      data-path="{{list[3].pagePath}}"
+      data-index="3"
+      bindtap="switchTab"
+    >
+      <image
+        class="tab-icon {{selected === 3 ? '' : 'dim'}}"
+        src="{{resolvedIcons[3] || list[3].iconPath}}"
+        mode="aspectFit"
+      />
+      <text class="tab-text">{{list[3].text}}</text>
     </view>
   </view>
 </view>

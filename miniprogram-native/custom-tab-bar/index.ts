@@ -1,32 +1,47 @@
+import { assetUrl } from '../utils/assets';
+import { resolveImage } from '../utils/image';
+
 Component({
   data: {
     selected: 0,
+    resolvedIcons: [] as string[],
+    publishIcon: assetUrl('tabs/publish.png'),
+    publishIconSrc: '',
     list: [
       {
         pagePath: '/pages/home/index',
         text: '首页',
-        iconPath: '/assets/tabs/home.png',
-        selectedIconPath: '/assets/tabs/home-active.png',
+        iconPath: assetUrl('tabs/home.png'),
       },
       {
         pagePath: '/pages/album/index',
         text: '相册',
-        iconPath: '/assets/tabs/album.png',
-        selectedIconPath: '/assets/tabs/album-active.png',
+        iconPath: assetUrl('tabs/album.png'),
       },
       {
         pagePath: '/pages/community/index',
         text: '社区',
-        iconPath: '/assets/tabs/community.png',
-        selectedIconPath: '/assets/tabs/community-active.png',
+        iconPath: assetUrl('tabs/community.png'),
       },
       {
         pagePath: '/pages/profile/index',
         text: '我的',
-        iconPath: '/assets/tabs/profile.png',
-        selectedIconPath: '/assets/tabs/profile-active.png',
+        iconPath: assetUrl('tabs/profile.png'),
       },
     ],
+  },
+
+  lifetimes: {
+    attached() {
+      Promise.all(
+        this.data.list.map((item: any) => resolveImage(item.iconPath)),
+      ).then((resolvedIcons) => {
+        this.setData({ resolvedIcons });
+      });
+      resolveImage(this.data.publishIcon).then((publishIconSrc) => {
+        this.setData({ publishIconSrc });
+      });
+    },
   },
 
   methods: {

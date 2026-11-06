@@ -1,5 +1,10 @@
 <view class="launch">
-  <image class="launch-bg" src="/assets/launch-bg.jpg" mode="aspectFill" />
+  <image
+    wx:if="{{launchBg}}"
+    class="launch-bg"
+    src="{{launchBg}}"
+    mode="aspectFill"
+  />
 
   <view class="launch-bottom">
     <button class="start-btn" bindtap="onTapStart">

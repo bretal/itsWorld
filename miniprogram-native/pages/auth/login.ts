@@ -1,12 +1,21 @@
 import { login } from '../../services/user';
 import { setAuth } from '../../utils/auth';
+import { assetUrl } from '../../utils/assets';
+import { resolveImage } from '../../utils/image';
 
 Page({
   data: {
     username: '',
     password: '',
+    logoUrl: '',
     loading: false,
     showPassword: false,
+  },
+
+  onLoad() {
+    resolveImage(assetUrl('logo.jpg')).then((logoUrl) => {
+      this.setData({ logoUrl });
+    });
   },
 
   onUsernameInput(event: any) {

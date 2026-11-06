@@ -44,6 +44,10 @@
    - 体验版/正式版（`trial` / `release`）：`https://lvhaorankk.top/api`。
    电脑 IP 变化时只需修改开发环境常量；生产域名需配置微信 request/uploadFile/downloadFile 合法域名。
    生产图片已走同域名 `https://lvhaorankk.top/files`；历史 9000 端口图片 URL 由 `utils/image.ts` 自动改写。
+   启动背景、logo、Tab 图标和发布按钮已上传到 MinIO `itsworld-static`，通过 `utils/assets.ts` 的 `assetUrl` 读取：
+   - 开发：`http://192.168.31.25:9000/itsworld-static/...`
+   - 生产：`https://lvhaorankk.top/files/itsworld-static/...`
+   本地仅保留 `avatar-placeholder.png`、`pet-placeholder.png` 两个小占位图。
 
 ## 类型检查
 
