@@ -1,0 +1,33 @@
+<view class="member-page">
+  <view class="nav" style="padding-top:{{top}}px;height:{{navHeight}}px">
+    <view class="back" bindtap="back" aria-label="返回">‹</view><text>会员中心</text>
+  </view>
+  <image class="hero" src="{{staticAssets['member/hero.jpg']}}" mode="aspectFill" />
+  <view class="body">
+    <view wx:if="{{failed}}" class="error" bindtap="load">会员信息加载失败，点击重试 ›</view>
+    <view wx:if="{{loading}}" class="loading">正在加载你的会员信息…</view>
+    <view class="membership">
+      <view class="membership-info"><view class="identity"><image src="{{staticAssets['member/membership-paw.png']}}" mode="aspectFit" /><view><view class="member-name">{{memberName}}</view><view class="validity">{{validity}}</view></view></view><text class="member-caption">✦ {{active ? '有效期内享专属权益' : '为爱宠开启更多美好'}} ✦</text></view>
+      <view class="membership-action"><button class="gold" data-panel="plans" bindtap="openPanel" disabled="{{loading || failed}}">{{active ? '立即续费' : '开通会员'}}</button></view>
+    </view>
+    <view class="wallet glass"><image class="wallet-icon" src="{{staticAssets['member/wallet-pink.png']}}" mode="aspectFit" /><view class="wallet-value"><view class="wallet-label" bindtap="balanceInfo">余额 <text>ⓘ</text></view><view class="money"><text>¥</text>{{balance}}</view></view><button class="gold small" data-panel="recharge" bindtap="openPanel">充值</button><button class="outline small" data-panel="wallet" bindtap="openPanel">明细</button></view>
+    <view class="glass privileges"><view class="section-title"><text>✦</text> 会员权益</view><view class="benefit-grid"><view wx:for="{{benefits}}" wx:key="name" class="benefit" data-panel="benefits" bindtap="openPanel"><image src="{{staticAssets['member/' + item.icon]}}" mode="aspectFit"/><view>{{item.name}}</view><text>{{item.subtitle}}</text></view></view></view>
+    <view class="gift-banner" data-panel="gifts" bindtap="openPanel"><view><view class="gift-title">会员专属礼包</view><text>{{giftSummary}}</text></view><image src="{{staticAssets['member/gift.png']}}" mode="aspectFit" /></view>
+    <view class="growth-card"><view class="growth-art"><text class="sparkle">✦</text><image class="growth-gift" src="{{staticAssets['member/gift.png']}}" mode="aspectFit"/><image class="growth-coin" src="{{staticAssets['member/coin.png']}}" mode="aspectFit"/></view><view class="growth-info"><view class="growth-title">我的成长值</view><view class="growth-value">{{growth}}</view><view class="growth-caption">完成任务攒成长值，兑换心仪好礼</view><view class="growth-actions"><button class="gold" data-panel="rewards" bindtap="openPanel">兑换好礼</button><button class="outline" data-panel="growth" bindtap="openPanel">成长明细 ›</button></view></view></view>
+    <view class="glass task-section"><view class="section-title"><text>✦</text> 成长任务</view><view wx:for="{{tasks}}" wx:key="id" class="task"><image src="{{staticAssets['member/' + item.icon]}}" mode="aspectFit"/><view class="task-info"><view class="task-title">{{item.taskName}}</view><view class="reward"><text>+{{item.growthReward}}</text> 成长值 <text class="progress">{{item.progress}}/{{item.targetValue}}</text></view></view><button class="gold task-button" disabled="{{busy || item.rewardStatus === 1}}" data-id="{{item.id}}" bindtap="taskAction">{{item.label}}</button></view><view wx:if="{{!tasks.length}}" class="empty" bindtap="load">{{loading ? '加载任务中…' : '暂无任务，点击刷新'}}</view></view>
+    <view class="footer" data-panel="redemptions" bindtap="openPanel">──　♔ 成长值可兑换礼品　──<view>查看我的兑换记录 ›</view></view>
+  </view>
+</view>
+<view wx:if="{{panel}}" class="overlay" bindtap="closePanel" catchtouchmove="noop">
+  <view class="sheet" catchtap="noop"><view class="sheet-heading">{{panelTitle}}<text bindtap="closePanel">×</text></view>
+    <view wx:if="{{panel === 'rewards'}}" class="sheet-note">可用 {{growth}} 成长值 · 兑换后到门店领取 <text data-panel="redemptions" bindtap="openPanel">兑换记录 ›</text></view>
+    <scroll-view scroll-y class="sheet-content">
+      <view wx:if="{{panel === 'plans' && pendingOrder}}" class="payment-box"><view class="section-title">选择支付方式</view><view class="sheet-note">订单已创建，15分钟内完成支付</view><view class="payment-choice" data-channel="WALLET" bindtap="selectChannel">储值余额支付 <text>{{paymentChannel === 'WALLET' ? '●' : '○'}}</text></view><view wx:if="{{overview.wallet.mockPayEnabled}}" class="payment-choice" data-channel="MOCK_WECHAT" bindtap="selectChannel">开发模拟支付（不扣微信）<text>{{paymentChannel === 'MOCK_WECHAT' ? '●' : '○'}}</text></view><button class="gold pay-button" loading="{{busy}}" disabled="{{busy}}" bindtap="payMembership">确认支付</button><view class="pending-link" bindtap="viewPendingOrder">查看订单 / 稍后支付 ›</view></view>
+      <block wx:else>
+        <view wx:for="{{rows}}" wx:key="id" class="sheet-row"><view class="row-info"><view class="row-title">{{item.title}}</view><view class="row-subtitle">{{item.subtitle}}</view><view wx:if="{{item.no}}" class="row-no">{{item.no}}</view></view><view class="row-end"><text wx:if="{{item.price}}">{{item.price}}</text><button wx:if="{{item.action}}" class="gold" disabled="{{busy || item.disabled}}" loading="{{busy}}" data-id="{{item.id}}" bindtap="actRow">{{item.action}}</button></view></view>
+        <view wx:if="{{panelLoading}}" class="empty">正在加载…</view><view wx:elif="{{panelError}}" class="empty" bindtap="retryPanel">加载失败，点击重试</view><view wx:elif="{{!rows.length}}" class="empty">{{panel === 'benefits' ? '开通会员后可查看专属权益' : '暂时没有相关记录或可用方案'}}</view>
+        <button wx:if="{{more && !panelLoading}}" class="outline load-more" bindtap="moreRows">加载更多</button>
+      </block>
+    </scroll-view>
+  </view>
+</view>

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itsworld.common.result.ErrorCode;
 import com.itsworld.common.result.PageResult;
 import com.itsworld.common.exception.BusinessException;
+import com.itsworld.member.service.MemberTaskService;
 import com.itsworld.pet.dto.PetCreateRequest;
 import com.itsworld.pet.dto.PetResponse;
 import com.itsworld.pet.dto.PetUpdateRequest;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class PetServiceImpl implements PetService {
 
     private final PetMapper petMapper;
+    private final MemberTaskService memberTaskService;
 
     /**
      * 创建宠物
@@ -67,6 +69,9 @@ public class PetServiceImpl implements PetService {
         if (result <= 0) {
             throw new BusinessException(ErrorCode.SERVER_ERROR);
         }
+
+        // 会员任务进度：完善宠物档案
+        memberTaskService.recordProgress(userId, "PET_CREATE");
 
         log.info("宠物创建成功: userId={}, petName={}", userId, createRequest.getPetName());
         return pet.getId();

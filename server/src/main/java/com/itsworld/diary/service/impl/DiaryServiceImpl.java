@@ -12,6 +12,7 @@ import com.itsworld.diary.dto.DiaryResponse;
 import com.itsworld.diary.entity.Diary;
 import com.itsworld.diary.mapper.DiaryMapper;
 import com.itsworld.diary.service.DiaryService;
+import com.itsworld.member.service.MemberTaskService;
 import com.itsworld.pet.service.PetService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class DiaryServiceImpl implements DiaryService {
 
     private final DiaryMapper diaryMapper;
     private final PetService petService;
+    private final MemberTaskService memberTaskService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -81,6 +83,9 @@ public class DiaryServiceImpl implements DiaryService {
         if (result <= 0) {
             throw new BusinessException(ErrorCode.SERVER_ERROR);
         }
+
+        // 会员任务进度：记录一篇日记
+        memberTaskService.recordProgress(userId, "DIARY_CREATE");
 
         log.info("日记创建成功: userId={}, petId={}, diaryDate={}", userId, createRequest.getPetId(), createRequest.getDiaryDate());
         return diary.getId();

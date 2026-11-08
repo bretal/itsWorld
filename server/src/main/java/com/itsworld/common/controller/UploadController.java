@@ -38,8 +38,13 @@ public class UploadController {
     private static final String TYPE_PET = "pet";
     private static final String TYPE_DIARY = "diary";
     private static final String TYPE_COMMUNITY = "community";
+    private static final String TYPE_STORE = "store";
+    private static final String TYPE_SHOP = "shop";
+    private static final String TYPE_REVIEW = "review";
 
     private final MinIOUtils minIOUtils;
+    private final com.itsworld.member.service.MemberTaskService memberTaskService;
+    private final com.itsworld.security.service.CurrentUserService currentUserService;
 
     @Value("${minio.bucket.avatars}")
     private String avatarBucket;
@@ -60,7 +65,7 @@ public class UploadController {
      * 上传图片
      *
      * @param file 图片文件
-     * @param type 上传类型：avatar / pet / diary / community
+     * @param type 上传类型：avatar / pet / diary / community / store / shop / review
      * @return 图片访问 URL
      */
     @PostMapping
@@ -88,6 +93,9 @@ public class UploadController {
                 throw new BusinessException(ErrorCode.FILE_UPLOAD_ERROR);
             }
             log.info("图片上传成功：type={}, object={}", type, objectName);
+            if (TYPE_PET.equals(type) || TYPE_DIARY.equals(type)) {
+                memberTaskService.recordProgress(currentUserService.getUserId(), "PHOTO_UPLOAD");
+            }
             return Result.success(url, "上传成功");
         } catch (BusinessException e) {
             throw e;
@@ -101,7 +109,7 @@ public class UploadController {
         return switch (type) {
             case TYPE_AVATAR, TYPE_PET -> avatarBucket;
             case TYPE_DIARY -> diaryBucket;
-            case TYPE_COMMUNITY -> communityBucket;
+            case TYPE_COMMUNITY, TYPE_STORE, TYPE_SHOP, TYPE_REVIEW -> communityBucket;
             default -> throw new BusinessException(ErrorCode.INVALID_PARAM.getCode(), "不支持的上传类型");
         };
     }

@@ -20,6 +20,7 @@ import com.itsworld.community.mapper.FollowMapper;
 import com.itsworld.community.mapper.PostLikeMapper;
 import com.itsworld.community.mapper.PostMapper;
 import com.itsworld.community.service.CommunityService;
+import com.itsworld.member.service.MemberTaskService;
 import com.itsworld.user.entity.User;
 import com.itsworld.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final FollowMapper followMapper;
     private final PostLikeMapper postLikeMapper;
     private final UserService userService;
+    private final MemberTaskService memberTaskService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -86,6 +88,9 @@ public class CommunityServiceImpl implements CommunityService {
         if (result <= 0) {
             throw new BusinessException(ErrorCode.SERVER_ERROR);
         }
+
+        // 会员任务进度：社区发帖
+        memberTaskService.recordProgress(userId, "POST_CREATE");
 
         log.info("帖子发布成功: userId={}, postId={}", userId, post.getId());
         return post.getId();
