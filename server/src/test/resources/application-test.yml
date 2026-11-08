@@ -1,0 +1,11 @@
+# 测试环境配置：数据源由 Testcontainers @DynamicPropertySource 注入
+spring:
+  main:
+    banner-mode: "off"
+
+logging:
+  level:
+    root: WARN
+    com.itsworld: INFO
+    org.springframework: WARN
+    org.mybatis: WARN
