@@ -131,3 +131,6 @@ app:
     cors-allowed-origins: https://lvhaorankk.top,https://www.lvhaorankk.top
     cors-allowed-methods: GET,POST,PUT,DELETE,OPTIONS
     cors-max-age: 3600
+  payment:
+    # 仅开发环境开启模拟支付；生产必须关闭并接入真实支付渠道
+    mock-enabled: false
