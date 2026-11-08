@@ -31,6 +31,14 @@ public interface UserService {
     UserLoginResponse login(UserLoginRequest loginRequest);
 
     /**
+     * 管理后台登录（仅 ADMIN）
+     *
+     * @param loginRequest 登录请求
+     * @return 登录响应（包含JWT Token）
+     */
+    UserLoginResponse adminLogin(UserLoginRequest loginRequest);
+
+    /**
      * 根据用户名/邮箱/手机号查询用户
      *
      * @param username 用户名/邮箱/手机号

@@ -62,4 +62,9 @@ public class UserResponse {
      */
     private String region;
 
+    /**
+     * 角色 (USER-普通用户 ADMIN-运营管理员)
+     */
+    private String role;
+
 }

@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <Card className={styles.card} title="登录">
+      <Card className={styles.card} title="管理后台登录">
         <Spin spinning={loading}>
           <Form
             form={form}
@@ -68,10 +68,7 @@ const LoginPage: React.FC = () => {
             </Form.Item>
 
             <div className={styles.footer}>
-              还没有账号？{' '}
-              <a onClick={() => navigate('/register')}>
-                立即注册
-              </a>
+              仅管理员账号可登录管理后台
             </div>
           </Form>
         </Spin>

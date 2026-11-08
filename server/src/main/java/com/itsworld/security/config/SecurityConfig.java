@@ -97,12 +97,15 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/user/register",
                                 "/api/user/login",
+                                "/api/admin/auth/login",
                                 "/api/doc.html",
                                 "/api/doc/**",
                                 "/api/v2/api-docs",
                                 "/api/swagger-ui/**",
                                 "/api/swagger-resources/**"
                         ).permitAll()
+                        // 运营管理接口仅管理员可访问
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // 其他所有请求都需要认证
                         .anyRequest().authenticated()
                 )

@@ -16,10 +16,10 @@ export const register = (data: UserRegisterRequest): Promise<number> => {
 };
 
 /**
- * 用户登录
+ * 管理后台登录（仅 ADMIN；用户登录接口保留给小程序）
  */
 export const login = (data: UserLoginRequest): Promise<UserLoginResponse> => {
-  return post('/api/user/login', data);
+  return post('/api/admin/auth/login', data);
 };
 
 /**

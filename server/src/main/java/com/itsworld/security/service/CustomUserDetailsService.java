@@ -51,9 +51,12 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("账户已被禁用");
         }
 
-        // 构建权限集合（可根据业务需求扩展）
+        // 构建权限集合：所有登录用户具备 ROLE_USER，运营管理员额外具备 ROLE_ADMIN
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
 
         // 构建Spring Security的UserDetails对象
         return org.springframework.security.core.userdetails.User.builder()

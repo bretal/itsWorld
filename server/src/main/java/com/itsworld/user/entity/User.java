@@ -94,6 +94,11 @@ public class User implements Serializable {
     private Integer status;
 
     /**
+     * 角色 (USER-普通用户 ADMIN-运营管理员)
+     */
+    private String role;
+
+    /**
      * 最后登录时间
      */
     private LocalDateTime lastLoginAt;

@@ -106,6 +106,24 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserLoginResponse login(UserLoginRequest loginRequest) {
+        return doLogin(loginRequest, false);
+    }
+
+    /**
+     * 管理后台登录（仅 ADMIN）
+     */
+    @Override
+    public UserLoginResponse adminLogin(UserLoginRequest loginRequest) {
+        return doLogin(loginRequest, true);
+    }
+
+    /**
+     * 登录公共逻辑
+     *
+     * @param loginRequest 登录请求
+     * @param requireAdmin 是否要求管理员角色
+     */
+    private UserLoginResponse doLogin(UserLoginRequest loginRequest, boolean requireAdmin) {
         // 1. 查询用户（支持用户名、邮箱、手机号）
         User user = userMapper.selectByUsername(loginRequest.getUsername());
         if (user == null) {
@@ -122,14 +140,20 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.PASSWORD_ERROR);
         }
 
-        // 4. 更新最后登录时间
+        // 4. 管理后台仅允许 ADMIN，角色校验放在密码校验之后，避免账号枚举
+        if (requireAdmin && !"ADMIN".equalsIgnoreCase(user.getRole())) {
+            log.warn("非管理员尝试登录管理后台: username={}", user.getUsername());
+            throw new BusinessException(ErrorCode.FORBIDDEN.getCode(), "仅管理员可登录");
+        }
+
+        // 5. 更新最后登录时间
         user.setLastLoginAt(LocalDateTime.now());
         userMapper.updateById(user);
 
-        // 5. 生成JWT Token
+        // 6. 生成JWT Token
         String token = jwtUtils.generateToken(user.getId().toString(), user.getUsername());
 
-        // 6. 构建登录响应
+        // 7. 构建登录响应
         UserResponse userResponse = convertToUserResponse(user);
         UserLoginResponse loginResponse = UserLoginResponse.builder()
                 .token(token)
@@ -270,6 +294,7 @@ public class UserServiceImpl implements UserService {
                 .bio(user.getBio())
                 .gender(user.getGender())
                 .region(user.getRegion())
+                .role(user.getRole())
                 .build();
     }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Row, Col, Statistic, Button, Empty } from 'antd';
-import { PlusOutlined, FileOutlined, TeamOutlined } from '@ant-design/icons';
+import { PlusOutlined, CrownOutlined, FileOutlined, TeamOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/hooks/useApp';
 
@@ -93,6 +93,18 @@ const HomePage: React.FC = () => {
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <PlusOutlined style={{ fontSize: 32, color: '#722ed1' }} />
               <div style={{ marginTop: 10 }}>每日问候</div>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            hoverable
+            onClick={() => navigate('/member')}
+            style={{ cursor: 'pointer' }}
+          >
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <CrownOutlined style={{ fontSize: 32, color: '#faad14' }} />
+              <div style={{ marginTop: 10 }}>会员中心</div>
             </div>
           </Card>
         </Col>

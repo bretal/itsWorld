@@ -10,6 +10,7 @@ export interface User {
   bio?: string;
   gender?: number; // 0=未知, 1=男, 2=女
   region?: string;
+  role?: string; // USER / ADMIN
 }
 
 export interface UserLoginRequest {
