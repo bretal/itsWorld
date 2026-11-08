@@ -1,0 +1,107 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 180rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.hero {
+  padding: 36rpx 32rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(135deg, #f2994a 0%, #f7b267 100%);
+  color: #ffffff;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.hero-sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.tabs {
+  white-space: nowrap;
+  margin: 22rpx 0 18rpx;
+}
+
+.tab {
+  display: inline-block;
+  margin-right: 16rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #5f6673;
+  font-size: 25rpx;
+}
+
+.tab.active {
+  background: #f2994a;
+  color: #ffffff;
+}
+
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.product-card {
+  width: 48%;
+  margin-bottom: 20rpx;
+  padding: 18rpx;
+  border-radius: 26rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+  box-shadow: 0 10rpx 26rpx rgba(31, 35, 41, 0.04);
+}
+
+.product-cover {
+  width: 100%;
+  height: 280rpx;
+  border-radius: 20rpx;
+  background: #eef1f6;
+}
+
+.product-name {
+  margin-top: 14rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #8a8f99;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-price {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f0564a;
+}
+
+.member {
+  margin-left: 8rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: #2f80ed;
+}
+
+.tip {
+  padding: 60rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 26rpx;
+}

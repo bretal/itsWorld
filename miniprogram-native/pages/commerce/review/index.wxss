@@ -1,0 +1,141 @@
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 200rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.tip {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 27rpx;
+}
+
+.card {
+  margin-bottom: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 16rpx;
+}
+
+.stars {
+  display: flex;
+  gap: 18rpx;
+}
+
+.star {
+  font-size: 56rpx;
+  color: #e0e4ea;
+}
+
+.star.active {
+  color: #f5a623;
+}
+
+.textarea {
+  width: 100%;
+  height: 200rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  border-radius: 14rpx;
+  background: #f7f8fa;
+  font-size: 26rpx;
+}
+
+.content {
+  margin-top: 16rpx;
+  font-size: 27rpx;
+  line-height: 1.7;
+  color: #1f2329;
+}
+
+.status {
+  margin-top: 12rpx;
+  font-size: 23rpx;
+  color: #8a8f99;
+}
+
+.reply {
+  margin-top: 16rpx;
+  padding: 16rpx;
+  border-radius: 14rpx;
+  background: #edf4ff;
+  color: #2f80ed;
+  font-size: 24rpx;
+}
+
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.image-item {
+  position: relative;
+  width: 150rpx;
+  height: 150rpx;
+}
+
+.image-item image {
+  width: 100%;
+  height: 100%;
+  border-radius: 14rpx;
+  background: #eef1f6;
+}
+
+.remove {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 34rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  text-align: center;
+  font-size: 24rpx;
+}
+
+.image-add {
+  width: 150rpx;
+  height: 150rpx;
+  line-height: 150rpx;
+  border-radius: 14rpx;
+  border: 1rpx dashed #cfd8e6;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 26rpx;
+  background: #fafbfc;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(31, 35, 41, 0.06);
+}
+
+.submit-btn {
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 999rpx;
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.submit-btn::after {
+  border: none;
+}

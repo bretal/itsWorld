@@ -14,7 +14,7 @@ import RegisterPage from '@/pages/auth/Register';
 import MainLayout from '@/layouts/MainLayout';
 
 // Pages
-import HomePage from '@/pages/home/HomePage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UserProfilePage from '@/pages/profile/UserProfilePage';
 import ChangePasswordPage from '@/pages/profile/ChangePasswordPage';
 
@@ -29,6 +29,28 @@ import GreetingFlowPage from '@/pages/diary/GreetingFlowPage';
 
 // Community Pages
 import CommunityPage from '@/pages/community/CommunityPage';
+
+// Member Pages
+import MemberCenterPage from '@/pages/member/MemberCenterPage';
+import MemberLevelPage from '@/pages/member/MemberLevelPage';
+import MemberPointsPage from '@/pages/member/MemberPointsPage';
+import MemberWalletPage from '@/pages/member/MemberWalletPage';
+import MemberCouponsPage from '@/pages/member/MemberCouponsPage';
+
+// Admin Pages
+import AdminRoute from '@/components/AdminRoute';
+import UserManagementPage from '@/pages/admin/users/UserManagementPage';
+import MemberAdminPage from '@/pages/admin/member/MemberAdminPage';
+import WalletAdminPage from '@/pages/admin/wallet/WalletAdminPage';
+import StoreManagementPage from '@/pages/admin/commerce/StoreManagementPage';
+import GroomingManagementPage from '@/pages/admin/commerce/GroomingManagementPage';
+import ProductManagementPage from '@/pages/admin/commerce/ProductManagementPage';
+import InventoryManagementPage from '@/pages/admin/commerce/InventoryManagementPage';
+import OrderManagementPage from '@/pages/admin/commerce/OrderManagementPage';
+import BookingManagementPage from '@/pages/admin/commerce/BookingManagementPage';
+import PackageManagementPage from '@/pages/admin/commerce/PackageManagementPage';
+import AfterSaleManagementPage from '@/pages/admin/commerce/AfterSaleManagementPage';
+import ReviewManagementPage from '@/pages/admin/commerce/ReviewManagementPage';
 
 const theme = {
   token: {
@@ -73,7 +95,7 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           >
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<AdminDashboardPage />} />
           <Route path="/pet" element={<PetListPage />} />
           <Route path="/pet/create" element={<PetCreatePage />} />
           <Route path="/pet/:petId" element={<PetDetailPage />} />
@@ -83,6 +105,111 @@ const App: React.FC = () => {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/profile" element={<UserProfilePage />} />
           <Route path="/settings" element={<ChangePasswordPage />} />
+
+          {/* 会员中心 */}
+          <Route path="/member" element={<MemberCenterPage />} />
+          <Route path="/member/levels" element={<MemberLevelPage />} />
+          <Route path="/member/points" element={<MemberPointsPage />} />
+          <Route path="/member/wallet" element={<MemberWalletPage />} />
+          <Route path="/member/coupons" element={<MemberCouponsPage />} />
+
+          {/* 运营管理（仅管理员） */}
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <UserManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/stores"
+            element={
+              <AdminRoute>
+                <StoreManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/grooming"
+            element={
+              <AdminRoute>
+                <GroomingManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/shop"
+            element={
+              <AdminRoute>
+                <ProductManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/inventory"
+            element={
+              <AdminRoute>
+                <InventoryManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/orders"
+            element={
+              <AdminRoute>
+                <OrderManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/bookings"
+            element={
+              <AdminRoute>
+                <BookingManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/packages"
+            element={
+              <AdminRoute>
+                <PackageManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/after-sales"
+            element={
+              <AdminRoute>
+                <AfterSaleManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/commerce/reviews"
+            element={
+              <AdminRoute>
+                <ReviewManagementPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/member"
+            element={
+              <AdminRoute>
+                <MemberAdminPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/wallet"
+            element={
+              <AdminRoute>
+                <WalletAdminPage />
+              </AdminRoute>
+            }
+          />
           </Route>
 
           {/* 未匹配路由 */}

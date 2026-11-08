@@ -1,0 +1,71 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{booking}}" class="page">
+  <view class="status-card status-{{booking.status}}">
+    <view class="status">{{statusText}}</view>
+    <view class="booking-no">预约号：{{booking.bookingNo}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">预约信息</view>
+    <view class="row"><text class="label">服务</text><text>{{booking.serviceName || '-'}}</text></view>
+    <view class="row"><text class="label">宠物</text><text>{{booking.petName || '-'}}</text></view>
+    <view class="row"><text class="label">门店</text><text>{{booking.storeName || '-'}}</text></view>
+    <view class="row"><text class="label">日期</text><text>{{dateText}}</text></view>
+    <view class="row"><text class="label">时段</text><text>{{timeText}}</text></view>
+    <view class="row"><text class="label">创建时间</text><text>{{createdAtText}}</text></view>
+    <view wx:if="{{checkinText}}" class="row"><text class="label">签到时间</text><text>{{checkinText}}</text></view>
+    <view wx:if="{{completedText}}" class="row"><text class="label">完成时间</text><text>{{completedText}}</text></view>
+    <view wx:if="{{booking.cancelReason}}" class="row"><text class="label">取消原因</text><text>{{booking.cancelReason}}</text></view>
+    <view wx:if="{{booking.orderNo}}" class="row" bindtap="goOrder">
+      <text class="label">关联订单</text>
+      <text class="link">{{booking.orderNo}} ›</text>
+    </view>
+    <view wx:else class="row"><text class="label">支付方式</text><text>套餐次数</text></view>
+  </view>
+
+  <view wx:if="{{showReschedule}}" class="card">
+    <view class="section-title">选择新时段</view>
+    <picker mode="date" value="{{rescheduleDate}}" start="{{rescheduleDate}}" bindchange="onRescheduleDateChange">
+      <view class="row"><text class="label">日期</text><text>{{rescheduleDate}} ›</text></view>
+    </picker>
+    <view wx:if="{{!rescheduleSlots.length}}" class="empty">当天暂无可约时段</view>
+    <view wx:else class="slot-grid">
+      <view
+        wx:for="{{rescheduleSlots}}"
+        wx:key="id"
+        class="slot {{selectedSlotId === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelectRescheduleSlot"
+      >
+        <view class="slot-time">{{item.startText}}</view>
+        <view class="slot-left">余 {{item.availableCapacity}}</view>
+      </view>
+    </view>
+    <button class="confirm-btn" bindtap="confirmReschedule">确认改期</button>
+  </view>
+
+  <view class="card" wx:if="{{logs.length}}">
+    <view class="section-title">预约记录</view>
+    <view wx:for="{{logs}}" wx:key="id" class="log">
+      <view class="log-dot"></view>
+      <view class="log-body">
+        <view class="log-action">{{item.action}} · {{item.toStatus}}</view>
+        <view class="log-remark">{{item.remark || ''}}</view>
+        <view class="log-time">{{item.createdAtText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <button class="list-btn" bindtap="goList">查看我的预约</button>
+
+  <view class="footer" wx:if="{{canPay || canCancel || canReschedule}}">
+    <button wx:if="{{canCancel}}" class="secondary-btn" bindtap="cancel">取消预约</button>
+    <button wx:if="{{canReschedule}}" class="secondary-btn" bindtap="toggleReschedule">
+      {{showReschedule ? '收起改期' : '改期'}}
+    </button>
+    <button wx:if="{{canPay}}" class="primary-btn" loading="{{paying}}" bindtap="choosePay">
+      去支付
+    </button>
+  </view>
+</view>
+<view wx:else class="tip">预约不存在</view>

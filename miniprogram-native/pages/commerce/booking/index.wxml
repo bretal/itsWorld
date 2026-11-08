@@ -1,0 +1,80 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:else class="page">
+  <view class="card service-card">
+    <view class="service-name">{{detail.name}}</view>
+    <view class="service-meta">{{detail.categoryName || '美容'}} · {{detail.durationMin}} 分钟</view>
+    <view class="price-row">
+      <text class="price">¥{{priceText}}</text>
+      <text wx:if="{{memberPriceText}}" class="member">{{memberPriceText}}</text>
+    </view>
+    <view wx:if="{{detail.petEligible === false}}" class="invalid">{{detail.ineligibleReason || '当前宠物不符合服务条件'}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">预约宠物</view>
+    <picker wx:if="{{pets.length}}" mode="selector" range="{{petNames}}" value="{{petIndex}}" bindchange="onPetChange">
+      <view class="picker-row">
+        <text>{{petNames[petIndex]}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </picker>
+    <view wx:else class="empty" bindtap="goPets">还没有宠物，去添加 ›</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">预约日期</view>
+    <picker mode="date" value="{{date}}" start="{{date}}" bindchange="onDateChange">
+      <view class="picker-row">
+        <text>{{date}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </picker>
+    <view class="section-title" style="margin-top: 24rpx;">可约时段</view>
+    <view wx:if="{{!slots.length}}" class="empty">当天暂无可约时段</view>
+    <view wx:else class="slot-grid">
+      <view
+        wx:for="{{slots}}"
+        wx:key="id"
+        class="slot {{selectedSlotId === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelectSlot"
+      >
+        <view class="slot-time">{{item.startText}}</view>
+        <view class="slot-left">余 {{item.availableCapacity}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">支付方式</view>
+    <view class="pay-tabs">
+      <view class="pay-tab {{payType === 'ONLINE' ? 'active' : ''}}" data-type="ONLINE" bindtap="onPayTypeChange">
+        <view class="pay-title">在线全额预付</view>
+        <view class="pay-sub">钱包 / 开发环境模拟微信</view>
+      </view>
+      <view class="pay-tab {{payType === 'PACKAGE' ? 'active' : ''}}" data-type="PACKAGE" bindtap="onPayTypeChange">
+        <view class="pay-title">套餐次数</view>
+        <view class="pay-sub">扣减已购套餐次数</view>
+      </view>
+    </view>
+    <block wx:if="{{payType === 'PACKAGE'}}">
+      <picker wx:if="{{packageOptions.length}}" mode="selector" range="{{packageLabels}}" value="{{packageIndex}}" bindchange="onPackageChange">
+        <view class="picker-row package-row">
+          <text>选择套餐次数</text>
+          <text class="arrow">›</text>
+        </view>
+      </picker>
+      <view wx:else class="empty">没有可用于该服务的套餐次数</view>
+    </block>
+  </view>
+
+  <view class="footer">
+    <view class="footer-total" wx:if="{{payType === 'ONLINE'}}">
+      应付 <text class="total-price">¥{{payableText}}</text>
+    </view>
+    <view class="footer-total" wx:else>套餐次数预约</view>
+    <button class="submit-btn" loading="{{submitting}}" bindtap="submit">
+      {{payType === 'ONLINE' ? '提交并去支付' : '使用套餐预约'}}
+    </button>
+  </view>
+</view>

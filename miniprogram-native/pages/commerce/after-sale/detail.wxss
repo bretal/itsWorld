@@ -1,0 +1,157 @@
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 60rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.tip {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 27rpx;
+}
+
+.status-card {
+  padding: 34rpx 28rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #2f80ed, #69a6ff);
+  color: #ffffff;
+}
+
+.status-card.status-REJECTED,
+.status-card.status-REFUND_FAILED {
+  background: linear-gradient(135deg, #e5484d, #f47a7e);
+}
+
+.status-card.status-REFUNDED {
+  background: linear-gradient(135deg, #2f9e44, #65c977);
+}
+
+.status {
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.no {
+  margin-top: 12rpx;
+  font-size: 23rpx;
+  opacity: 0.85;
+}
+
+.card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 14rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.label {
+  color: #9aa0aa;
+}
+
+.amount {
+  color: #f0564a;
+  font-weight: 600;
+}
+
+.link {
+  color: #2f80ed;
+}
+
+.evidence-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.evidence {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 14rpx;
+  background: #eef1f6;
+}
+
+.item {
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f2f5;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item-title {
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.item-meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #8a8f99;
+}
+
+.log {
+  display: flex;
+  padding: 12rpx 0;
+}
+
+.log-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 14rpx;
+  margin-right: 16rpx;
+  border-radius: 50%;
+  background: #2f80ed;
+}
+
+.log-body {
+  flex: 1;
+}
+
+.log-action {
+  font-size: 25rpx;
+  color: #1f2329;
+}
+
+.log-remark {
+  margin-top: 4rpx;
+  font-size: 23rpx;
+  color: #8a8f99;
+}
+
+.log-time {
+  margin-top: 4rpx;
+  font-size: 21rpx;
+  color: #b0b5bd;
+}
+
+.list-btn {
+  margin-top: 30rpx;
+  height: 82rpx;
+  line-height: 82rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #2f80ed;
+  font-size: 27rpx;
+}
+
+.list-btn::after {
+  border: none;
+}

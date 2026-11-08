@@ -1,7 +1,7 @@
 import { ENV } from '../config/env';
 import { getToken } from './auth';
 
-export type UploadType = 'avatar' | 'pet' | 'diary' | 'community';
+export type UploadType = 'avatar' | 'pet' | 'diary' | 'community' | 'store' | 'shop' | 'review';
 
 export function uploadImage(filePath: string, type: UploadType): Promise<string> {
   return new Promise<string>((resolve, reject) => {

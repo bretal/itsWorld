@@ -1,0 +1,19 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{store}}" class="page">
+  <view class="card">
+    <view class="name">{{store.name}}</view>
+    <view class="address">{{addressText || '地址待补充'}}</view>
+    <view class="phone" wx:if="{{store.phone}}" bindtap="callStore">电话：{{store.phone}} ›</view>
+    <view class="description" wx:if="{{store.description}}">{{store.description}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">营业时间</view>
+    <view wx:if="{{!hours.length}}" class="empty">暂无营业时间信息</view>
+    <view wx:for="{{hours}}" wx:key="dayText" class="hour-row">
+      <text class="day">{{item.dayText}}</text>
+      <text class="time {{item.closed ? 'closed' : ''}}">{{item.timeText}}</text>
+    </view>
+  </view>
+</view>
+<view wx:else class="tip">门店不存在</view>

@@ -1,0 +1,57 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{order}}" class="page">
+  <view class="status-card">
+    <view class="status">{{statusText}}</view>
+    <view class="status-sub">{{paymentStatusText}}<text wx:if="{{paymentChannelText}}"> · {{paymentChannelText}}</text></view>
+    <view class="order-no">订单号：{{order.orderNo}}</view>
+  </view>
+
+  <view class="card" wx:if="{{addressText}}">
+    <view class="section-title">收货地址</view>
+    <view class="address">{{addressText}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">商品明细</view>
+    <view wx:for="{{items}}" wx:key="id" class="item">
+      <view class="info">
+        <view class="name">{{item.titleSnapshot}}</view>
+        <view class="spec">{{item.specText || ''}}</view>
+        <view class="row">
+          <text class="price">¥{{item.priceText}}</text>
+          <text class="qty">x{{item.quantity}}</text>
+        </view>
+      </view>
+      <view class="line-total">¥{{item.lineTotalText}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="amount-row"><text>商品原价</text><text>¥{{originalText}}</text></view>
+    <view class="amount-row"><text>优惠</text><text>-¥{{discountText}}</text></view>
+    <view class="amount-row"><text>应付</text><text>¥{{payableText}}</text></view>
+    <view class="amount-row"><text>实付</text><text>¥{{paidText}}</text></view>
+    <view class="amount-row" wx:if="{{paidTimeText}}"><text>支付时间</text><text>{{paidTimeText}}</text></view>
+    <view class="amount-row" wx:if="{{order.cancelReason}}"><text>取消原因</text><text>{{order.cancelReason}}</text></view>
+  </view>
+
+  <view class="card" wx:if="{{hasShipment || canAfterSale || (order.orderStatus === 'COMPLETED' && order.orderType === 'PRODUCT')}}">
+    <view class="section-title">订单服务</view>
+    <view class="action-row">
+      <button wx:if="{{hasShipment}}" class="action-btn" bindtap="goShipment">查看物流</button>
+      <button wx:if="{{order.orderStatus === 'SHIPPED'}}" class="action-btn primary" bindtap="confirmReceipt">确认收货</button>
+      <button wx:if="{{canAfterSale}}" class="action-btn" bindtap="goAfterSale">申请售后</button>
+      <button wx:if="{{order.orderStatus === 'COMPLETED' && order.orderType === 'PRODUCT' && !review}}" class="action-btn primary" bindtap="goReview">评价订单</button>
+      <button wx:if="{{review}}" class="action-btn" bindtap="goReview">查看评价</button>
+      <button class="action-btn" bindtap="goAfterSaleList">我的售后</button>
+    </view>
+  </view>
+
+  <button class="orders-btn" bindtap="goOrders">查看我的订单</button>
+
+  <view wx:if="{{canPay}}" class="footer">
+    <button class="cancel-btn" bindtap="cancelOrder">取消订单</button>
+    <button class="pay-btn" loading="{{paying}}" bindtap="choosePay">去支付 ¥{{payableText}}</button>
+  </view>
+</view>
+<view wx:else class="tip">订单不存在</view>

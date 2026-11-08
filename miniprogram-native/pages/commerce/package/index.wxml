@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="hero">
+    <view>
+      <view class="hero-title">宠物套餐</view>
+      <view class="hero-sub">多次服务更划算，绑定单只宠物使用</view>
+    </view>
+    <view class="mine-link" bindtap="goMine">我的套餐 ›</view>
+  </view>
+
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索套餐" value="{{keyword}}" bindconfirm="onSearch" bindinput="onSearch" />
+  </view>
+
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!list.length}}" class="tip">暂无可购买的套餐</view>
+  <view wx:else class="list">
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="package-card"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <image class="cover" src="{{item.coverSrc || staticAssets['pet-placeholder.png']}}" mode="aspectFill" />
+      <view class="info">
+        <view class="name">{{item.name}}</view>
+        <view class="valid">{{item.validText}}</view>
+        <view wx:for="{{item.itemTexts}}" wx:for-item="text" wx:key="*this" class="item">{{text}}</view>
+        <view class="price-row">
+          <text class="price">¥{{item.priceText}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{loadingMore}}" class="tip">加载更多...</view>
+</view>

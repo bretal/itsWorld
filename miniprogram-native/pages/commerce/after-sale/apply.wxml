@@ -1,0 +1,61 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:else class="page">
+  <view class="card">
+    <view class="section-title">售后类型</view>
+    <view class="type-tabs">
+      <view class="type-tab {{type === 'REFUND_ONLY' ? 'active' : ''}}" data-type="REFUND_ONLY" bindtap="onTypeChange">
+        <view class="type-title">仅退款</view>
+        <view class="type-sub">未发货订单</view>
+      </view>
+      <view class="type-tab {{type === 'RETURN_REFUND' ? 'active' : ''}}" data-type="RETURN_REFUND" bindtap="onTypeChange">
+        <view class="type-title">退货退款</view>
+        <view class="type-sub">已发货/已完成</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">售后商品</view>
+    <view wx:if="{{!items.length}}" class="empty">该订单没有可售后商品</view>
+    <view wx:for="{{items}}" wx:key="id" class="item {{item.checked ? 'checked' : ''}}">
+      <view class="item-head" data-id="{{item.id}}" bindtap="onToggleItem">
+        <view class="check">{{item.checked ? '✓' : ''}}</view>
+        <view class="item-info">
+          <view class="item-title">{{item.title}}</view>
+          <view class="item-meta">实付 ¥{{item.priceText}} · 购买 {{item.quantity}} 件</view>
+        </view>
+      </view>
+      <view wx:if="{{item.checked}}" class="qty-row">
+        <text class="qty-label">申请数量</text>
+        <view class="qty-control">
+          <view class="qty-btn" data-id="{{item.id}}" data-delta="-1" bindtap="onQtyChange">-</view>
+          <view class="qty-value">{{item.qty}}</view>
+          <view class="qty-btn" data-id="{{item.id}}" data-delta="1" bindtap="onQtyChange">+</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">申请原因</view>
+    <input class="input" placeholder="请填写申请原因" value="{{reason}}" bindinput="onReasonInput" />
+    <textarea class="textarea" placeholder="补充问题描述（选填）" value="{{description}}" bindinput="onDescriptionInput" maxlength="500" />
+  </view>
+
+  <view class="card">
+    <view class="section-title">凭证图片（最多 {{maxEvidence}} 张）</view>
+    <view class="evidence-list">
+      <view wx:for="{{evidenceUrls}}" wx:key="*this" class="evidence-item">
+        <image src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewEvidence" />
+        <view class="remove" data-index="{{index}}" bindtap="removeEvidence">×</view>
+      </view>
+      <view wx:if="{{evidenceUrls.length < maxEvidence}}" class="evidence-add" bindtap="chooseEvidence">
+        {{uploading ? '上传中' : '+'}}
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="submit-btn" loading="{{submitting}}" bindtap="submit">提交售后申请</button>
+  </view>
+</view>

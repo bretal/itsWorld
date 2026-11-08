@@ -1,0 +1,120 @@
+.page {
+  min-height: 100vh;
+  padding: 0 24rpx 200rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.cover {
+  width: 100%;
+  height: 420rpx;
+  border-radius: 0 0 32rpx 32rpx;
+  background: #eef1f6;
+}
+
+.card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.name {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+
+.meta {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #8a8f99;
+}
+
+.price-row {
+  margin-top: 18rpx;
+  display: flex;
+  align-items: baseline;
+}
+
+.price {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #f0564a;
+}
+
+.member {
+  margin-left: 14rpx;
+  font-size: 24rpx;
+  color: #2f80ed;
+}
+
+.pet-status {
+  margin-top: 18rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+}
+
+.pet-status.good {
+  background: #edf8ee;
+  color: #2f9e44;
+}
+
+.pet-status.bad {
+  background: #fff0f0;
+  color: #e5484d;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 14rpx;
+}
+
+.desc {
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: #5f6673;
+}
+
+.rule {
+  padding: 10rpx 0;
+  font-size: 25rpx;
+  color: #5f6673;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(31, 35, 41, 0.06);
+}
+
+.book-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 999rpx;
+  background: #cfd8e6;
+  color: #ffffff;
+  font-size: 29rpx;
+}
+
+.book-btn.active {
+  background: #2f80ed;
+}
+
+.book-btn::after {
+  border: none;
+}
+
+.tip {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 27rpx;
+}

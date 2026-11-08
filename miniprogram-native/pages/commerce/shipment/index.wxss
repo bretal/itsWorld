@@ -1,0 +1,106 @@
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 200rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.tip {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 27rpx;
+}
+
+.status-card {
+  padding: 36rpx 28rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #2f80ed, #69a6ff);
+  color: #ffffff;
+}
+
+.status {
+  font-size: 38rpx;
+  font-weight: 700;
+}
+
+.company {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  opacity: 0.85;
+}
+
+.card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 14rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.label {
+  color: #9aa0aa;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 0;
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.qty {
+  color: #8a8f99;
+}
+
+.order-btn {
+  margin-top: 30rpx;
+  height: 82rpx;
+  line-height: 82rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #2f80ed;
+  font-size: 27rpx;
+}
+
+.order-btn::after {
+  border: none;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(31, 35, 41, 0.06);
+}
+
+.confirm-btn {
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 999rpx;
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.confirm-btn::after {
+  border: none;
+}

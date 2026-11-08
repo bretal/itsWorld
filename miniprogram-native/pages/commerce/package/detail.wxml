@@ -1,0 +1,77 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{template}}" class="page">
+  <image class="cover" src="{{coverSrc || staticAssets['pet-placeholder.png']}}" mode="aspectFill" />
+  <view class="card">
+    <view class="name">{{template.name}}</view>
+    <view class="valid">{{validText}} · {{template.allowCrossStore === 1 ? '支持跨店' : '限购买门店使用'}}</view>
+    <view class="price">¥{{priceText}}</view>
+    <view wx:if="{{template.description}}" class="desc">{{template.description}}</view>
+  </view>
+
+  <view class="card" wx:if="{{fixedItemTexts.length}}">
+    <view class="section-title">套餐包含</view>
+    <view wx:for="{{fixedItemTexts}}" wx:for-item="text" wx:key="*this" class="fixed-item">· {{text}}</view>
+  </view>
+
+  <view class="card" wx:for="{{options}}" wx:key="id" wx:for-item="option">
+    <view class="option-head">
+      <view class="section-title">{{option.optionName}}</view>
+      <view class="option-hint">{{option.hintText}}</view>
+    </view>
+    <view
+      wx:for="{{option.items}}"
+      wx:key="id"
+      class="option-item {{item.selected ? 'selected' : ''}}"
+      data-option-id="{{option.id}}"
+      data-item-id="{{item.id}}"
+      bindtap="onToggleOption"
+    >
+      <view class="option-main">
+        <view class="option-name">{{item.serviceName || '服务'}}</view>
+        <view class="option-meta">含 {{item.includedTimes}} 次{{item.addPrice ? ' · 加价 ¥' + item.addPriceText : ''}}</view>
+      </view>
+      <view class="check">{{item.selected ? '✓' : ''}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">购买信息</view>
+    <picker mode="selector" range="{{petNames}}" value="{{petIndex}}" bindchange="onPetChange">
+      <view class="picker-row">
+        <text class="label">绑定宠物</text>
+        <text>{{petNames[petIndex] || '请选择'}} ›</text>
+      </view>
+    </picker>
+    <picker mode="selector" range="{{storeNames}}" value="{{storeIndex}}" bindchange="onStoreChange">
+      <view class="picker-row">
+        <text class="label">购买门店</text>
+        <text>{{storeNames[storeIndex] || '请选择'}} ›</text>
+      </view>
+    </picker>
+    <picker mode="selector" range="{{couponLabels}}" value="{{couponIndex}}" bindchange="onCouponChange">
+      <view class="picker-row">
+        <text class="label">优惠券</text>
+        <text>{{couponLabels[couponIndex] || '不使用优惠券'}} ›</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <view class="section-title">费用明细</view>
+    <view wx:for="{{previewItems}}" wx:key="serviceId" class="fee-item">
+      <text>{{item.serviceName || '服务'}} ×{{item.times}}</text>
+      <text>{{item.fromOption && item.addPrice ? '+¥' + item.addPriceText : '已含'}}</text>
+    </view>
+    <view class="amount-row"><text>套餐原价</text><text>¥{{originalText}}</text></view>
+    <view class="amount-row"><text>会员优惠</text><text>-¥{{memberDiscountText}}</text></view>
+    <view class="amount-row"><text>优惠券</text><text>-¥{{couponDiscountText}}</text></view>
+    <view class="amount-row total"><text>应付</text><text>¥{{payableText}}</text></view>
+    <view class="wallet-tip">钱包可用余额：¥{{walletText}}</view>
+  </view>
+
+  <view class="footer">
+    <view class="footer-total">应付 <text class="total-price">¥{{payableText}}</text></view>
+    <button class="submit-btn" loading="{{submitting}}" bindtap="submit">立即购买</button>
+  </view>
+</view>
+<view wx:else class="tip">套餐不存在或已下架</view>

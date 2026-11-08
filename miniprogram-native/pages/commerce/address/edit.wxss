@@ -1,0 +1,53 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.form {
+  padding: 8rpx 26rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  min-height: 92rpx;
+  border-bottom: 1rpx solid #f1f3f6;
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.label {
+  width: 150rpx;
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.input {
+  flex: 1;
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.switch-field {
+  justify-content: space-between;
+}
+
+.save-btn {
+  margin-top: 28rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 999rpx;
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.save-btn::after {
+  border: none;
+}

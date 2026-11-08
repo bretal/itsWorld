@@ -1,0 +1,32 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{shipment}}" class="page">
+  <view class="status-card">
+    <view class="status">{{statusText}}</view>
+    <view class="company">{{shipment.deliveryCompany}} · {{shipment.trackingNo}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">物流信息</view>
+    <view class="row"><text class="label">发货单号</text><text>{{shipment.shipmentNo}}</text></view>
+    <view class="row"><text class="label">物流公司</text><text>{{shipment.deliveryCompany}}</text></view>
+    <view class="row"><text class="label">物流单号</text><text>{{shipment.trackingNo}}</text></view>
+    <view class="row"><text class="label">发货时间</text><text>{{shippedText || '-'}}</text></view>
+    <view class="row"><text class="label">签收时间</text><text>{{receivedText || '-'}}</text></view>
+    <view wx:if="{{shipment.remark}}" class="row"><text class="label">备注</text><text>{{shipment.remark}}</text></view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">发货商品</view>
+    <view wx:for="{{shipment.items}}" wx:key="orderItemId" class="item">
+      <text>{{item.titleSnapshot || '商品'}}</text>
+      <text class="qty">x{{item.qty}}</text>
+    </view>
+  </view>
+
+  <button class="order-btn" bindtap="goOrder">返回订单</button>
+
+  <view wx:if="{{canConfirm}}" class="footer">
+    <button class="confirm-btn" loading="{{confirming}}" bindtap="confirm">确认收货</button>
+  </view>
+</view>
+<view wx:else class="tip">暂无物流信息</view>

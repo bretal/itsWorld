@@ -1,0 +1,51 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:else class="page">
+  <view class="card address-card" bindtap="goAddressList">
+    <view wx:if="{{addresses.length}}">
+      <view class="address-name">{{addresses[addressIndex].recipientName}} {{addresses[addressIndex].mobile}}</view>
+      <view class="address-detail">{{addresses[addressIndex].province || ''}}{{addresses[addressIndex].city || ''}}{{addresses[addressIndex].district || ''}}{{addresses[addressIndex].addressDetail}}</view>
+    </view>
+    <view wx:else class="address-empty">
+      <text>还没有收货地址</text>
+      <text class="link" catchtap="goAddAddress">新增地址</text>
+    </view>
+    <view class="arrow">›</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">商品清单</view>
+    <view wx:for="{{items}}" wx:key="cartItemId" class="item">
+      <image class="cover" src="{{item.coverSrc || staticAssets['pet-placeholder.png']}}" mode="aspectFill" />
+      <view class="info">
+        <view class="name">{{item.productName}}</view>
+        <view class="spec">{{item.specText || item.skuCode || ''}}</view>
+        <view wx:if="{{item.invalidReason}}" class="invalid">{{item.invalidReason}}</view>
+        <view class="row">
+          <text class="price">¥{{item.priceText}}</text>
+          <text class="qty">x{{item.quantity}}</text>
+        </view>
+      </view>
+      <view class="line-total">¥{{item.lineTotalText}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="coupon-row">
+      <text>优惠券</text>
+      <picker mode="selector" range="{{couponLabels}}" value="{{couponIndex}}" bindchange="onCouponChange">
+        <view class="picker-value">{{couponLabels[couponIndex] || '不使用优惠券'}} ›</view>
+      </picker>
+    </view>
+    <view class="amount-row"><text>商品原价</text><text>¥{{originalText}}</text></view>
+    <view class="amount-row"><text>会员优惠</text><text>-¥{{memberDiscountText}}</text></view>
+    <view class="amount-row"><text>优惠券</text><text>-¥{{couponDiscountText}}</text></view>
+    <view class="amount-row"><text>运费</text><text>¥0.00</text></view>
+    <view class="amount-row total"><text>应付</text><text>¥{{payableText}}</text></view>
+    <view class="wallet-tip">钱包可用余额：¥{{walletText}}</view>
+  </view>
+
+  <view class="footer">
+    <view class="footer-total">应付 <text class="total-price">¥{{payableText}}</text></view>
+    <button class="submit-btn" loading="{{submitting}}" bindtap="submitOrder">提交订单</button>
+  </view>
+</view>

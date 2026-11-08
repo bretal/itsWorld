@@ -1,6 +1,6 @@
 import { post } from './api';
 
-export type UploadType = 'avatar' | 'pet' | 'diary' | 'community';
+export type UploadType = 'avatar' | 'pet' | 'diary' | 'community' | 'store' | 'shop' | 'review';
 
 /**
  * 上传图片到 MinIO，返回可访问的图片 URL

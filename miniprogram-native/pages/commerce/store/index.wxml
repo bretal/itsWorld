@@ -1,0 +1,21 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!stores.length}}" class="tip">暂无营业中的门店</view>
+  <view wx:else class="store-list">
+    <view
+      wx:for="{{stores}}"
+      wx:key="id"
+      class="store-card"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="store-name">{{item.name}}</view>
+      <view class="store-address">{{item.addressText || '地址待补充'}}</view>
+      <view class="store-phone" wx:if="{{item.phone}}">电话：{{item.phone}}</view>
+      <view class="store-foot">
+        <text class="status">营业中</text>
+        <text class="more">查看详情 ›</text>
+      </view>
+    </view>
+  </view>
+</view>

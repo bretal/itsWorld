@@ -1,0 +1,54 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{existing}}" class="page">
+  <view class="card">
+    <view class="section-title">我的评价</view>
+    <view class="stars">
+      <text wx:for="{{stars}}" wx:key="*this" class="star {{item <= existing.rating ? 'active' : ''}}">★</text>
+    </view>
+    <view class="content">{{existing.content || '（无文字评价）'}}</view>
+    <view class="status">{{existing.status === 'APPROVED' ? '已通过审核' : existing.status === 'HIDDEN' ? '已隐藏' : '待审核'}}</view>
+    <view wx:if="{{existing.reply}}" class="reply">商家回复：{{existing.reply}}</view>
+  </view>
+</view>
+<view wx:else class="page">
+  <view class="card">
+    <view class="section-title">订单评分</view>
+    <view class="stars">
+      <text
+        wx:for="{{stars}}"
+        wx:key="*this"
+        class="star {{item <= rating ? 'active' : ''}}"
+        data-value="{{item}}"
+        bindtap="onSelectRating"
+      >★</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">评价内容</view>
+    <textarea
+      class="textarea"
+      placeholder="说说这次服务的体验吧（选填）"
+      value="{{content}}"
+      bindinput="onContentInput"
+      maxlength="1000"
+    />
+  </view>
+
+  <view class="card">
+    <view class="section-title">评价图片（最多 {{maxImages}} 张）</view>
+    <view class="image-list">
+      <view wx:for="{{images}}" wx:key="*this" class="image-item">
+        <image src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewImage" />
+        <view class="remove" data-index="{{index}}" bindtap="removeImage">×</view>
+      </view>
+      <view wx:if="{{images.length < maxImages}}" class="image-add" bindtap="chooseImages">
+        {{uploading ? '上传中' : '+'}}
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="submit-btn" loading="{{submitting}}" bindtap="submit">提交评价</button>
+  </view>
+</view>

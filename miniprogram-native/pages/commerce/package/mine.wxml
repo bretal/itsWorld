@@ -1,0 +1,58 @@
+<view class="page">
+  <view class="filters">
+    <view
+      wx:for="{{filters}}"
+      wx:key="key"
+      class="filter {{activeStatus === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onFilterChange"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!list.length}}" class="empty">
+    <view class="empty-text">还没有购买套餐</view>
+    <button class="empty-btn" bindtap="goPackages">去选购套餐</button>
+  </view>
+  <view wx:else class="list">
+    <view wx:for="{{list}}" wx:key="id" wx:for-item="pkg" class="package-card">
+      <view class="card-head">
+        <view class="name">{{pkg.packageName}}</view>
+        <view class="status status-{{pkg.status}}">{{pkg.statusText}}</view>
+      </view>
+      <view class="row"><text class="label">宠物</text><text>{{pkg.petName || '-'}}</text></view>
+      <view class="row"><text class="label">门店</text><text>{{pkg.storeName || '全部门店'}}</text></view>
+      <view class="row"><text class="label">有效期</text><text>{{pkg.expireText}}</text></view>
+      <view class="items">
+        <view wx:for="{{pkg.itemTexts}}" wx:key="name" wx:for-item="pkgItem" class="pkg-item">
+          <text class="pkg-item-name">{{pkgItem.name}}</text>
+          <text class="pkg-item-times">剩余 {{pkgItem.remaining}} / {{pkgItem.total}} 次</text>
+          <view
+            wx:if="{{pkg.status === 'ACTIVE' && pkgItem.remaining > 0}}"
+            class="book-link"
+            data-service-id="{{pkgItem.serviceId}}"
+            data-store-id="{{pkg.storeId}}"
+            data-pet-id="{{pkg.petId}}"
+            bindtap="goBooking"
+          >去预约</view>
+        </view>
+      </view>
+      <view class="usage-toggle" data-id="{{pkg.id}}" bindtap="toggleUsages">
+        {{expandedId === pkg.id ? '收起使用记录' : '查看使用记录'}} ›
+      </view>
+      <view wx:if="{{expandedId === pkg.id}}" class="usage-list">
+        <view wx:if="{{usageLoading}}" class="usage-empty">加载中...</view>
+        <view wx:elif="{{!usages.length}}" class="usage-empty">暂无使用记录</view>
+        <block wx:else>
+          <view wx:for="{{usages}}" wx:key="id" wx:for-item="usage" class="usage-item">
+            <view>
+              <view class="usage-name">{{usage.serviceName || '服务'}} ×{{usage.qty}}</view>
+              <view class="usage-booking">{{usage.bookingNo || ''}}</view>
+            </view>
+            <view class="usage-status">{{usage.status === 'USED' ? '已核销' : usage.status === 'FROZEN' ? '待服务' : '已释放'}}</view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

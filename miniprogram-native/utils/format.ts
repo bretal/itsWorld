@@ -103,3 +103,7 @@ export function formatWeight(weight?: number | string): string {
   }
   return `${weight}kg`;
 }
+
+export function formatMoney(cents?: number | null): string {
+  return ((cents || 0) / 100).toFixed(2);
+}

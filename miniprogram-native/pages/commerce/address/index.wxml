@@ -1,0 +1,25 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!addresses.length}}" class="empty">
+    <view class="empty-title">还没有收货地址</view>
+    <button class="add-btn" bindtap="goAdd">新增地址</button>
+  </view>
+  <view wx:else class="list">
+    <view wx:for="{{addresses}}" wx:key="id" class="card">
+      <view class="top">
+        <text class="name">{{item.recipientName}}</text>
+        <text class="mobile">{{item.mobile}}</text>
+        <text wx:if="{{item.isDefault === 1}}" class="default">默认</text>
+      </view>
+      <view class="address">{{item.fullAddress}}</view>
+      <view class="actions">
+        <text wx:if="{{item.isDefault !== 1}}" class="action" data-id="{{item.id}}" bindtap="setDefault">设为默认</text>
+        <text class="action" data-id="{{item.id}}" bindtap="goEdit">编辑</text>
+        <text class="action danger" data-id="{{item.id}}" bindtap="remove">删除</text>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{addresses.length}}" class="footer">
+    <button class="add-btn" bindtap="goAdd">新增地址</button>
+  </view>
+</view>

@@ -1,0 +1,79 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.card {
+  margin-bottom: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+
+.address {
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #5f6673;
+}
+
+.phone {
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: #2f80ed;
+}
+
+.description {
+  margin-top: 18rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #eef1f6;
+  font-size: 25rpx;
+  line-height: 1.7;
+  color: #5f6673;
+}
+
+.section-title {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 14rpx;
+}
+
+.hour-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 0;
+  font-size: 25rpx;
+}
+
+.day {
+  color: #1f2329;
+}
+
+.time {
+  color: #5f6673;
+}
+
+.time.closed {
+  color: #e5484d;
+}
+
+.empty {
+  font-size: 25rpx;
+  color: #9aa0aa;
+}
+
+.tip {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 27rpx;
+}

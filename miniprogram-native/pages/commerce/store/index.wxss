@@ -1,0 +1,65 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.store-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.store-card {
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 10rpx 26rpx rgba(31, 35, 41, 0.04);
+}
+
+.store-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+
+.store-address {
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: #5f6673;
+  line-height: 1.5;
+}
+
+.store-phone {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #8a8f99;
+}
+
+.store-foot {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: #edf8ee;
+  color: #2f9e44;
+  font-size: 21rpx;
+}
+
+.more {
+  font-size: 24rpx;
+  color: #2f80ed;
+}
+
+.tip {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 27rpx;
+}

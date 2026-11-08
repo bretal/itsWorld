@@ -1,0 +1,42 @@
+<view class="page">
+  <view class="filters">
+    <view
+      wx:for="{{filters}}"
+      wx:key="key"
+      class="filter {{activeStatus === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onFilterChange"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!list.length}}" class="tip">暂无售后记录</view>
+  <view wx:else class="list">
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="card"
+      data-no="{{item.afterSaleNo}}"
+      bindtap="goDetail"
+    >
+      <view class="card-head">
+        <view class="type">{{item.typeText}}</view>
+        <view class="status status-{{item.status}}">{{item.statusText}}</view>
+      </view>
+      <view class="order-no">{{item.orderNo || item.afterSaleNo}}</view>
+      <view class="row">
+        <text class="label">退款金额</text>
+        <text class="amount">¥{{item.amountText}}</text>
+      </view>
+      <view class="row">
+        <text class="label">申请时间</text>
+        <text>{{item.createdAtText}}</text>
+      </view>
+      <view class="foot">
+        <text class="no">{{item.afterSaleNo}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{loadingMore}}" class="tip">加载更多...</view>
+</view>

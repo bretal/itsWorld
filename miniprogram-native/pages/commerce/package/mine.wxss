@@ -1,0 +1,181 @@
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 60rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.filters {
+  display: flex;
+  gap: 12rpx;
+  padding-bottom: 12rpx;
+}
+
+.filter {
+  padding: 12rpx 26rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #5f6673;
+  font-size: 25rpx;
+}
+
+.filter.active {
+  background: #2f80ed;
+  color: #ffffff;
+}
+
+.tip {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 26rpx;
+}
+
+.empty {
+  padding: 120rpx 0;
+  text-align: center;
+}
+
+.empty-text {
+  color: #9aa0aa;
+  font-size: 27rpx;
+}
+
+.empty-btn {
+  margin-top: 30rpx;
+  width: 300rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: 999rpx;
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 26rpx;
+}
+
+.empty-btn::after {
+  border: none;
+}
+
+.package-card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14rpx;
+}
+
+.name {
+  font-size: 31rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.status {
+  font-size: 23rpx;
+  color: #8a8f99;
+}
+
+.status-ACTIVE {
+  color: #2f9e44;
+}
+
+.status-EXPIRED,
+.status-USED_UP {
+  color: #9aa0aa;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7rpx 0;
+  font-size: 25rpx;
+  color: #5f6673;
+}
+
+.label {
+  color: #9aa0aa;
+}
+
+.items {
+  margin-top: 16rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.pkg-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.pkg-item-name {
+  flex: 1;
+  font-size: 25rpx;
+  color: #1f2329;
+}
+
+.pkg-item-times {
+  font-size: 23rpx;
+  color: #8a8f99;
+}
+
+.book-link {
+  margin-left: 16rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  background: #edf4ff;
+  color: #2f80ed;
+  font-size: 22rpx;
+}
+
+.usage-toggle {
+  margin-top: 14rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f2f5;
+  text-align: right;
+  color: #2f80ed;
+  font-size: 24rpx;
+}
+
+.usage-list {
+  margin-top: 12rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 18rpx;
+  background: #fafbfc;
+}
+
+.usage-empty {
+  padding: 16rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 23rpx;
+}
+
+.usage-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+}
+
+.usage-name {
+  font-size: 24rpx;
+  color: #1f2329;
+}
+
+.usage-booking {
+  margin-top: 4rpx;
+  font-size: 21rpx;
+  color: #9aa0aa;
+}
+
+.usage-status {
+  font-size: 22rpx;
+  color: #2f80ed;
+}

@@ -1,0 +1,65 @@
+<view wx:if="{{loading}}" class="tip">加载中...</view>
+<view wx:elif="{{afterSale}}" class="page">
+  <view class="status-card status-{{afterSale.status}}">
+    <view class="status">{{statusText}}</view>
+    <view class="no">售后单号：{{afterSale.afterSaleNo}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">售后信息</view>
+    <view class="row"><text class="label">售后类型</text><text>{{typeText}}</text></view>
+    <view class="row"><text class="label">订单号</text><text class="link" bindtap="goOrder">{{afterSale.orderNo || '-'}} ›</text></view>
+    <view class="row"><text class="label">退款金额</text><text class="amount">¥{{amountText}}</text></view>
+    <view class="row"><text class="label">申请原因</text><text>{{afterSale.reason}}</text></view>
+    <view wx:if="{{afterSale.description}}" class="row"><text class="label">问题描述</text><text>{{afterSale.description}}</text></view>
+    <view class="row"><text class="label">申请时间</text><text>{{createdAtText}}</text></view>
+    <view wx:if="{{afterSale.reviewRemark}}" class="row"><text class="label">审核备注</text><text>{{afterSale.reviewRemark}}</text></view>
+    <view wx:if="{{refundedAtText}}" class="row"><text class="label">退款时间</text><text>{{refundedAtText}}</text></view>
+  </view>
+
+  <view class="card" wx:if="{{afterSale.evidenceUrls.length}}">
+    <view class="section-title">凭证图片</view>
+    <view class="evidence-list">
+      <image
+        wx:for="{{afterSale.evidenceUrls}}"
+        wx:key="*this"
+        class="evidence"
+        src="{{item}}"
+        mode="aspectFill"
+        data-url="{{item}}"
+        bindtap="previewEvidence"
+      />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">售后商品</view>
+    <view wx:for="{{items}}" wx:key="id" class="item">
+      <view class="item-title">{{item.titleSnapshot || '商品'}}</view>
+      <view class="item-meta">数量 {{item.qty}} · 退款 ¥{{item.amountText}}</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{afterSale.refund}}">
+    <view class="section-title">退款记录</view>
+    <view class="row"><text class="label">退款单号</text><text>{{afterSale.refund.refundNo}}</text></view>
+    <view class="row"><text class="label">退款渠道</text><text>{{afterSale.refund.channel}}</text></view>
+    <view class="row"><text class="label">退款状态</text><text>{{afterSale.refund.status}}</text></view>
+    <view wx:if="{{afterSale.refund.externalRefundNo}}" class="row"><text class="label">外部单号</text><text>{{afterSale.refund.externalRefundNo}}</text></view>
+  </view>
+
+  <view class="card" wx:if="{{logs.length}}">
+    <view class="section-title">处理记录</view>
+    <view wx:for="{{logs}}" wx:key="id" class="log">
+      <view class="log-dot"></view>
+      <view class="log-body">
+        <view class="log-action">{{item.action}} · {{item.toStatus}}</view>
+        <view class="log-remark">{{item.remark || ''}}</view>
+        <view class="log-time">{{item.createdAtText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <button class="list-btn" bindtap="goList">查看我的售后</button>
+</view>
+<view wx:else class="tip">售后单不存在</view>

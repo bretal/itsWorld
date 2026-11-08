@@ -1,0 +1,47 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">美容服务</view>
+    <view class="hero-sub">为毛孩子挑选合适的洗护与美容</view>
+  </view>
+
+  <view class="store-bar">
+    <picker mode="selector" range="{{storeNames}}" value="{{storeIndex}}" bindchange="onStoreChange">
+      <view class="store-picker">门店：{{storeNames[storeIndex] || '全部门店'}} ▾</view>
+    </picker>
+    <view class="store-link" bindtap="goStores">门店列表 ›</view>
+  </view>
+
+  <scroll-view scroll-x class="tabs">
+    <view class="tab {{activeCategoryId === 0 ? 'active' : ''}}" data-id="0" bindtap="onTapCategory">全部</view>
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="tab {{activeCategoryId === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onTapCategory"
+    >{{item.name}}</view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!services.length}}" class="tip">暂无可预约的美容服务</view>
+  <view wx:else class="service-list">
+    <view
+      wx:for="{{services}}"
+      wx:key="id"
+      class="service-card"
+      data-id="{{item.id}}"
+      bindtap="goServiceDetail"
+    >
+      <image class="service-cover" src="{{item.coverSrc || staticAssets['pet-placeholder.png']}}" mode="aspectFill" />
+      <view class="service-info">
+        <view class="service-name">{{item.name}}</view>
+        <view class="service-meta">{{item.categoryName || '美容'}} · {{item.durationText}}</view>
+        <view class="service-price">
+          ¥{{item.priceText}}
+          <text wx:if="{{item.memberPriceText}}" class="member">{{item.memberPriceText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{loadingMore}}" class="tip">加载更多...</view>
+</view>

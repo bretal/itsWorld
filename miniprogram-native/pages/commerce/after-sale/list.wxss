@@ -1,0 +1,115 @@
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 60rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.filters {
+  display: flex;
+  gap: 12rpx;
+  overflow-x: auto;
+  padding-bottom: 12rpx;
+}
+
+.filter {
+  flex-shrink: 0;
+  padding: 12rpx 26rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #5f6673;
+  font-size: 25rpx;
+}
+
+.filter.active {
+  background: #2f80ed;
+  color: #ffffff;
+}
+
+.tip {
+  padding: 100rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 26rpx;
+}
+
+.card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.type {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.status {
+  font-size: 24rpx;
+  color: #8a8f99;
+}
+
+.status-APPLIED,
+.status-REVIEWING,
+.status-APPROVED,
+.status-REFUNDING {
+  color: #2f80ed;
+}
+
+.status-REFUNDED {
+  color: #2f9e44;
+}
+
+.status-REJECTED,
+.status-REFUND_FAILED {
+  color: #e5484d;
+}
+
+.order-no {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #9aa0aa;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 0;
+  font-size: 25rpx;
+  color: #5f6673;
+}
+
+.label {
+  color: #9aa0aa;
+}
+
+.amount {
+  color: #f0564a;
+  font-weight: 600;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.no {
+  font-size: 21rpx;
+  color: #b0b5bd;
+}
+
+.arrow {
+  color: #9aa0aa;
+}

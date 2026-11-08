@@ -1,0 +1,128 @@
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 60rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.filters {
+  display: flex;
+  gap: 12rpx;
+  overflow-x: auto;
+  padding-bottom: 12rpx;
+}
+
+.filter {
+  flex-shrink: 0;
+  padding: 12rpx 26rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #5f6673;
+  font-size: 25rpx;
+}
+
+.filter.active {
+  background: #2f80ed;
+  color: #ffffff;
+}
+
+.tip {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 26rpx;
+}
+
+.empty {
+  padding: 120rpx 0;
+  text-align: center;
+}
+
+.empty-text {
+  color: #9aa0aa;
+  font-size: 27rpx;
+}
+
+.empty-btn {
+  margin-top: 30rpx;
+  width: 300rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: 999rpx;
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 26rpx;
+}
+
+.empty-btn::after {
+  border: none;
+}
+
+.booking-card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.service {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.status {
+  font-size: 24rpx;
+  color: #8a8f99;
+}
+
+.status-PENDING_PAYMENT {
+  color: #f0a020;
+}
+
+.status-CONFIRMED,
+.status-CHECKED_IN,
+.status-IN_SERVICE {
+  color: #2f80ed;
+}
+
+.status-COMPLETED {
+  color: #2f9e44;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 0;
+  font-size: 25rpx;
+  color: #5f6673;
+}
+
+.label {
+  color: #9aa0aa;
+}
+
+.card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.booking-no {
+  font-size: 22rpx;
+  color: #9aa0aa;
+}
+
+.arrow {
+  color: #9aa0aa;
+}

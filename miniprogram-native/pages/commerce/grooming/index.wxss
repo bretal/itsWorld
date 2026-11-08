@@ -1,0 +1,128 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 180rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.hero {
+  padding: 36rpx 32rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(135deg, #2f80ed 0%, #5b9cff 100%);
+  color: #ffffff;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.hero-sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  opacity: 0.85;
+}
+
+.store-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24rpx 0 18rpx;
+  padding: 20rpx 24rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+}
+
+.store-picker {
+  font-size: 27rpx;
+  color: #1f2329;
+  font-weight: 600;
+}
+
+.store-link {
+  font-size: 24rpx;
+  color: #2f80ed;
+}
+
+.tabs {
+  white-space: nowrap;
+  margin-bottom: 18rpx;
+}
+
+.tab {
+  display: inline-block;
+  margin-right: 16rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #5f6673;
+  font-size: 25rpx;
+}
+
+.tab.active {
+  background: #2f80ed;
+  color: #ffffff;
+}
+
+.service-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.service-card {
+  display: flex;
+  padding: 20rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 10rpx 26rpx rgba(31, 35, 41, 0.04);
+}
+
+.service-cover {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 22rpx;
+  background: #eef1f6;
+  flex-shrink: 0;
+}
+
+.service-info {
+  flex: 1;
+  margin-left: 22rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.service-name {
+  font-size: 31rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.service-meta {
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: #8a8f99;
+}
+
+.service-price {
+  margin-top: 16rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #f0564a;
+}
+
+.member {
+  margin-left: 10rpx;
+  font-size: 21rpx;
+  font-weight: 500;
+  color: #2f80ed;
+}
+
+.tip {
+  padding: 60rpx 0;
+  text-align: center;
+  color: #9aa0aa;
+  font-size: 26rpx;
+}
