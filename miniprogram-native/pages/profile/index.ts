@@ -1,26 +1,46 @@
+import { withStaticImages } from '../../utils/static-images';
 import { clearAuth, getUser, requireLogin } from '../../utils/auth';
 import type { AuthUser } from '../../utils/auth';
 import { getProfile } from '../../services/user';
 import { listPets } from '../../services/pet';
 import { listDiaries } from '../../services/diary';
 import { resolveImage } from '../../utils/image';
+import { assetUrl } from '../../utils/assets';
 
-Page({
+Page(withStaticImages({
   data: {
     user: null as AuthUser | null,
     displayName: '宠物家长',
-    avatarUrl: '/assets/avatar-placeholder.png',
+    avatarUrl: '',
     avatarSrc: '',
     petCount: 0,
     photoCount: 0,
+    petBgSrc: '',
+    albumBgSrc: '',
+    serviceMenu: [] as any[],
+    utilityMenu: [] as any[],
     menu: [
-      { key: 'pets', icon: '🐾', title: '我的宠物', desc: '管理宠物档案' },
-      { key: 'album', icon: '🖼️', title: '成长相册', desc: '按时间回看成长' },
-      { key: 'messages', icon: '🔔', title: '消息通知', desc: '赞和评论' },
-      { key: 'favorites', icon: '⭐', title: '我的收藏', desc: '收藏的帖子' },
-      { key: 'help', icon: '💬', title: '帮助与反馈', desc: '使用问题与建议' },
-      { key: 'settings', icon: '⚙️', title: '设置', desc: '账号与隐私' },
+      { key: 'member', image: 'profile-menu/member-crown.png', title: '会员中心' },
+      { key: 'orders', image: 'profile-menu/order-list.png', title: '我的订单' },
+      { key: 'bookings', image: 'profile-menu/booking-calendar.png', title: '我的预约' },
+      { key: 'packages', image: 'profile-menu/custom-gift.png', title: '我的套餐' },
+      { key: 'after-sales', image: 'profile-menu/delivery-box.png', title: '我的售后' },
+      { key: 'cart', image: 'profile-menu/shopping-cart.png', title: '购物车' },
+      { key: 'addresses', image: 'profile-menu/map-location.png', title: '收货地址' },
+      { key: 'messages', image: 'profile-menu/notification-bell.png', title: '消息通知', dot: true },
+      { key: 'favorites', image: 'profile-menu/favorite-heart.png', title: '我的收藏' },
+      { key: 'help', image: 'profile-menu/chat.png', title: '帮助与反馈' },
+      { key: 'settings', image: 'profile-menu/member-shield.png', title: '设置' },
     ],
+  },
+
+  onLoad() {
+    const serviceKeys = ['orders', 'bookings', 'packages', 'after-sales', 'cart'];
+    const utilityKeys = ['addresses', 'messages', 'favorites', 'help'];
+    this.setData({
+      serviceMenu: this.data.menu.filter((item: any) => serviceKeys.includes(item.key)),
+      utilityMenu: this.data.menu.filter((item: any) => utilityKeys.includes(item.key)),
+    });
   },
 
   onShow() {
@@ -32,6 +52,14 @@ Page({
       return;
     }
     this.loadData();
+  },
+
+  async loadBackgrounds() {
+    const [petBgSrc, albumBgSrc] = await Promise.all([
+      resolveImage(assetUrl('profile/pet-bg.jpg')),
+      resolveImage(assetUrl('profile/album-bg.jpg')),
+    ]);
+    this.setData({ petBgSrc, albumBgSrc });
   },
 
   async loadData() {
@@ -80,7 +108,7 @@ Page({
     this.setData({
       user,
       displayName: user.nickName || user.username || '宠物家长',
-      avatarUrl: user.avatarUrl || '/assets/avatar-placeholder.png',
+      avatarUrl: user.avatarUrl || '',
     });
     resolveImage(user.avatarUrl).then((avatarSrc) => {
       this.setData({ avatarSrc });
@@ -89,12 +117,40 @@ Page({
 
   onTapMenu(event: any) {
     const key = event.currentTarget.dataset.key;
+    if (key === 'member') {
+      wx.navigateTo({ url: '/pages/member/index' });
+      return;
+    }
     if (key === 'pets') {
       wx.navigateTo({ url: '/pages/pet/list' });
       return;
     }
     if (key === 'album') {
       wx.switchTab({ url: '/pages/album/index' });
+      return;
+    }
+    if (key === 'orders') {
+      wx.navigateTo({ url: '/pages/commerce/order/index' });
+      return;
+    }
+    if (key === 'bookings') {
+      wx.navigateTo({ url: '/pages/commerce/booking/list' });
+      return;
+    }
+    if (key === 'packages') {
+      wx.navigateTo({ url: '/pages/commerce/package/mine' });
+      return;
+    }
+    if (key === 'after-sales') {
+      wx.navigateTo({ url: '/pages/commerce/after-sale/list' });
+      return;
+    }
+    if (key === 'cart') {
+      wx.navigateTo({ url: '/pages/commerce/cart/index' });
+      return;
+    }
+    if (key === 'addresses') {
+      wx.navigateTo({ url: '/pages/commerce/address/index' });
       return;
     }
     if (key === 'settings') {
@@ -144,4 +200,4 @@ Page({
   onLogout() {
     this.showSettings();
   },
-});
+}, ["member/membership-paw.png", "profile-menu/album.png", "profile-menu/booking-calendar.png", "profile-menu/chat.png", "profile-menu/custom-gift.png", "profile-menu/delivery-box.png", "profile-menu/favorite-heart.png", "profile-menu/map-location.png", "profile-menu/member-crown.png", "profile-menu/member-shield.png", "profile-menu/notification-bell.png", "profile-menu/order-list.png", "profile-menu/shopping-cart.png"]));

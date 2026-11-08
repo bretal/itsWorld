@@ -29,7 +29,7 @@
       <view class="pet-avatar-wrap">
         <image
           class="pet-avatar"
-          src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+          src="{{petAvatarSrc || currentPet.avatarUrl || staticAssets['pet-placeholder.png']}}"
           mode="aspectFill"
         />
         <view class="heart">♥</view>
@@ -76,6 +76,22 @@
         <view class="feature-icon album">🖼️</view>
         <text class="feature-name">成长相册</text>
       </view>
+      <view class="feature" bindtap="goGrooming">
+        <view class="feature-icon grooming">✂️</view>
+        <text class="feature-name">美容服务</text>
+      </view>
+      <view class="feature" bindtap="goShop">
+        <view class="feature-icon shop">🛍️</view>
+        <text class="feature-name">宠物商城</text>
+      </view>
+      <view class="feature" bindtap="goPackages">
+        <view class="feature-icon package">🎟️</view>
+        <text class="feature-name">宠物套餐</text>
+      </view>
+      <view class="feature" bindtap="goStores">
+        <view class="feature-icon store">🏠</view>
+        <text class="feature-name">附近门店</text>
+      </view>
     </view>
 
     <view class="section-head">
@@ -90,7 +106,7 @@
       <view class="diary-top">
         <image
           class="diary-avatar"
-          src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+          src="{{petAvatarSrc || currentPet.avatarUrl || staticAssets['pet-placeholder.png']}}"
           mode="aspectFill"
         />
         <view class="diary-meta">
@@ -151,7 +167,7 @@
       >
         <image
           class="sheet-avatar"
-          src="{{item.avatarSrc || item.avatarUrl || '/assets/pet-placeholder.png'}}"
+          src="{{item.avatarSrc || item.avatarUrl || staticAssets['pet-placeholder.png']}}"
           mode="aspectFill"
         />
         <view class="sheet-info">

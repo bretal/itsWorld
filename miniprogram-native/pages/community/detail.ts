@@ -1,3 +1,5 @@
+import { staticImageUrl } from '../../utils/static-images';
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import {
   createComment,
@@ -17,7 +19,7 @@ interface CommentItem extends Comment {
   avatarSrc?: string;
 }
 
-Page({
+Page(withStaticImages({
   data: {
     id: 0,
     post: null as Post | null,
@@ -83,8 +85,8 @@ Page({
         timeText: relativeTime(comment.createdAt),
         displayName: comment.username || '宠友',
         displayAvatar:
-          comment.userAvatar || '/assets/avatar-placeholder.png',
-        avatarSrc: await resolveImage(comment.userAvatar),
+          comment.userAvatar || staticImageUrl('avatar-placeholder.png'),
+        avatarSrc: await resolveImage(comment.userAvatar || staticImageUrl('avatar-placeholder.png')),
       })),
     );
   },
@@ -182,4 +184,4 @@ Page({
       this.setData({ sending: false });
     }
   },
-});
+}, ["avatar-placeholder.png", "community/comment.png", "community/like.png"]));

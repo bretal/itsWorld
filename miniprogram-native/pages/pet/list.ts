@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { deletePet, listPetsPage } from '../../services/pet';
 import type { Pet } from '../../services/pet';
@@ -10,7 +11,7 @@ interface PetItem extends Pet {
   avatarSrc?: string;
 }
 
-Page({
+Page(withStaticImages({
   data: {
     pets: [] as PetItem[],
     loading: true,
@@ -169,4 +170,4 @@ Page({
       },
     });
   },
-});
+}, ["pet-placeholder.png"]));

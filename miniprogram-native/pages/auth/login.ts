@@ -1,9 +1,10 @@
+import { withStaticImages } from '../../utils/static-images';
 import { login } from '../../services/user';
 import { setAuth } from '../../utils/auth';
 import { assetUrl } from '../../utils/assets';
 import { resolveImage } from '../../utils/image';
 
-Page({
+Page(withStaticImages({
   data: {
     username: '',
     password: '',
@@ -55,4 +56,4 @@ Page({
       this.setData({ loading: false });
     }
   },
-});
+}, ["avatar-placeholder.png"]));

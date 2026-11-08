@@ -3,7 +3,7 @@
     <view class="avatar-picker" bindtap="chooseAvatar">
       <image
         class="avatar-image"
-        src="{{avatarPreviewSrc || avatarUrl || '/assets/pet-placeholder.png'}}"
+        src="{{avatarPreviewSrc || avatarUrl || staticAssets['pet-placeholder.png']}}"
         mode="aspectFill"
       />
       <view class="avatar-mask">

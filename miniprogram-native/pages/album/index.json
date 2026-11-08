@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "宠物日记",
   "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark"
+  "backgroundTextStyle": "dark",
+  "navigationBarBackgroundColor": "#fff6fa",
+  "backgroundColor": "#fff6fa"
 }

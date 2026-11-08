@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { listPets } from '../../services/pet';
 import type { Pet } from '../../services/pet';
@@ -5,7 +6,7 @@ import { createPost } from '../../services/community';
 import { uploadImage } from '../../utils/upload';
 import { resolveImage, resolveImages } from '../../utils/image';
 
-Page({
+Page(withStaticImages({
   data: {
     currentPet: null as Pet | null,
     petAvatarSrc: '',
@@ -132,4 +133,4 @@ Page({
       this.setData({ saving: false });
     }
   },
-});
+}, ["pet-placeholder.png"]));

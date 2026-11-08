@@ -5,7 +5,7 @@
     <view class="hero-top">
       <image
         class="hero-avatar"
-        src="{{petAvatarSrc || pet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        src="{{petAvatarSrc || pet.avatarUrl || staticAssets['pet-placeholder.png']}}"
         mode="aspectFill"
       />
       <view class="hero-edit" bindtap="goEdit">编辑档案</view>

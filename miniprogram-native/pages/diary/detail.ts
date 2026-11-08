@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { deleteDiary, getDiary, likeDiary } from '../../services/diary';
 import type { Diary } from '../../services/diary';
@@ -6,7 +7,7 @@ import type { Pet } from '../../services/pet';
 import { formatDate, formatDateTime } from '../../utils/format';
 import { resolveImage, resolveImages } from '../../utils/image';
 
-Page({
+Page(withStaticImages({
   data: {
     id: 0,
     diary: null as Diary | null,
@@ -105,4 +106,4 @@ Page({
       },
     });
   },
-});
+}, ["pet-placeholder.png"]));

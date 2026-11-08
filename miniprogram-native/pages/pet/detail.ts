@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { getPet } from '../../services/pet';
 import type { Pet } from '../../services/pet';
@@ -17,7 +18,7 @@ interface DiaryItem extends Diary {
   photos: string[];
 }
 
-Page({
+Page(withStaticImages({
   data: {
     id: 0,
     pet: null as Pet | null,
@@ -154,4 +155,4 @@ Page({
     }
     wx.navigateTo({ url: `/pages/diary/detail?id=${diaryId}` });
   },
-});
+}, ["pet-placeholder.png"]));

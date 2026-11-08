@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { listPets } from '../../services/pet';
 import type { Pet } from '../../services/pet';
@@ -20,9 +21,11 @@ interface DiaryItem extends Diary {
 
 interface AlbumPet extends Pet {
   metaText?: string;
+  avatarSrc?: string;
 }
 
-Page({
+Page(withStaticImages({
+  diaryRequest: 0,
   data: {
     tabs: [
       { key: 'all', label: '全部' },
@@ -41,6 +44,8 @@ Page({
     total: 0,
     hasMore: true,
     emptyHint: '',
+    pets: [] as AlbumPet[],
+    showPetSwitcher: false,
   },
 
   onShow() {
@@ -67,7 +72,11 @@ Page({
   async loadData(reset: boolean) {
     this.setData({ loading: reset });
     try {
-      const pets = await listPets();
+      const pets: AlbumPet[] = await Promise.all((await listPets()).map(async pet => ({
+        ...pet,
+        avatarSrc: await resolveImage(pet.avatarUrl),
+        metaText: [formatAge(pet.birthDate), pet.breed || pet.petType, genderText(pet.gender)].filter(Boolean).join(' · '),
+      })));
       const storedPetId = Number(wx.getStorageSync('currentPetId') || 0);
       const pet =
         (pets || []).find((item) => item.id === storedPetId) ||
@@ -88,7 +97,8 @@ Page({
         : null;
 
       const petAvatarSrc = await resolveImage(currentPet?.avatarUrl);
-      this.setData({ currentPet, petAvatarSrc });
+      if (currentPet) wx.setStorageSync('currentPetId', currentPet.id);
+      this.setData({ pets, currentPet, petAvatarSrc, diaries: [], page: 1, hasMore: Boolean(currentPet) });
       await this.loadDiaries(reset);
     } catch (error) {
       this.setData({ loading: false });
@@ -96,6 +106,7 @@ Page({
   },
 
   async loadDiaries(reset: boolean) {
+    const request = ++this.diaryRequest;
     const { currentPet, activeTab, size } = this.data;
     if (!currentPet) {
       this.setData({ diaries: [], loading: false, loadingMore: false });
@@ -120,12 +131,14 @@ Page({
         (result.records || []).map(async (diary) => ({
           ...diary,
           dateText: formatDate(diary.diaryDate),
-          timeText: formatDateTime(diary.createdAt),
+          timeText: (diary.createdAt || '').replace('T', ' ').slice(11, 16),
+          moodText: ({ happy: '开心', calm: '平静', tired: '疲惫', sad: '难过' } as Record<string, string>)[diary.greeting || ''] || diary.greeting || '今日记录',
           photos: await resolveImages(diary.photoUrls || []),
           liked: false,
         })),
       );
 
+      if (request !== this.diaryRequest) return;
       this.setData({
         diaries: reset ? items : this.data.diaries.concat(items),
         page: result.pageNum,
@@ -139,7 +152,7 @@ Page({
             : '',
       });
     } catch (error) {
-      this.setData({ loading: false, loadingMore: false });
+      if (request === this.diaryRequest) this.setData({ loading: false, loadingMore: false });
     }
   },
 
@@ -161,6 +174,7 @@ Page({
 
     try {
       await likeDiary(item.id);
+      if (this.data.diaries[index]?.id !== item.id) return;
       const diaries = this.data.diaries.slice();
       const target = diaries[index];
       target.likeCount = (target.likeCount || 0) + 1;
@@ -172,11 +186,28 @@ Page({
   },
 
   goRecord() {
+    if (!this.data.currentPet) { this.goCreatePet(); return; }
+    wx.setStorageSync('currentPetId', this.data.currentPet.id);
     wx.navigateTo({ url: '/pages/diary/edit' });
   },
 
   goCreatePet() {
+    this.setData({ showPetSwitcher: false });
     wx.navigateTo({ url: '/pages/pet/edit' });
+  },
+
+  openPetSwitcher() { this.setData({ showPetSwitcher: true }); },
+  closePetSwitcher() { this.setData({ showPetSwitcher: false }); },
+  stopTap() {},
+  selectPet(event: any) {
+    const pet = this.data.pets.find((item: AlbumPet) => item.id === Number(event.currentTarget.dataset.id));
+    if (!pet) return;
+    this.setData({ showPetSwitcher: false });
+    if (this.data.currentPet?.id === pet.id) return;
+    wx.setStorageSync('currentPetId', pet.id);
+    this.setData({ currentPet: pet, petAvatarSrc: pet.avatarSrc || '', diaries: [], page: 1, hasMore: true });
+    wx.pageScrollTo({ scrollTop: 0, duration: 0 });
+    this.loadDiaries(true);
   },
 
   goDetail(event: any) {
@@ -186,4 +217,4 @@ Page({
     }
     wx.navigateTo({ url: `/pages/diary/detail?id=${id}` });
   },
-});
+}, ["community/comment.png", "community/like.png", "pet-placeholder.png"]));

@@ -6,7 +6,7 @@
     <view wx:if="{{currentPet}}" class="hero-pet">
       <image
         class="hero-avatar"
-        src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        src="{{petAvatarSrc || currentPet.avatarUrl || staticAssets['pet-placeholder.png']}}"
         mode="aspectFill"
       />
       <view class="hero-info">

@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { createPet, getPet, updatePet } from '../../services/pet';
 import type { PetPayload } from '../../services/pet';
@@ -5,7 +6,7 @@ import { uploadImage } from '../../utils/upload';
 import { todayString } from '../../utils/format';
 import { resolveImage } from '../../utils/image';
 
-Page({
+Page(withStaticImages({
   data: {
     id: 0,
     isEdit: false,
@@ -186,4 +187,4 @@ Page({
       this.setData({ saving: false });
     }
   },
-});
+}, ["pet-placeholder.png"]));

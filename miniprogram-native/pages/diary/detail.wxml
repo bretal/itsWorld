@@ -4,7 +4,7 @@
       <view class="detail-head">
         <image
           class="pet-avatar"
-          src="{{petAvatarSrc || pet.avatarUrl || '/assets/pet-placeholder.png'}}"
+          src="{{petAvatarSrc || pet.avatarUrl || staticAssets['pet-placeholder.png']}}"
           mode="aspectFill"
         />
         <view class="head-info">

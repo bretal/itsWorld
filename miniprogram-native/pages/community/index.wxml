@@ -4,7 +4,7 @@
       <view class="community-title">宠友圈</view>
       <view class="community-sub">和同频的宠友分享养宠日常</view>
     </view>
-    <view class="head-paw">🐾</view>
+    <view class="head-paw" bindtap="goCreatePost" aria-label="发布宠友圈">🐾</view>
   </view>
 
   <view class="tabs">
@@ -31,7 +31,7 @@
         <view class="post-head">
           <image
             class="post-avatar"
-            src="{{item.avatarSrc || item.userAvatar || '/assets/avatar-placeholder.png'}}"
+            src="{{item.avatarSrc || item.userAvatar || staticAssets['avatar-placeholder.png']}}"
             mode="aspectFill"
           />
           <view class="post-author">
@@ -44,7 +44,7 @@
         <view wx:if="{{item.title}}" class="post-title">{{item.title}}</view>
         <view class="post-content">{{item.content}}</view>
 
-        <view wx:if="{{item.photos.length}}" class="post-photos">
+        <view wx:if="{{item.photos.length}}" class="post-photos {{item.photos.length === 1 ? 'single-photo' : 'photo-grid'}}">
           <image
             wx:for="{{item.photos}}"
             wx:for-item="photo"
@@ -61,19 +61,17 @@
             catchtap="like"
             data-index="{{index}}"
           >
-            <text class="action-icon {{item.liked ? 'liked' : ''}}">
-              {{item.liked ? '♥' : '♡'}}
-            </text>
+            <image class="action-image {{item.liked ? 'is-liked' : 'not-liked'}}" src="{{staticAssets['community/like.png']}}" mode="aspectFit" />
             <text>{{item.likeCount || 0}}</text>
           </view>
           <view class="action">
-            <text class="action-icon">💬</text>
+            <image class="action-image" src="{{staticAssets['community/comment.png']}}" mode="aspectFit" />
             <text>{{item.commentCount || 0}}</text>
           </view>
-          <view class="action">
+          <button class="action share-action" open-type="share" data-id="{{item.id}}" catchtap="stopCardTap">
             <text class="action-icon">↗</text>
             <text>分享</text>
-          </view>
+          </button>
         </view>
       </view>
 
@@ -86,7 +84,7 @@
       <view wx:else class="empty-btn" bindtap="goCreatePost">去发帖</view>
     </view>
 
-    <view wx:if="{{loadingMore}}" class="list-footer">加载中…</view>
-    <view wx:elif="{{!hasMore && posts.length}}" class="list-footer">没有更多了</view>
+    <view wx:if="{{loading || loadingMore}}" class="list-footer">加载中…</view>
+    <view wx:elif="{{!hasMore && posts.length}}" class="list-footer">每一份陪伴，都值得记录</view>
   </view>
 </view>

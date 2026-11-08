@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import {
   getToken,
   getUser,
@@ -8,7 +9,7 @@ import { updateProfile } from '../../services/user';
 import { uploadImage } from '../../utils/upload';
 import { resolveImage } from '../../utils/image';
 
-Page({
+Page(withStaticImages({
   data: {
     nickName: '',
     bio: '',
@@ -113,4 +114,4 @@ Page({
       this.setData({ saving: false });
     }
   },
-});
+}, ["avatar-placeholder.png"]));

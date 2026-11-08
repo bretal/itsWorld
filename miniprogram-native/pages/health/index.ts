@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { listPets } from '../../services/pet';
 import type { Pet } from '../../services/pet';
@@ -60,7 +61,7 @@ const FEED_TYPE_LABELS: Record<string, string> = {
   snack: '加餐',
 };
 
-Page({
+Page(withStaticImages({
   data: {
     tabs: [
       { key: 'weight', label: '体重' },
@@ -512,4 +513,4 @@ Page({
   goCreatePet() {
     wx.navigateTo({ url: '/pages/pet/edit' });
   },
-});
+}, ["pet-placeholder.png"]));

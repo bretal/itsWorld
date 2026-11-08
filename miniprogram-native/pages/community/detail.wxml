@@ -4,7 +4,7 @@
       <view class="post-head">
         <image
           class="post-avatar"
-          src="{{postAvatarSrc || post.userAvatar || '/assets/avatar-placeholder.png'}}"
+          src="{{postAvatarSrc || post.userAvatar || staticAssets['avatar-placeholder.png']}}"
           mode="aspectFill"
         />
         <view class="post-author">
@@ -28,13 +28,11 @@
 
       <view class="post-actions">
         <view class="action" bindtap="toggleLike">
-          <text class="action-icon {{liked ? 'liked' : ''}}">
-            {{liked ? '♥' : '♡'}}
-          </text>
+          <image class="action-image {{liked ? 'is-liked' : 'not-liked'}}" src="{{staticAssets['community/like.png']}}" mode="aspectFit" />
           <text>{{post.likeCount || 0}}</text>
         </view>
         <view class="action">
-          <text class="action-icon">💬</text>
+          <image class="action-image" src="{{staticAssets['community/comment.png']}}" mode="aspectFit" />
           <text>{{post.commentCount || 0}}</text>
         </view>
       </view>
@@ -42,8 +40,7 @@
 
     <view class="comment-card">
       <view class="comment-head">
-        <text class="comment-title">评论</text>
-        <text class="comment-count">{{post.commentCount || 0}} 条</text>
+        <text class="comment-title">评论 <text class="comment-count">· {{post.commentCount || 0}}</text></text>
       </view>
 
       <view wx:if="{{comments.length}}" class="comment-list">
@@ -69,7 +66,7 @@
       </view>
 
       <view wx:elif="{{!commentsLoading}}" class="comment-empty">
-        还没有评论，来抢沙发~
+        还没有评论，聊聊吧
       </view>
 
       <view

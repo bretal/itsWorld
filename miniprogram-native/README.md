@@ -47,7 +47,7 @@
    启动背景、logo、Tab 图标和发布按钮已上传到 MinIO `itsworld-static`，通过 `utils/assets.ts` 的 `assetUrl` 读取：
    - 开发：`http://192.168.31.25:9000/itsworld-static/...`
    - 生产：`https://lvhaorankk.top/files/itsworld-static/...`
-   本地仅保留 `avatar-placeholder.png`、`pet-placeholder.png` 两个小占位图。
+   我的页两个方形统计卡片背景同样来自 `itsworld-static/profile/`；本地仅保留 `avatar-placeholder.png`、`pet-placeholder.png` 两个小占位图。
 
 ## 类型检查
 

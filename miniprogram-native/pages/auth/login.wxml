@@ -3,7 +3,7 @@
     <view class="logo-wrap">
       <image
         class="logo"
-        src="{{logoUrl || '/assets/avatar-placeholder.png'}}"
+        src="{{logoUrl || staticAssets['avatar-placeholder.png']}}"
         mode="aspectFit"
       />
     </view>

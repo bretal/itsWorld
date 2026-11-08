@@ -1,68 +1,20 @@
 <view class="profile-page">
   <view class="profile-hero">
-    <view class="hero-circle circle-a"></view>
-    <view class="hero-circle circle-b"></view>
-
-    <view class="hero-top">
-      <view class="hero-title">我的</view>
-      <view class="hero-settings" bindtap="showSettings">⚙</view>
-    </view>
-
+    <view class="hero-settings" bindtap="showSettings" aria-label="设置"><text class="iconfont icon-settings"></text></view>
     <view class="user-row" bindtap="goEditProfile">
-      <image
-        class="user-avatar"
-        src="{{avatarSrc || avatarUrl}}"
-        mode="aspectFill"
-      />
-      <view class="user-info">
-        <view class="user-name">{{displayName}}</view>
-        <view class="user-tag">🐾 宠物家长</view>
-      </view>
+      <image class="user-avatar" src="{{avatarSrc || avatarUrl}}" mode="aspectFill" />
+      <view class="user-info"><view class="user-name">{{displayName}}</view><view class="user-tag"><image src="{{staticAssets['member/membership-paw.png']}}" mode="aspectFit"/>宠物家长</view></view>
       <view class="edit-arrow">›</view>
     </view>
   </view>
-
   <view class="profile-body">
     <view class="stat-grid">
-      <view class="stat-card" data-key="pets" bindtap="onTapMenu">
-        <view class="stat-icon pets">🐾</view>
-        <view class="stat-info">
-          <view class="stat-title">我的宠物</view>
-          <view class="stat-value">{{petCount}}<text class="stat-unit">只</text></view>
-        </view>
-      </view>
-      <view class="stat-card" data-key="album" bindtap="onTapMenu">
-        <view class="stat-icon album">🖼️</view>
-        <view class="stat-info">
-          <view class="stat-title">成长相册</view>
-          <view class="stat-value">{{photoCount}}<text class="stat-unit">张</text></view>
-        </view>
-      </view>
+      <view class="stat-card pets" data-key="pets" bindtap="onTapMenu"><image class="stat-icon" src="{{staticAssets['member/membership-paw.png']}}" mode="aspectFit"/><view class="stat-info"><view class="stat-title">我的宠物</view><view class="stat-value">{{petCount}}<text>只</text></view></view><text class="stat-arrow">›</text></view>
+      <view class="stat-card album" data-key="album" bindtap="onTapMenu"><view class="album-icon"><image src="{{staticAssets['profile-menu/album.png']}}" mode="aspectFit"/></view><view class="stat-info"><view class="stat-title">成长相册</view><view class="stat-value">{{photoCount}}<text>张</text></view></view><text class="stat-arrow">›</text></view>
     </view>
-
-    <view class="menu-card">
-      <view
-        wx:for="{{menu}}"
-        wx:key="key"
-        class="menu-item"
-        data-key="{{item.key}}"
-        bindtap="onTapMenu"
-      >
-        <view class="menu-icon">{{item.icon}}</view>
-        <view class="menu-text">
-          <view class="menu-title">{{item.title}}</view>
-          <view class="menu-desc">{{item.desc}}</view>
-        </view>
-        <view class="menu-arrow">›</view>
-      </view>
-    </view>
-
-    <view class="quote-card">
-      <view class="quote-text">有你在，</view>
-      <view class="quote-text">就是最好的时光</view>
-      <view class="quote-emoji">🐶🐱</view>
-    </view>
-
-    <view class="logout" bindtap="onLogout">退出登录</view>
+    <view class="membership-entry" data-key="member" bindtap="onTapMenu"><image src="{{staticAssets['profile-menu/member-crown.png']}}" mode="aspectFit"/><view class="membership-copy"><view>会员中心</view><text>发现更多宠爱权益</text></view><view class="membership-link">查看权益 ›</view></view>
+    <view class="service-card"><view class="section-title">我的服务</view><view class="service-grid"><view wx:for="{{serviceMenu}}" wx:key="key" class="service-item" data-key="{{item.key}}" bindtap="onTapMenu"><image src="{{staticAssets[item.image]}}" mode="aspectFit"/><text>{{item.title}}</text></view></view></view>
+    <view class="menu-card"><view wx:for="{{utilityMenu}}" wx:key="key" class="menu-item" data-key="{{item.key}}" bindtap="onTapMenu"><view class="menu-icon"><image src="{{staticAssets[item.image]}}" mode="aspectFit"/><view wx:if="{{item.dot}}" class="menu-dot"></view></view><text class="menu-title">{{item.title}}</text><text class="menu-arrow">›</text></view></view>
+    <view class="quote"><view></view><text>有你在，就是最好的时光</text><view></view></view>
   </view>
 </view>

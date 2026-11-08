@@ -3,7 +3,7 @@
     <view wx:if="{{currentPet}}" class="pet-chip">
       <image
         class="pet-chip-avatar"
-        src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        src="{{petAvatarSrc || currentPet.avatarUrl || staticAssets['pet-placeholder.png']}}"
         mode="aspectFill"
       />
       <text class="pet-chip-name">{{currentPet.petName}}</text>

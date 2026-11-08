@@ -31,7 +31,7 @@
     >
       <image
         class="pet-avatar"
-        src="{{item.avatarSrc || item.avatarUrl || '/assets/pet-placeholder.png'}}"
+        src="{{item.avatarSrc || item.avatarUrl || staticAssets['pet-placeholder.png']}}"
         mode="aspectFill"
       />
       <view class="pet-main">

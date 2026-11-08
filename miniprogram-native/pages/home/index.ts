@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { getUser, requireLogin } from '../../utils/auth';
 import { listPets } from '../../services/pet';
 import type { Pet } from '../../services/pet';
@@ -19,7 +20,7 @@ interface HomePet extends Pet {
 
 let loadSequence = 0;
 
-Page({
+Page(withStaticImages({
   data: {
     statusBarHeight: 20,
     user: null as any,
@@ -219,6 +220,22 @@ Page({
     wx.switchTab({ url: '/pages/community/index' });
   },
 
+  goGrooming() {
+    wx.navigateTo({ url: '/pages/commerce/grooming/index' });
+  },
+
+  goShop() {
+    wx.navigateTo({ url: '/pages/commerce/shop/index' });
+  },
+
+  goPackages() {
+    wx.navigateTo({ url: '/pages/commerce/package/index' });
+  },
+
+  goStores() {
+    wx.navigateTo({ url: '/pages/commerce/store/index' });
+  },
+
   onTapFeature(event: any) {
     const key = event.currentTarget.dataset.key;
     if (key === 'ai') {
@@ -261,4 +278,4 @@ Page({
       url: `/pages/diary/detail?id=${this.data.todayDiary.id}`,
     });
   },
-});
+}, ["pet-placeholder.png"]));

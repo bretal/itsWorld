@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "宠友圈",
   "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark"
+  "backgroundTextStyle": "dark",
+  "navigationBarBackgroundColor": "#fff7fb",
+  "backgroundColor": "#fff7fb"
 }

@@ -5,15 +5,15 @@
 
     <view wx:if="{{currentPet}}" class="pet-summary">
       <image
-        class="summary-avatar"
-        src="{{petAvatarSrc || currentPet.avatarUrl || '/assets/pet-placeholder.png'}}"
+        class="summary-avatar" bindtap="openPetSwitcher"
+        src="{{petAvatarSrc || currentPet.avatarUrl || staticAssets['pet-placeholder.png']}}"
         mode="aspectFill"
       />
-      <view class="summary-info">
-        <view class="summary-name">{{currentPet.petName}}</view>
+      <view class="summary-info" bindtap="openPetSwitcher">
+        <view class="summary-name">{{currentPet.petName}} <text class="pet-chevron">▾</text></view><view class="switch-label">⇄ 切换宠物</view>
         <view class="summary-meta">{{currentPet.metaText}}</view>
         <view class="summary-bio ellipsis">
-          {{currentPet.description || '活泼开朗，喜欢玩球和吃零食~'}}
+          正在查看它的日记
         </view>
       </view>
       <view class="record-btn" bindtap="goRecord">记录</view>
@@ -49,14 +49,14 @@
       <view class="diary-head">
         <view class="diary-date">{{item.dateText}}</view>
         <view class="diary-time">{{item.timeText}}</view>
-        <view class="diary-tag">{{item.greeting || '今日记录'}}</view>
+        <view class="diary-tag">☺ {{item.moodText}}</view>
       </view>
 
       <view class="diary-text">
         {{item.content || '今天也留下了可爱的记录~'}}
       </view>
 
-      <view wx:if="{{item.photos.length}}" class="photo-grid">
+      <view wx:if="{{item.photos.length}}" class="photo-grid {{item.photos.length === 1 ? 'single-photo' : ''}}">
         <image
           wx:for="{{item.photos}}"
           wx:for-item="photo"
@@ -69,13 +69,11 @@
 
       <view class="diary-actions">
         <view class="action" catchtap="like" data-index="{{index}}">
-          <text class="action-icon {{item.liked ? 'liked' : ''}}">
-            {{item.liked ? '♥' : '♡'}}
-          </text>
+          <image class="action-image {{item.liked ? 'liked-image' : 'unliked-image'}}" src="{{staticAssets['community/like.png']}}" mode="aspectFit"/>
           <text>{{item.likeCount || 0}}</text>
         </view>
         <view class="action">
-          <text class="action-icon">💬</text>
+          <image class="action-image" src="{{staticAssets['community/comment.png']}}" mode="aspectFit"/>
           <text>{{item.commentCount || 0}}</text>
         </view>
       </view>
@@ -88,6 +86,12 @@
     </view>
 
     <view wx:if="{{loadingMore}}" class="list-footer">加载中…</view>
-    <view wx:elif="{{!hasMore && diaries.length}}" class="list-footer">没有更多了</view>
+    <view wx:elif="{{!hasMore && diaries.length}}" class="list-footer">每一天，都值得珍藏</view>
+  </view>
+</view>
+<view wx:if="{{showPetSwitcher}}" class="pet-overlay" bindtap="closePetSwitcher" catchtouchmove="stopTap">
+  <view class="pet-sheet" catchtap="stopTap"><view class="sheet-handle"></view><view class="sheet-close" bindtap="closePetSwitcher">×</view><view class="sheet-title">切换宠物</view><view class="sheet-subtitle">选择要查看日记的毛孩子</view>
+    <scroll-view scroll-y class="pet-options"><view wx:for="{{pets}}" wx:key="id" class="pet-option {{currentPet.id === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectPet"><image src="{{item.avatarSrc || item.avatarUrl || staticAssets['pet-placeholder.png']}}" mode="aspectFill"/><view class="option-info"><view>{{item.petName}}</view><text>{{item.metaText}}</text></view><view class="pet-radio">{{currentPet.id === item.id ? '✓' : ''}}</view></view></scroll-view>
+    <view class="add-pet" bindtap="goCreatePet">＋ 添加宠物</view>
   </view>
 </view>

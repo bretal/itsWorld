@@ -1,3 +1,4 @@
+import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { getPostPage, likePost, unlikePost } from '../../services/community';
 import type { CommunityTab, Post } from '../../services/community';
@@ -11,7 +12,7 @@ interface PostItem extends Post {
   avatarSrc?: string;
 }
 
-Page({
+Page(withStaticImages({
   data: {
     tabs: [
       { key: 'follow', label: '关注' },
@@ -143,8 +144,19 @@ Page({
     wx.navigateTo({ url: '/pages/community/create' });
   },
 
+  stopCardTap() {},
+
+  onShareAppMessage(event: any) {
+    const id = Number(event.target?.dataset?.id);
+    const post = this.data.posts.find((item: PostItem) => item.id === id);
+    return {
+      title: post?.title || '和同频的宠友分享养宠日常',
+      path: post ? `/pages/community/detail?id=${post.id}` : '/pages/community/index',
+    };
+  },
+
   goRecommend() {
     this.setData({ activeTab: 'recommend', posts: [], hasMore: true });
     this.loadData('recommend', true);
   },
-});
+}, ["avatar-placeholder.png", "community/comment.png", "community/like.png"]));
