@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "健康管理",
-  "backgroundTextStyle": "dark"
+  "backgroundTextStyle": "dark",
+  "navigationBarBackgroundColor": "#fcebf4",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f6edfc"
 }

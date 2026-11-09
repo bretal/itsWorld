@@ -464,3 +464,49 @@
   width: 100%;
   margin-top: 18rpx;
 }
+
+/* 2026-11 健康档案：粉紫统一视觉 */
+.health-page { background:linear-gradient(145deg,#fff1e7,#fcebf4 35%,#f1e8fd); color:#4c2f59; }
+.health-hero { padding:24rpx 28rpx 12rpx; background:transparent; }
+.hero-circle { display:none; }
+.hero-pet { padding:24rpx; border:2rpx solid white; border-radius:34rpx; background:linear-gradient(120deg,#ffffff99,#f0dbf6aa); }
+.hero-avatar { border-radius:50%; flex-shrink:0; }
+.hero-name { color:#4c2f59; }
+.hero-sub { color:#987da2; }
+.tabs { margin:14rpx 28rpx 0; padding:4rpx; border:2rpx solid white; border-radius:32rpx; background:#ffffff77; }
+.tab { flex:1; text-align:center; margin:0; background:transparent; font-size:27rpx; padding:13rpx 0; color:#8f7499; }
+.tab.active { background:linear-gradient(#d6b5ed,#b58ada); box-shadow:0 5rpx 12rpx #b987d533; }
+.content { padding:24rpx 28rpx 0; }
+.summary-card,.record-row,.feeding-card,.record-card { position:relative; border:2rpx solid white; border-radius:32rpx; background:#ffffffbb; box-shadow:0 8rpx 22rpx #c999d51a; }
+.summary-card { margin-bottom:22rpx; overflow:hidden; }
+.summary-icon { position:absolute; right:22rpx; top:16rpx; width:170rpx; height:170rpx; }
+.summary-label { font-size:32rpx; font-weight:700; color:#4c2f59; padding-right:150rpx; }
+.summary-value { font-size:84rpx; color:#4c2f59; padding-right:150rpx; line-height:1.4; }
+.summary-unit { font-size:30rpx; color:#6c4b79; margin-left:8rpx; }
+.summary-bottom { display:flex; align-items:center; justify-content:space-between; margin-top:12rpx; font-size:24rpx; color:#987da2; }
+.add-btn { display:table; padding:13rpx 24rpx; border:2rpx solid #fff5da; border-radius:40rpx; background:linear-gradient(#ffc25c,#ff981f); color:white; box-shadow:0 5rpx 12rpx #f4b16a33; }
+.summary-head { display:block; }
+.summary-head .add-btn { margin-top:14rpx; }
+.summary-tip { background:transparent; padding:0; color:#a18aaa; font-size:23rpx; }
+.archive-desc { max-width:72%; margin:12rpx 0 28rpx; font-size:24rpx; color:#977aa2; min-height:65rpx; }
+.archive-summary .summary-icon { top:24rpx; }
+.first-record { padding:36rpx 24rpx; border:2rpx solid white; border-radius:32rpx; background:linear-gradient(130deg,#f9e5f6,#ead9fb); text-align:center; }
+.first-record view { font-size:29rpx; font-weight:600; color:#674275; }
+.first-record text { display:block; margin-top:14rpx; font-size:23rpx; color:#a080ae; }
+.trend-card .summary-label { padding:0; }
+.trend-caption { color:#a18aaa; font-size:22rpx; margin:8rpx 0; }
+.trend-image { display:block; margin-top:10rpx; }
+.section-title,.record-title { color:#55345f; }
+.record-sub { color:#9b80a5; overflow-wrap:break-word; }
+.record-notes { background:#f5eafa; color:#83618f; }
+.record-delete { background:#f6edf7; color:#a78aaf; min-height:52rpx; }
+.feeding-dot { width:14rpx; height:14rpx; border-radius:50%; background:#c294d6; flex-shrink:0; margin-right:22rpx; }
+.add-link { color:#a376bd; }
+.sheet { background:linear-gradient(#fff8fc,#f5edfc); }
+.sheet-title { color:#664470; }
+.field { border-color:#ecdff1; }
+.field-label { color:#997ca4; }
+.field-input,.field-textarea,.picker-value { color:#694574; }
+.sheet-save { border-radius:44rpx; background:linear-gradient(#ffc25c,#ff981f); color:white; }
+.empty { text-align:center; color:#a48aae; }
+.list-footer { color:#b29cbb; }

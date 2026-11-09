@@ -7,7 +7,9 @@
   </view>
 
   <block wx:else>
+    <view class="editor-intro"><view>收藏今天的小美好</view><text>一段文字，一张照片，都是陪伴的印记</text><view class="intro-paw">✦</view></view>
     <view class="form-card">
+      <view class="card-heading">今天，想为谁记录？</view>
       <view class="form-item">
         <text class="form-label">宠物</text>
         <picker
@@ -40,7 +42,7 @@
       </view>
 
       <view class="form-block">
-        <text class="form-label block-label">今天的心情</text>
+        <text class="form-label block-label">TA今天的心情</text>
         <view class="mood-row">
           <view
             wx:for="{{moods}}"
@@ -83,6 +85,8 @@
         bindinput="onContentInput"
       />
 
+      <view class="word-count">{{content.length}} / 1000</view>
+      <view class="photo-heading"><text>定格可爱瞬间</text><text>{{photos.length}} / 9 张</text></view>
       <view class="photo-grid">
         <view
           wx:for="{{photoPreviews}}"
@@ -111,11 +115,11 @@
       <view class="switch-row">
         <view>
           <view class="switch-title">公开这篇日记</view>
-          <view class="switch-desc">公开后宠友圈可以看见TA的日常</view>
+          <view class="switch-desc">记录这份日常的分享意愿</view>
         </view>
         <switch
           checked="{{isPublic}}"
-          color="#2f80ed"
+          color="#b58adb"
           bindchange="onPublicChange"
         />
       </view>
@@ -127,7 +131,7 @@
       disabled="{{saving}}"
       bindtap="onSave"
     >
-      保存日记
+      保存这份美好
     </button>
   </block>
 </view>

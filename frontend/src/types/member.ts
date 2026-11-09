@@ -137,6 +137,7 @@ export interface AdminMemberAccount {
   levelId?: number;
   levelName?: string;
   growthValue: number;
+  memberExpiresAt?: string;
   pointsBalance: number;
   principalBalance: number;
   bonusBalance: number;
@@ -235,7 +236,7 @@ export interface MemberGiftEntity {
   giftName: string;
   description?: string;
   requiredLevelId?: number;
-  pointsReward: number;
+  growthReward: number;
   couponTemplateId?: number;
   startAt?: string;
   endAt?: string;
@@ -249,7 +250,7 @@ export interface MemberGiftRequest {
   giftName: string;
   description?: string;
   requiredLevelId?: number;
-  pointsReward?: number;
+  growthReward?: number;
   couponTemplateId?: number;
   startAt?: string;
   endAt?: string;

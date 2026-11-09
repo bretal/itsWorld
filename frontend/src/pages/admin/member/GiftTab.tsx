@@ -66,7 +66,7 @@ const GiftTab: React.FC = () => {
     setModalOpen(true);
     form.resetFields();
     form.setFieldsValue({
-      pointsReward: 0,
+      growthReward: 0,
       status: 1,
       sortOrder: 0,
     });
@@ -79,7 +79,7 @@ const GiftTab: React.FC = () => {
       giftName: gift.giftName,
       description: gift.description,
       requiredLevelId: gift.requiredLevelId,
-      pointsReward: gift.pointsReward,
+      growthReward: gift.growthReward,
       couponTemplateId: gift.couponTemplateId,
       startAt: gift.startAt ? dayjs(gift.startAt) : undefined,
       endAt: gift.endAt ? dayjs(gift.endAt) : undefined,
@@ -96,7 +96,7 @@ const GiftTab: React.FC = () => {
         giftName: values.giftName,
         description: values.description,
         requiredLevelId: values.requiredLevelId,
-        pointsReward: values.pointsReward,
+        growthReward: values.growthReward,
         couponTemplateId: values.couponTemplateId,
         startAt: values.startAt ? values.startAt.format('YYYY-MM-DDTHH:mm:ss') : undefined,
         endAt: values.endAt ? values.endAt.format('YYYY-MM-DDTHH:mm:ss') : undefined,
@@ -163,9 +163,9 @@ const GiftTab: React.FC = () => {
         value ? levelNameMap.get(value) || `等级#${value}` : '不限',
     },
     {
-      title: '积分奖励',
-      dataIndex: 'pointsReward',
-      key: 'pointsReward',
+      title: '成长值奖励',
+      dataIndex: 'growthReward',
+      key: 'growthReward',
       width: 100,
     },
     {
@@ -265,7 +265,7 @@ const GiftTab: React.FC = () => {
             </Form.Item>
           </Space>
           <Space style={{ display: 'flex' }} align="baseline">
-            <Form.Item label="积分奖励" name="pointsReward" style={{ width: 150 }}>
+            <Form.Item label="成长值奖励" name="growthReward" style={{ width: 150 }}>
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item label="附带优惠券" name="couponTemplateId" style={{ width: 220 }}>

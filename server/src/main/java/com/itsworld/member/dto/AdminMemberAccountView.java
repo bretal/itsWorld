@@ -42,6 +42,8 @@ public class AdminMemberAccountView {
 
     private Integer growthValue;
 
+    private LocalDateTime memberExpiresAt;
+
 
     private Long principalBalance;
 

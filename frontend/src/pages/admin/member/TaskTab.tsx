@@ -56,7 +56,6 @@ const TaskTab: React.FC = () => {
     form.setFieldsValue({
       periodType: 'DAILY',
       targetValue: 1,
-      pointsReward: 0,
       growthReward: 0,
       status: 1,
       sortOrder: 0,
@@ -79,7 +78,6 @@ const TaskTab: React.FC = () => {
         description: values.description,
         periodType: values.periodType,
         targetValue: values.targetValue,
-        pointsReward: values.pointsReward,
         growthReward: values.growthReward,
         status: values.status,
         sortOrder: values.sortOrder,
@@ -152,12 +150,6 @@ const TaskTab: React.FC = () => {
       title: '目标次数',
       dataIndex: 'targetValue',
       key: 'targetValue',
-      width: 100,
-    },
-    {
-      title: '积分奖励',
-      dataIndex: 'pointsReward',
-      key: 'pointsReward',
       width: 100,
     },
     {
@@ -251,9 +243,6 @@ const TaskTab: React.FC = () => {
               style={{ width: 140 }}
             >
               <InputNumber min={1} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item label="积分奖励" name="pointsReward" style={{ width: 140 }}>
-              <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item label="成长值奖励" name="growthReward" style={{ width: 140 }}>
               <InputNumber min={0} style={{ width: '100%' }} />

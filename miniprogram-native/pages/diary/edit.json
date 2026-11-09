@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "记录日记",
-  "backgroundTextStyle": "dark"
+  "backgroundTextStyle": "dark",
+  "navigationBarBackgroundColor": "#fcebf4",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f8effb"
 }

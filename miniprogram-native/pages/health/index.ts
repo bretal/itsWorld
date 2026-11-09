@@ -52,6 +52,7 @@ interface WeightBar {
   height: number;
   label: string;
   value: number;
+  time: number;
 }
 
 const FEED_TYPE_LABELS: Record<string, string> = {
@@ -86,6 +87,7 @@ Page(withStaticImages({
     checkupHasMore: true,
     weightRecords: [] as WeightItem[],
     weightBars: [] as WeightBar[],
+    chartWidth: 280,
     feedingRecords: [] as FeedingItem[],
     todayFeedingCount: 0,
     vaccineRecords: [] as VaccineItem[],
@@ -112,6 +114,11 @@ Page(withStaticImages({
     checkupClinic: '',
     checkupFindings: '',
     checkupRecommendations: '',
+  },
+
+  onLoad() {
+    const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+    this.setData({ chartWidth: info.windowWidth - 64 });
   },
 
   onShow() {
@@ -200,7 +207,16 @@ Page(withStaticImages({
 
     try {
       if (tab === 'weight') {
-        const result = await getWeightRecordPage(id, page, this.data.pageSize);
+        let result = await getWeightRecordPage(id, page, this.data.pageSize);
+        const loaded = [...(result.records || [])];
+        // 首屏补足最近七个记录日，避免同日多条记录挤掉趋势日期。
+        if (reset) {
+          while (new Set(loaded.map(record => record.recordedAt.slice(0, 10))).size < 7 && result.pageNum < result.totalPages) {
+            result = await getWeightRecordPage(id, result.pageNum + 1, this.data.pageSize);
+            loaded.push(...(result.records || []));
+          }
+        }
+        result = { ...result, records: loaded };
         const items: WeightItem[] = (result.records || []).map((record) => ({
           ...record,
           dateText: formatDate(record.recordedAt),
@@ -270,7 +286,9 @@ Page(withStaticImages({
         });
       }
 
-      this.setData({ loading: false, loadingMore: false });
+      this.setData({ loading: false, loadingMore: false }, () => {
+        if (tab === 'weight') wx.nextTick(() => this.drawTrend());
+      });
     } catch (error) {
       this.setData({ loading: false, loadingMore: false });
     }
@@ -281,15 +299,13 @@ Page(withStaticImages({
       return [];
     }
 
-    const sorted = records
-      .slice()
-      .sort(
-        (left, right) =>
-          (parseDate(left.recordedAt)?.getTime() || 0) -
-          (parseDate(right.recordedAt)?.getTime() || 0),
-      )
-      .slice(-7);
-
+    const days = new Map<string, WeightRecord>();
+    records.slice().sort((a, b) =>
+      (parseDate(a.recordedAt)?.getTime() || 0) - (parseDate(b.recordedAt)?.getTime() || 0) || a.id - b.id,
+    ).forEach(record => {
+      if (parseDate(record.recordedAt) && Number(record.weightKg) > 0) days.set(record.recordedAt.slice(0, 10), record);
+    });
+    const sorted = Array.from(days.values()).slice(-7);
     const values = sorted.map((item) => Number(item.weightKg) || 0);
     const max = Math.max(...values);
     const min = Math.min(...values);
@@ -299,7 +315,38 @@ Page(withStaticImages({
       height: 28 + Math.round(((Number(item.weightKg) - min) / range) * 64),
       label: (item.recordedAt || '').slice(5, 10).replace('-', '/'),
       value: Number(item.weightKg),
+      time: parseDate(item.recordedAt)?.getTime() || 0,
     }));
+  },
+
+  drawTrend() {
+    const points = this.data.weightBars as WeightBar[];
+    if (points.length < 2 || this.data.activeTab !== 'weight') return;
+    const ctx = wx.createCanvasContext('weightTrend', this);
+    const width = this.data.chartWidth;
+    const min = Math.max(0, Math.floor((Math.min(...points.map(p => p.value)) - 0.3) * 10) / 10);
+    const max = Math.ceil((Math.max(...points.map(p => p.value)) + 0.3) * 10) / 10;
+    const x = (p: WeightBar) => 38 + (p.time - points[0].time) / (points[points.length - 1].time - points[0].time) * (width - 62);
+    const y = (p: WeightBar) => 155 - (p.value - min) / (max - min) * 125;
+    ctx.clearRect(0, 0, width, 210);
+    ctx.setFontSize(10);
+    for (let i = 0; i < 3; i++) {
+      const gy = 155 - i * 62.5;
+      ctx.setStrokeStyle('#e8dced'); ctx.setLineWidth(1);
+      ctx.beginPath(); ctx.moveTo(36, gy); ctx.lineTo(width - 16, gy); ctx.stroke();
+      ctx.setFillStyle('#9b81a7'); ctx.fillText((min + (max - min) * i / 2).toFixed(1), 0, gy + 4);
+    }
+    ctx.setStrokeStyle('#ad7cd7'); ctx.setLineWidth(2);
+    ctx.beginPath(); points.forEach((p, i) => i ? ctx.lineTo(x(p), y(p)) : ctx.moveTo(x(p), y(p))); ctx.stroke();
+    points.forEach((p, i) => {
+      ctx.setFillStyle('#ad7cd7'); ctx.beginPath(); ctx.arc(x(p), y(p), 3, 0, Math.PI * 2); ctx.fill();
+      ctx.setTextAlign('center'); ctx.setFillStyle('#755482');
+      if (points.length <= 4 || i % 2 === 0 || i === points.length - 1) {
+        ctx.fillText(String(p.value), x(p), y(p) - 10);
+        ctx.fillText(p.label, x(p), 180);
+      }
+    });
+    ctx.draw();
   },
 
   switchTab(event: any) {
@@ -513,4 +560,4 @@ Page(withStaticImages({
   goCreatePet() {
     wx.navigateTo({ url: '/pages/pet/edit' });
   },
-}, ["pet-placeholder.png"]));
+}, ["pet-placeholder.png", "health/health-weight-scale.png", "health/health-feeding-bowl.png", "health/health-vaccine-vial.png", "health/health-medical-kit.png"]));

@@ -38,7 +38,6 @@ import type {
   Coupon,
   CouponTemplate,
   MemberGrowthLog,
-  MemberPointsLog,
 } from '@/types/member';
 import type { RechargeOrder, WalletTransaction } from '@/types/wallet';
 
@@ -97,12 +96,10 @@ const UserManagementPage: React.FC = () => {
   const [detailUser, setDetailUser] = useState<AdminMemberAccount | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [growthData, setGrowthData] = useState<PageData<MemberGrowthLog> | null>(null);
-  const [pointsData, setPointsData] = useState<PageData<MemberPointsLog> | null>(null);
   const [txData, setTxData] = useState<PageData<WalletTransaction> | null>(null);
   const [rechargeData, setRechargeData] = useState<PageData<RechargeOrder> | null>(null);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [growthPage, setGrowthPage] = useState(1);
-  const [pointsPage, setPointsPage] = useState(1);
   const [txPage, setTxPage] = useState(1);
   const [rechargePage, setRechargePage] = useState(1);
 
@@ -178,20 +175,17 @@ const UserManagementPage: React.FC = () => {
     setDetailUser(user);
     setDetailOpen(true);
     setGrowthPage(1);
-    setPointsPage(1);
     setTxPage(1);
     setRechargePage(1);
     try {
       setDetailLoading(true);
-      const [growth, points, txs, recharges, couponList] = await Promise.all([
+      const [growth, txs, recharges, couponList] = await Promise.all([
         adminMemberService.getUserGrowthLogs(user.userId, 1, PAGE_SIZE),
-        adminMemberService.getUserPointsLogs(user.userId, 1, PAGE_SIZE),
         adminMemberService.getUserTransactions(user.userId, 1, PAGE_SIZE),
         adminMemberService.getUserRecharges(user.userId, 1, PAGE_SIZE),
         adminMemberService.getUserCoupons(user.userId),
       ]);
       setGrowthData(growth);
-      setPointsData(points);
       setTxData(txs);
       setRechargeData(recharges);
       setCoupons(couponList || []);
@@ -213,22 +207,6 @@ const UserManagementPage: React.FC = () => {
       setGrowthPage(current);
     } catch (error: any) {
       message.error(error.message || '加载成长值流水失败');
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
-  const fetchPoints = async (current: number) => {
-    if (!detailUser) {
-      return;
-    }
-    try {
-      setDetailLoading(true);
-      const result = await adminMemberService.getUserPointsLogs(detailUser.userId, current, PAGE_SIZE);
-      setPointsData(result);
-      setPointsPage(current);
-    } catch (error: any) {
-      message.error(error.message || '加载积分流水失败');
     } finally {
       setDetailLoading(false);
     }
@@ -389,7 +367,7 @@ const UserManagementPage: React.FC = () => {
       title: '成长/积分',
       key: 'memberValue',
       width: 120,
-      render: (_, record) => `${record.growthValue} / ${record.pointsBalance}`,
+      render: (_, record) => `${record.growthValue ?? 0}`,
     },
     {
       title: '本金（元）',
@@ -506,7 +484,6 @@ const UserManagementPage: React.FC = () => {
     },
   ];
 
-  const pointsColumns: ColumnsType<MemberPointsLog> = growthColumns as ColumnsType<MemberPointsLog>;
 
   const txColumns: ColumnsType<WalletTransaction> = [
     {
@@ -743,8 +720,9 @@ const UserManagementPage: React.FC = () => {
                     <Descriptions.Item label="会员等级">
                       {detailUser.levelName || '未开通'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="成长值/积分">
-                      {detailUser.growthValue} / {detailUser.pointsBalance}
+                    <Descriptions.Item label="会员到期时间">{detailUser.memberExpiresAt ? formatDateTime(detailUser.memberExpiresAt) : '未开通'}</Descriptions.Item>
+                    <Descriptions.Item label="可用成长值">
+                      {detailUser.growthValue ?? 0}
                     </Descriptions.Item>
                     <Descriptions.Item label="本金余额">
                       ¥{formatMoney(detailUser.principalBalance)}
@@ -780,26 +758,6 @@ const UserManagementPage: React.FC = () => {
                       total: growthData?.total || 0,
                       showSizeChanger: false,
                       onChange: fetchGrowth,
-                    }}
-                  />
-                ),
-              },
-              {
-                key: 'points',
-                label: '积分流水',
-                children: (
-                  <Table
-                    rowKey="id"
-                    loading={detailLoading}
-                    columns={pointsColumns}
-                    dataSource={pointsData?.records || []}
-                    locale={{ emptyText: '暂无积分流水' }}
-                    pagination={{
-                      current: pointsPage,
-                      pageSize: PAGE_SIZE,
-                      total: pointsData?.total || 0,
-                      showSizeChanger: false,
-                      onChange: fetchPoints,
                     }}
                   />
                 ),

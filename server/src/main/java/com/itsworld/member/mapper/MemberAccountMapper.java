@@ -47,7 +47,7 @@ public interface MemberAccountMapper extends BaseMapper<MemberAccount> {
     @Select("<script>"
             + "SELECT u.id AS user_id, u.username, u.nick_name, u.phone, u.email, u.role, "
             + "u.status, u.last_login_at, u.created_at, "
-            + "ma.level_id, ml.level_name, "
+            + "ma.level_id, ml.level_name, ma.member_expires_at, "
             + "COALESCE(ma.growth_value, 0) AS growth_value, "
             + "COALESCE(wa.principal_balance, 0) AS principal_balance, "
             + "COALESCE(wa.bonus_balance, 0) AS bonus_balance, "

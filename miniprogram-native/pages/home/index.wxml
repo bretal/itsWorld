@@ -8,11 +8,10 @@
         <text>我的宠物</text>
         <text class="chevron">⌄</text>
       </view>
-      <view class="camera-btn" bindtap="onTapCamera">
-        <text class="camera-icon">◉</text>
-      </view>
+
     </view>
 
+    <view class="hero-copy"><view>把每一天，宠成好时光</view><text>记录成长 · 用心陪伴</text></view>
     <view wx:if="{{loading}}" class="pet-card pet-card-loading">
       <view class="skeleton skeleton-avatar"></view>
       <view class="skeleton-lines">
@@ -58,44 +57,49 @@
   </view>
 
   <view class="body">
+    <view class="record-banner" bindtap="goRecordDiary"><image src="{{staticAssets['member/paw.png']}}" mode="aspectFit"/><view><view>今天的小可爱，值得被记录</view><text>留住每一个心动瞬间</text></view><text class="record-action">写日记 ›</text></view>
+    <view class="tools-panel"><view class="panel-heading">陪伴日常<text>TA的每件小事，都很重要</text></view>
     <view class="feature-grid">
       <view class="feature" data-key="ai" bindtap="onTapFeature">
-        <view class="feature-icon ai">📷</view>
+        <image class="feature-icon ai" src="{{staticAssets['member/task-photo.png']}}" mode="aspectFit"/>
         <text class="feature-name">拍照识情绪</text>
         <text class="feature-tag">即将上线</text>
       </view>
       <view class="feature" data-key="diary" bindtap="onTapFeature">
-        <view class="feature-icon diary">📔</view>
+        <image class="feature-icon diary" src="{{staticAssets['profile-menu/order-list.png']}}" mode="aspectFit"/>
         <text class="feature-name">宠物日记</text>
       </view>
       <view class="feature" data-key="health" bindtap="onTapFeature">
-        <view class="feature-icon health">💗</view>
+        <image class="feature-icon health" src="{{staticAssets['profile-menu/favorite-heart.png']}}" mode="aspectFit"/>
         <text class="feature-name">健康管理</text>
       </view>
       <view class="feature" data-key="album" bindtap="onTapFeature">
-        <view class="feature-icon album">🖼️</view>
+        <image class="feature-icon album" src="{{staticAssets['profile-menu/album.png']}}" mode="aspectFit"/>
         <text class="feature-name">成长相册</text>
       </view>
+    </view></view>
+    <view class="tools-panel service-panel"><view class="panel-heading">宠爱生活<text>给TA多一点偏爱</text></view><view class="feature-grid">
       <view class="feature" bindtap="goGrooming">
-        <view class="feature-icon grooming">✂️</view>
+        <image class="feature-icon grooming" src="{{staticAssets['member/benefit-beauty.png']}}" mode="aspectFit"/>
         <text class="feature-name">美容服务</text>
       </view>
       <view class="feature" bindtap="goShop">
-        <view class="feature-icon shop">🛍️</view>
+        <image class="feature-icon shop" src="{{staticAssets['profile-menu/shopping-cart.png']}}" mode="aspectFit"/>
         <text class="feature-name">宠物商城</text>
       </view>
       <view class="feature" bindtap="goPackages">
-        <view class="feature-icon package">🎟️</view>
+        <image class="feature-icon package" src="{{staticAssets['profile-menu/custom-gift.png']}}" mode="aspectFit"/>
         <text class="feature-name">宠物套餐</text>
       </view>
       <view class="feature" bindtap="goStores">
-        <view class="feature-icon store">🏠</view>
+        <image class="feature-icon store" src="{{staticAssets['profile-menu/map-location.png']}}" mode="aspectFit"/>
         <text class="feature-name">附近门店</text>
       </view>
     </view>
 
+    </view>
     <view class="section-head">
-      <view class="section-title">今日动态</view>
+      <view class="section-title">陪伴时光</view>
       <view class="section-more" bindtap="goAlbum">
         <text>更多</text>
         <text class="more-arrow">›</text>
@@ -147,6 +151,7 @@
       <view class="empty-diary-desc">拍张照片，记下TA今天的小情绪吧</view>
       <view class="empty-diary-btn">去记录</view>
     </view>
+    <view class="home-footer">每一份陪伴，都是给TA的礼物</view>
   </view>
 
   <view wx:if="{{petPickerVisible}}" class="sheet-mask" bindtap="closePetPicker"></view>

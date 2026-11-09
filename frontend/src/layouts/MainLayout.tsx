@@ -71,6 +71,17 @@ const MainLayout: React.FC = () => {
       path: '/admin/users',
     },
     {
+      key: 'records',
+      label: '业务管理',
+      children: [
+        { key: 'admin-pets', label: '宠物管理', path: '/admin/pets' },
+        { key: 'admin-diaries', label: '日记管理', path: '/admin/diaries' },
+        { key: 'admin-community', label: '社区内容', path: '/admin/community' },
+        { key: 'admin-health', label: '健康档案', path: '/admin/health' },
+        { key: 'admin-reports', label: '举报处理', path: '/admin/reports' },
+      ],
+    },
+    {
       key: 'commerce',
       icon: <ShopOutlined />,
       label: '商业服务',

@@ -238,7 +238,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Transactional
     public void likePost(Long userId, Long postId) {
         Post post = postMapper.selectById(postId);
-        if (post == null) {
+        if (post == null || !Integer.valueOf(1).equals(post.getStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
@@ -272,7 +272,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Transactional
     public void unlikePost(Long userId, Long postId) {
         Post post = postMapper.selectById(postId);
-        if (post == null) {
+        if (post == null || !Integer.valueOf(1).equals(post.getStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
@@ -299,7 +299,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Transactional
     public Long createComment(Long userId, Long postId, CommentRequest commentRequest) {
         Post post = postMapper.selectById(postId);
-        if (post == null) {
+        if (post == null || !Integer.valueOf(1).equals(post.getStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
@@ -329,7 +329,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public List<CommentResponse> getComments(Long postId) {
         Post post = postMapper.selectById(postId);
-        if (post == null) {
+        if (post == null || !Integer.valueOf(1).equals(post.getStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
@@ -342,7 +342,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public PageResult<CommentResponse> getCommentPage(Long postId, long pageNum, long pageSize) {
         Post post = postMapper.selectById(postId);
-        if (post == null) {
+        if (post == null || !Integer.valueOf(1).equals(post.getStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 

@@ -11,11 +11,7 @@
       />
       <view class="hero-info">
         <view class="hero-name">{{currentPet.petName}}</view>
-        <view class="hero-sub">健康管理 · 记录每一天的变化</view>
-      </view>
-      <view class="hero-weight">
-        <view class="hero-weight-value">{{currentWeight}}<text class="hero-weight-unit">kg</text></view>
-        <view class="hero-weight-label">当前体重</view>
+        <view class="hero-sub">用心记录，陪伴每一步</view>
       </view>
     </view>
 
@@ -40,33 +36,19 @@
 
   <view class="content">
     <block wx:if="{{activeTab === 'weight'}}">
-      <view class="summary-card">
-        <view class="summary-head">
-          <view>
-            <view class="summary-label">体重趋势</view>
-            <view class="summary-value">{{currentWeight}}<text class="summary-unit">kg</text></view>
-          </view>
-          <view class="add-btn" data-type="weight" bindtap="openSheet">+ 记录</view>
-        </view>
-
-        <view wx:if="{{weightBars.length}}" class="chart">
-          <view
-            wx:for="{{weightBars}}"
-            wx:key="index"
-            class="bar-col"
-          >
-            <text class="bar-value">{{item.value}}</text>
-            <view class="bar-track">
-              <view class="bar" style="height: {{item.height}}%"></view>
-            </view>
-            <text class="bar-label">{{item.label}}</text>
-          </view>
-        </view>
-        <view wx:else class="chart-empty">记录体重后，这里会出现趋势</view>
+      <view class="summary-card weight-summary">
+        <image class="summary-icon" src="{{staticAssets['health/health-weight-scale.png']}}" mode="aspectFit"/>
+        <view class="summary-label">最新体重</view>
+        <view class="summary-value">{{currentWeight}}<text class="summary-unit">kg</text></view>
+        <view class="summary-bottom"><text>{{weightRecords.length ? weightRecords[0].dateText : '还没有体重记录'}}</text><view class="add-btn" data-type="weight" bindtap="openSheet">+ 记录体重</view></view>
       </view>
-
+      <view wx:if="{{weightBars.length > 1}}" class="summary-card trend-card">
+        <view class="summary-label">体重变化</view><view class="trend-caption">最近{{weightBars.length}}个记录日 · 按实际日期展示</view>
+        <canvas class="trend-image" canvas-id="weightTrend" style="width: {{chartWidth}}px; height: 210px;"/>
+      </view>
+      <view wx:elif="{{!loading}}" class="first-record"><view>{{weightBars.length ? '第一次记录，成长有了起点' : '从第一次称重，开始记录成长'}}</view><text>{{weightBars.length ? '再记录一个日期，即可查看体重变化' : '添加体重记录，留存TA的成长变化'}}</text></view>
       <view class="section-head">
-        <view class="section-title">历史记录</view>
+        <view class="section-title">体重记录</view>
       </view>
 
       <view class="record-list">
@@ -96,17 +78,18 @@
       <view class="summary-card">
         <view class="summary-head">
           <view>
-            <view class="summary-label">今日喂食</view>
+            <image class="summary-icon" src="{{staticAssets['health/health-feeding-bowl.png']}}" mode="aspectFit"/><view class="summary-label">今日喂食</view>
             <view class="summary-value">{{todayFeedingCount}}<text class="summary-unit">次</text></view>
           </view>
-          <view class="add-btn" data-type="feeding" bindtap="openSheet">+ 添加</view>
+          <view class="add-btn" data-type="feeding" bindtap="openSheet">+ 记录喂食</view>
         </view>
-        <view class="summary-tip">记录早饭、晚饭，帮TA养成规律饮食</view>
+        <view class="summary-tip">{{today}} · 记录每一餐，陪伴每一天</view>
       </view>
 
+      <view class="section-head"><view class="section-title">今日记录</view></view>
       <view class="record-list">
         <view wx:for="{{feedingRecords}}" wx:key="id" class="feeding-card">
-          <view class="feeding-icon">🍽️</view>
+          <view class="feeding-dot"></view>
           <view class="feeding-main">
             <view class="record-title">{{item.mealLabel}} · {{item.timeText}}</view>
             <view class="record-sub">
@@ -131,9 +114,9 @@
     </block>
 
     <block wx:elif="{{activeTab === 'vaccine'}}">
+      <view class="summary-card archive-summary"><image class="summary-icon" src="{{staticAssets['health/health-vaccine-vial.png']}}" mode="aspectFit"/><view class="summary-label">疫苗档案</view><view class="archive-desc">留存每一次接种记录</view><view class="add-btn" data-type="vaccine" bindtap="openSheet">+ 添加记录</view></view>
       <view class="section-head">
         <view class="section-title">疫苗记录</view>
-        <view class="add-link" data-type="vaccine" bindtap="openSheet">+ 添加</view>
       </view>
 
       <view class="record-list">
@@ -163,9 +146,9 @@
     </block>
 
     <block wx:else>
+      <view class="summary-card archive-summary"><image class="summary-icon" src="{{staticAssets['health/health-medical-kit.png']}}" mode="aspectFit"/><view class="summary-label">体检档案</view><view class="archive-desc">把检查发现和医生建议好好保存</view><view class="add-btn" data-type="checkup" bindtap="openSheet">+ 添加体检</view></view>
       <view class="section-head">
         <view class="section-title">体检记录</view>
-        <view class="add-link" data-type="checkup" bindtap="openSheet">+ 添加</view>
       </view>
 
       <view class="record-list">
@@ -180,7 +163,7 @@
             >删除</view>
           </view>
           <view wx:if="{{item.vetClinic}}" class="record-sub">医院：{{item.vetClinic}}</view>
-          <view wx:if="{{item.findings}}" class="record-notes">发现：{{item.findings}}</view>
+          <view wx:if="{{item.findings}}" class="record-notes">体检发现：{{item.findings}}</view>
           <view wx:if="{{item.recommendations}}" class="record-notes">建议：{{item.recommendations}}</view>
         </view>
         <view wx:if="{{!loading && !checkupRecords.length}}" class="empty">

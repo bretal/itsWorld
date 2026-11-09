@@ -278,4 +278,4 @@ Page(withStaticImages({
       url: `/pages/diary/detail?id=${this.data.todayDiary.id}`,
     });
   },
-}, ["pet-placeholder.png"]));
+}, ["pet-placeholder.png", "member/paw.png", "member/task-photo.png", "profile-menu/order-list.png", "profile-menu/favorite-heart.png", "profile-menu/album.png", "member/benefit-beauty.png", "profile-menu/shopping-cart.png", "profile-menu/custom-gift.png", "profile-menu/map-location.png"]));

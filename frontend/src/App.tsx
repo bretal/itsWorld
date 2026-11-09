@@ -37,6 +37,9 @@ import MemberPointsPage from '@/pages/member/MemberPointsPage';
 import MemberWalletPage from '@/pages/member/MemberWalletPage';
 import MemberCouponsPage from '@/pages/member/MemberCouponsPage';
 
+import DataManagementPage from '@/pages/admin/data/DataManagementPage';
+import ReportManagementPage from '@/pages/admin/data/ReportManagementPage';
+
 // Admin Pages
 import AdminRoute from '@/components/AdminRoute';
 import UserManagementPage from '@/pages/admin/users/UserManagementPage';
@@ -113,6 +116,11 @@ const App: React.FC = () => {
           <Route path="/member/wallet" element={<MemberWalletPage />} />
           <Route path="/member/coupons" element={<MemberCouponsPage />} />
 
+          <Route path="/admin/pets" element={<AdminRoute><DataManagementPage section="pets" /></AdminRoute>} />
+          <Route path="/admin/diaries" element={<AdminRoute><DataManagementPage section="diaries" /></AdminRoute>} />
+          <Route path="/admin/community" element={<AdminRoute><DataManagementPage section="community" /></AdminRoute>} />
+          <Route path="/admin/health" element={<AdminRoute><DataManagementPage section="health" /></AdminRoute>} />
+          <Route path="/admin/reports" element={<AdminRoute><ReportManagementPage /></AdminRoute>} />
           {/* 运营管理（仅管理员） */}
           <Route
             path="/admin/users"

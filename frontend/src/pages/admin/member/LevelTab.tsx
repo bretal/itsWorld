@@ -18,7 +18,6 @@ import { formatDiscount } from '@/utils/format';
 import type { MemberLevel, MemberLevelRequest } from '@/types/member';
 
 const BENEFIT_TYPES = [
-  { label: '积分', value: 'POINTS' },
   { label: '折扣', value: 'DISCOUNT' },
   { label: '礼包', value: 'GIFT' },
   { label: '服务', value: 'SERVICE' },
