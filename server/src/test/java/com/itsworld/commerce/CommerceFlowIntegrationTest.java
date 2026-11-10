@@ -182,6 +182,52 @@ class CommerceFlowIntegrationTest {
     }
 
     @Test
+    void addressOwnershipAndDefaultSwitchAreEnforced() {
+        long owner = registerUser("addressowner");
+        long other = registerUser("addressother");
+        UserShippingAddress first = addressService.createAddress(owner,
+                AddressSaveRequest.builder()
+                        .recipientName("主人")
+                        .mobile("13800000001")
+                        .province("浙江省")
+                        .city("杭州市")
+                        .district("西湖区")
+                        .addressDetail("文三路 1 号")
+                        .build());
+        assertEquals(1, first.getIsDefault());
+
+        UserShippingAddress second = addressService.createAddress(owner,
+                AddressSaveRequest.builder()
+                        .recipientName("主人")
+                        .mobile("13800000002")
+                        .province("浙江省")
+                        .city("杭州市")
+                        .district("西湖区")
+                        .addressDetail("文三路 2 号")
+                        .isDefault(1)
+                        .build());
+        assertEquals(1, second.getIsDefault());
+        assertEquals(0, addressService.getOwnedAddress(owner, first.getId()).getIsDefault());
+
+        addressService.setDefault(owner, first.getId());
+        assertEquals(1, addressService.getOwnedAddress(owner, first.getId()).getIsDefault());
+        assertEquals(0, addressService.getOwnedAddress(owner, second.getId()).getIsDefault());
+
+        AddressSaveRequest update = AddressSaveRequest.builder()
+                .recipientName("他人")
+                .mobile("13800000003")
+                .province("浙江省")
+                .city("杭州市")
+                .district("西湖区")
+                .addressDetail("文三路 3 号")
+                .build();
+        assertThrows(BusinessException.class, () -> addressService.getOwnedAddress(other, first.getId()));
+        assertThrows(BusinessException.class, () -> addressService.updateAddress(other, first.getId(), update));
+        assertThrows(BusinessException.class, () -> addressService.setDefault(other, first.getId()));
+        assertThrows(BusinessException.class, () -> addressService.deleteAddress(other, first.getId()));
+    }
+
+    @Test
     void productOrderShipReviewAndRefundFlow() {
         long userId = registerUser("prod");
         long otherUserId = registerUser("prodother");
