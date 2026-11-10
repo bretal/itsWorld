@@ -2,6 +2,7 @@ package com.itsworld.member.service;
 
 import com.itsworld.member.dto.MemberCenterRequests.*;
 import com.itsworld.member.mapper.MemberAccountMapper;
+import com.itsworld.member.mapper.MemberCenterMapper;
 import com.itsworld.member.entity.MemberAccount;
 import com.itsworld.commerce.order.entity.*;
 import com.itsworld.commerce.order.mapper.*;
@@ -10,7 +11,6 @@ import com.itsworld.common.exception.BusinessException;
 import com.itsworld.common.result.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -20,24 +20,24 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class MemberCenterService {
-    private final JdbcTemplate jdbc;
+    private final MemberCenterMapper memberCenterMapper;
     private final MemberService members;
     private final MemberAccountMapper accounts;
     private final CommerceOrderMapper orders;
     private final CommerceOrderItemMapper items;
 
     public List<Map<String,Object>> plans(boolean admin) {
-        return jdbc.queryForList("SELECT * FROM member_subscription_plan" + (admin ? "" : " WHERE status=1") + " ORDER BY id");
+        return memberCenterMapper.selectPlans(!admin);
     }
 
     @Transactional
     public void savePlan(Long id, Plan p) {
-        Long count=jdbc.queryForObject("SELECT COUNT(*) FROM member_level WHERE id=? AND status=1",Long.class,p.levelId());
-        require(count != null && count == 1,"权益档位不存在或已停用");
+        long count=memberCenterMapper.countActiveLevel(p.levelId());
+        require(count == 1,"权益档位不存在或已停用");
         if(id == null) {
-            jdbc.update("INSERT INTO member_subscription_plan(name,level_id,price,duration_days,status) VALUES(?,?,?,?,?)",p.name(),p.levelId(),p.price(),p.durationDays(),p.status());
+            memberCenterMapper.insertPlan(p.name(),p.levelId(),p.price(),p.durationDays(),p.status());
         } else {
-            require(jdbc.update("UPDATE member_subscription_plan SET name=?,level_id=?,price=?,duration_days=?,status=? WHERE id=?",p.name(),p.levelId(),p.price(),p.durationDays(),p.status(),id)==1,"方案不存在");
+            require(memberCenterMapper.updatePlan(id,p.name(),p.levelId(),p.price(),p.durationDays(),p.status())==1,"方案不存在");
         }
     }
 
@@ -48,11 +48,11 @@ public class MemberCenterService {
         String key="MEMBER:"+request.requestKey();
         CommerceOrder previous=orders.selectByUserAndIdempotency(userId,key);
         if(previous != null) {
-            Long target=jdbc.queryForObject("SELECT target_id FROM commerce_order_item WHERE order_id=?",Long.class,previous.getId());
+            Long target=memberCenterMapper.selectOrderItemTargetId(previous.getId());
             require(Objects.equals(target,request.planId()),"幂等键已用于其他会员方案");
             return previous.getOrderNo();
         }
-        List<Map<String,Object>> rows=jdbc.queryForList("SELECT p.* FROM member_subscription_plan p JOIN member_level l ON l.id=p.level_id WHERE p.id=? AND p.status=1 AND l.status=1",request.planId());
+        List<Map<String,Object>> rows=memberCenterMapper.selectPurchasablePlan(request.planId());
         require(!rows.isEmpty(),"会员方案不可购买");
         Map<String,Object> plan=rows.get(0);
         long level=((Number)plan.get("level_id")).longValue();
@@ -80,34 +80,34 @@ public class MemberCenterService {
         CommerceOrder order=event.getOrder();
         if(!"MEMBERSHIP".equals(order.getOrderType()) || !"PAID".equals(event.getAction())) { return; }
         MemberAccount account=accounts.selectByUserIdForUpdate(order.getUserId());
-        Long granted=jdbc.queryForObject("SELECT COUNT(*) FROM member_subscription_grant WHERE order_id=?",Long.class,order.getId());
-        if(granted != null && granted > 0) { return; }
-        Map<String,Object> spec=jdbc.queryForMap("SELECT JSON_EXTRACT(spec_snapshot,'$.levelId') AS levelId, JSON_EXTRACT(spec_snapshot,'$.durationDays') AS days FROM commerce_order_item WHERE order_id=?",order.getId());
+        long granted=memberCenterMapper.countGrantByOrder(order.getId());
+        if(granted > 0) { return; }
+        Map<String,Object> spec=memberCenterMapper.selectGrantSpec(order.getId());
         long level=Long.parseLong(spec.get("levelId").toString());
         int days=Integer.parseInt(spec.get("days").toString());
         require(!account.isActive() || Objects.equals(account.getLevelId(),level),"会员档位发生变化，请取消订单后重新购买");
         LocalDateTime now=LocalDateTime.now();
         LocalDateTime start=account.isActive() ? account.getMemberExpiresAt() : now;
         LocalDateTime end=start.plusDays(days);
-        jdbc.update("INSERT INTO member_subscription_grant(order_id,user_id,level_id,starts_at,expires_at) VALUES(?,?,?,?,?)",order.getId(),order.getUserId(),level,start,end);
+        memberCenterMapper.insertGrant(order.getId(),order.getUserId(),level,start,end);
         account.setLevelId(level);
         account.setMemberExpiresAt(end);
         account.setUpdatedAt(now);
         accounts.updateById(account);
         orders.completeIfPaid(order.getId());
-        jdbc.update("UPDATE commerce_order_item SET fulfilled_qty=1 WHERE order_id=?",order.getId());
+        memberCenterMapper.markOrderItemFulfilled(order.getId());
     }
 
     public List<Map<String,Object>> rewards(boolean admin) {
-        return jdbc.queryForList("SELECT * FROM member_reward_product"+(admin ? "" : " WHERE status=1")+" ORDER BY id");
+        return memberCenterMapper.selectRewards(!admin);
     }
 
     @Transactional
     public void saveReward(Long id, Reward p) {
         if(id == null) {
-            jdbc.update("INSERT INTO member_reward_product(name,growth_cost,stock,status) VALUES(?,?,?,?)",p.name(),p.growthCost(),p.stock(),p.status());
+            memberCenterMapper.insertReward(p.name(),p.growthCost(),p.stock(),p.status());
         } else {
-            require(jdbc.update("UPDATE member_reward_product SET name=?,growth_cost=?,stock=?,status=? WHERE id=?",p.name(),p.growthCost(),p.stock(),p.status(),id)==1,"礼品不存在");
+            require(memberCenterMapper.updateReward(id,p.name(),p.growthCost(),p.stock(),p.status())==1,"礼品不存在");
         }
     }
 
@@ -115,34 +115,33 @@ public class MemberCenterService {
     public String redeem(Long userId, Redeem request) {
         members.getOrCreateAccount(userId);
         accounts.selectByUserIdForUpdate(userId);
-        List<Map<String,Object>> existing=jdbc.queryForList("SELECT * FROM member_redemption WHERE user_id=? AND request_key=?",userId,request.requestKey());
+        List<Map<String,Object>> existing=memberCenterMapper.selectRedemptionByRequest(userId,request.requestKey());
         if(!existing.isEmpty()) {
             require(((Number)existing.get(0).get("product_id")).longValue()==request.productId(),"幂等键已用于其他礼品");
             return (String)existing.get(0).get("redemption_no");
         }
-        List<Map<String,Object>> products=jdbc.queryForList("SELECT * FROM member_reward_product WHERE id=? AND status=1 FOR UPDATE",request.productId());
+        List<Map<String,Object>> products=memberCenterMapper.selectRewardForUpdate(request.productId());
         require(!products.isEmpty(),"礼品不可兑换");
         Map<String,Object> p=products.get(0);
         int cost=((Number)p.get("growth_cost")).intValue();
-        require(jdbc.update("UPDATE member_reward_product SET stock=stock-1 WHERE id=? AND stock>0",request.productId())==1,"礼品库存不足");
+        require(memberCenterMapper.decrementRewardStock(request.productId())==1,"礼品库存不足");
         String no="REW"+UUID.randomUUID().toString().replace("-","");
         members.award(userId,-cost,"REDEMPTION",no,"兑换礼品："+p.get("name"));
-        jdbc.update("INSERT INTO member_redemption(redemption_no,user_id,product_id,name_snapshot,growth_cost,request_key) VALUES(?,?,?,?,?,?)",no,userId,request.productId(),p.get("name"),cost,request.requestKey());
+        memberCenterMapper.insertRedemption(no,userId,request.productId(),(String)p.get("name"),cost,request.requestKey());
         return no;
     }
 
     public List<Map<String,Object>> redemptions(Long userId,int page,int size) {
         int limit=Math.min(Math.max(size,1),100);
-        return jdbc.queryForList("SELECT * FROM member_redemption"+(userId == null ? "" : " WHERE user_id=?")+" ORDER BY id DESC LIMIT ? OFFSET ?",
-                userId == null ? new Object[]{limit,(long)(Math.max(page,1)-1)*limit} : new Object[]{userId,limit,(long)(Math.max(page,1)-1)*limit});
+        return memberCenterMapper.selectRedemptions(userId,limit,(long)(Math.max(page,1)-1)*limit);
     }
 
     @Transactional
     public void fulfill(String no,Long adminId) {
-        int changed=jdbc.update("UPDATE member_redemption SET status='FULFILLED',fulfilled_by=?,fulfilled_at=NOW() WHERE redemption_no=? AND status='PENDING'",adminId,no);
+        int changed=memberCenterMapper.fulfillRedemption(no,adminId);
         if(changed==0) {
-            Long count=jdbc.queryForObject("SELECT COUNT(*) FROM member_redemption WHERE redemption_no=? AND status='FULFILLED'",Long.class,no);
-            require(count != null && count==1,"兑换记录不存在或状态不可核销");
+            long count=memberCenterMapper.countFulfilled(no);
+            require(count==1,"兑换记录不存在或状态不可核销");
         }
     }
 
