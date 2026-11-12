@@ -11,8 +11,8 @@ Page(withStaticImages({
     id: 0,
     isEdit: false,
     petName: '',
-    petTypes: ['狗狗', '猫咪', '其他'],
-    petTypeValues: ['dog', 'cat', 'other'],
+    petTypes: ['请选择宠物类型', '狗狗', '猫咪', '其他'],
+    petTypeValues: ['', 'dog', 'cat', 'other'],
     petTypeIndex: 0,
     genders: ['未知', '公', '母'],
     genderValues: [0, 1, 2],
@@ -141,6 +141,11 @@ Page(withStaticImages({
     }
     if (!petName.trim()) {
       wx.showToast({ title: '请填写宠物名字', icon: 'none' });
+      return;
+    }
+
+    if (!this.data.petTypeValues[petTypeIndex]) {
+      wx.showToast({ title: '请选择宠物类型', icon: 'none' });
       return;
     }
 
