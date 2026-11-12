@@ -47,6 +47,7 @@ import MemberAdminPage from '@/pages/admin/member/MemberAdminPage';
 import WalletAdminPage from '@/pages/admin/wallet/WalletAdminPage';
 import StoreManagementPage from '@/pages/admin/commerce/StoreManagementPage';
 import GroomingManagementPage from '@/pages/admin/commerce/GroomingManagementPage';
+import AssistantInstructionsPage from '@/pages/admin/AssistantInstructionsPage';
 import ProductManagementPage from '@/pages/admin/commerce/ProductManagementPage';
 import InventoryManagementPage from '@/pages/admin/commerce/InventoryManagementPage';
 import OrderManagementPage from '@/pages/admin/commerce/OrderManagementPage';
@@ -146,6 +147,7 @@ const App: React.FC = () => {
               </AdminRoute>
             }
           />
+          <Route path="/admin/assistant/instructions" element={<AdminRoute><AssistantInstructionsPage /></AdminRoute>} />
           <Route
             path="/admin/commerce/shop"
             element={

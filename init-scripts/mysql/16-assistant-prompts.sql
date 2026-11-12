@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS assistant_prompt_config (
+    id TINYINT NOT NULL PRIMARY KEY,
+    prompts JSON NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

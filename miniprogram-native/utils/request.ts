@@ -14,6 +14,7 @@ interface RequestOptions {
   data?: Record<string, any>;
   showLoading?: boolean;
   auth?: boolean;
+  timeout?: number;
 }
 
 let redirectingToLogin = false;
@@ -64,7 +65,7 @@ export function request<T>(options: RequestOptions): Promise<T> {
       url: `${ENV.baseUrl}${options.url}`,
       method: options.method || 'GET',
       data: sanitizeData(options.data),
-      timeout: 15000,
+      timeout: options.timeout ?? 15000,
       header: {
         'Content-Type': 'application/json',
         ...(token && options.auth !== false

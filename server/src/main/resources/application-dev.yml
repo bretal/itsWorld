@@ -40,8 +40,9 @@ ai:
     api-key: ${AI_DASHSCOPE_KEY:}
 
   deepseek:
-    enabled: false
-    api-key: ${AI_DEEPSEEK_KEY:}
+    enabled: ${DEEPSEEK_ENABLED:true}
+    api-key: ${DEEPSEEK_API_KEY:${AI_DEEPSEEK_KEY:}}
+    model: ${DEEPSEEK_MODEL:deepseek-flash}
 
   vision:
     enabled: false

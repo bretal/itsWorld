@@ -1,5 +1,6 @@
+import { ENV } from '../../config/env';
 import { withStaticImages } from '../../utils/static-images';
-import { getUser, requireLogin } from '../../utils/auth';
+import { getToken, getUser, requireLogin } from '../../utils/auth';
 import { listPets } from '../../services/pet';
 import type { Pet } from '../../services/pet';
 import { listDiariesPage } from '../../services/diary';
@@ -18,10 +19,19 @@ interface HomePet extends Pet {
   avatarSrc?: string;
 }
 
+const PROMPT_DISMISSED_KEY = 'shopAssistantPromptDismissed';
+const defaultPrompts = [
+  '今天毛孩子状态怎么样？', '看看有没有毛孩子爱吃的？',
+  '今天给毛孩子梳毛了吗？', '最近给毛孩子拍新照片了吗？', '想给毛孩子安排一次护理吗？',
+];
+
 let loadSequence = 0;
 
 Page(withStaticImages({
   data: {
+    assistantPrompt: defaultPrompts[0],
+    assistantPromptVisible: false,
+    moodLabels: { happy: '开心', calm: '平静', tired: '疲惫', sad: '难过' } as Record<string, string>,
     statusBarHeight: 20,
     user: null as any,
     pets: [] as HomePet[],
@@ -33,6 +43,11 @@ Page(withStaticImages({
     loading: true,
     petPickerVisible: false,
   },
+
+  _promptTimer: undefined as ReturnType<typeof setInterval> | undefined,
+  _prompts: defaultPrompts,
+  _promptIndex: 0,
+  _promptLoad: 0,
 
   onLoad() {
     const windowInfo = wx.getWindowInfo
@@ -53,7 +68,48 @@ Page(withStaticImages({
       return;
     }
     this.loadData();
+    this.startPromptRotation();
   },
+
+  startPromptRotation() {
+    this.stopPromptRotation();
+    const dismissed = wx.getStorageSync(PROMPT_DISMISSED_KEY) === true;
+    this.setData({ assistantPromptVisible: !dismissed });
+    if (dismissed) return;
+    const load = this._promptLoad;
+    this._promptTimer = setInterval(() => {
+      this._promptIndex = (this._promptIndex + 1) % this._prompts.length;
+      this.setData({ assistantPrompt: this._prompts[this._promptIndex] });
+    }, 5500);
+    wx.request({
+      url: ENV.baseUrl + '/assistant/prompts',
+      header: { Authorization: 'Bearer ' + getToken() },
+      success: (response: any) => {
+        const prompts = response.data?.data;
+        if (load !== this._promptLoad || response.data?.code !== 0
+            || !Array.isArray(prompts) || !prompts.length || !prompts.every(text => typeof text === 'string' && text.trim())) return;
+        this._prompts = prompts;
+        this._promptIndex = 0;
+        this.setData({ assistantPrompt: prompts[0] });
+      },
+    });
+  },
+  dismissAssistantPrompt() {
+    this.stopPromptRotation();
+    this.setData({ assistantPromptVisible: false });
+    wx.setStorageSync(PROMPT_DISMISSED_KEY, true);
+  },
+  onHide() { this.stopPromptRotation(); },
+  stopPromptRotation() {
+    if (this._promptTimer !== undefined) clearInterval(this._promptTimer);
+    this._promptTimer = undefined;
+    this._promptLoad++;
+  },
+  onUnload() { this.stopPromptRotation(); },
+  onAssistantNavigationFail() {
+    wx.showToast({ title: '助手页面打开失败，请重新编译小程序', icon: 'none' });
+  },
+
 
   onPullDownRefresh() {
     this.loadData().finally(() => wx.stopPullDownRefresh());

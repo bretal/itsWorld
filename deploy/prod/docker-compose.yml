@@ -113,6 +113,9 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:?required}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?required}
       JWT_SECRET: ${JWT_SECRET:?required}
+      DEEPSEEK_ENABLED: ${DEEPSEEK_ENABLED:-false}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}
       LOGGING_LEVEL_COM_ITSWORLD: INFO
       TZ: Asia/Shanghai
     extra_hosts:

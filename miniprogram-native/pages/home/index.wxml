@@ -37,12 +37,7 @@
       <view class="pet-info">
         <view class="pet-name">{{currentPet.petName}}</view>
         <view class="pet-meta">{{currentPet.metaText}}</view>
-        <view class="mood-bubble">
-          <text class="mood-emoji">☺</text>
-          <text class="mood-text ellipsis">
-            {{todayDiary && todayDiary.greeting ? todayDiary.greeting : '今天也要好好陪伴TA哦'}}
-          </text>
-        </view>
+        <text wx:if="{{todayDiary && todayDiary.greeting}}" class="mood-bubble">☺ {{moodLabels[todayDiary.greeting] || todayDiary.greeting}}</text>
       </view>
     </view>
 
@@ -185,4 +180,15 @@
     <view class="sheet-manage" bindtap="goManagePets">管理宠物</view>
     <view class="sheet-cancel" bindtap="closePetPicker">取消</view>
   </view>
+</view>
+
+<view class="assistant-float">
+  <view wx:if="{{assistantPromptVisible}}" class="assistant-speech">
+    <navigator class="assistant-speech-text" url="/pages/assistant/chat" open-type="navigate" bindfail="onAssistantNavigationFail">{{assistantPrompt}}</navigator>
+    <button class="assistant-speech-close" bindtap="dismissAssistantPrompt" aria-label="关闭气泡提示">×</button>
+  </view>
+  <navigator class="assistant-float-link" url="/pages/assistant/chat" open-type="navigate" bindfail="onAssistantNavigationFail" aria-label="打开宠物助手">
+    <image class="assistant-float-icon" src="/assets/shop/silver-maine-coon-ear-flick-wink.gif" mode="aspectFit" />
+    <text class="assistant-float-label">宠物助手</text>
+  </navigator>
 </view>

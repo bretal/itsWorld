@@ -39,7 +39,8 @@
     "pages/commerce/after-sale/list",
     "pages/commerce/after-sale/detail",
     "pages/commerce/review/index",
-    "pages/member/index"
+    "pages/member/index",
+    "pages/assistant/chat"
   ],
   "window": {
     "backgroundTextStyle": "dark",

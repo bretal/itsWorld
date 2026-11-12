@@ -4,7 +4,8 @@
   "private": true,
   "description": "它的世界 - 微信原生小程序",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:assistant": "tsc -p tsconfig.json --outDir ../server/target/miniprogram-contract && node --test scripts/assistant-contract.test.cjs"
   },
   "devDependencies": {
     "typescript": "~7.0.2"

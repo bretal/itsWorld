@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "宠物助手",
+  "backgroundColor": "#f8f1fa",
+  "usingComponents": {
+    "product-detail": "/components/product-detail/index"
+  },
+  "navigationStyle": "custom"
+}

@@ -1,0 +1,68 @@
+<view class="chat">
+  <view class="assistant-nav" style="padding-top: {{statusBarHeight}}px">
+    <view class="assistant-nav-row" style="height: {{navHeight}}px">
+      <view class="assistant-nav-back" role="button" bindtap="goBack" aria-label="返回"><view class="assistant-nav-arrow"/></view>
+      <text class="assistant-nav-title">宠物助手</text>
+    </view>
+  </view>
+  <picker class="assistant-pet-picker" range="{{petChoices}}" range-key="label" value="{{petChoiceIndex}}"
+    disabled="{{busy || loading}}" bindchange="choosePet">
+    <view class="assistant-pet-picker-content">
+      <text>咨询对象 · {{petChoices[petChoiceIndex].label}}</text>
+      <view class="assistant-pet-picker-arrow"/>
+    </view>
+  </picker>
+  <view class="ambient cloud-one"/><view class="ambient cloud-two"/>
+  <view wx:if="{{turns.length || sessions.length}}" class="session-bar">
+    <button size="mini" disabled="{{busy || loading}}" bindtap="newSession">＋ 新对话</button>
+    <scroll-view scroll-x class="sessions"><text wx:for="{{sessions}}" wx:key="id" class="session {{sessionId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="chooseSession">{{item.title}}</text></scroll-view>
+  </view>
+  <scroll-view class="messages" scroll-y="{{!detailId}}" scroll-into-view="{{scrollTarget}}" scroll-with-animation="{{!loading}}">
+    <view wx:if="{{!turns.length}}" class="welcome">
+      <view class="hero">
+        <view class="hero-glow"/>
+        <image wx:if="{{artwork.hero}}" class="hero-cats" src="{{artwork.hero}}" mode="aspectFit" data-name="hero" binderror="artworkError"/>
+      </view>
+    </view>
+    <view wx:if="{{greeting}}" class="message-row message-greeting"><view class="message-bubble message-assistant"><text selectable>{{greeting}}</text></view></view>
+    <button wx:if="{{hasMore}}" class="history-button" size="mini" disabled="{{busy || loading}}" bindtap="older">加载更早消息</button>
+    <view wx:for="{{turns}}" wx:key="requestId" wx:for-item="turn" id="turn-{{turn.requestId}}" class="turn">
+      <view class="message-row message-row-user"><view class="message-bubble message-user"><text selectable>{{turn.question}}</text></view></view>
+      <view wx:if="{{turn.status === 'SUCCEEDED'}}" class="message-row"><view class="message-bubble message-assistant"><text selectable>{{turn.content}}</text></view></view>
+      <view wx:else class="status"><text>{{busy ? '助手正在查询 / 回复…' : (turn.status === 'FAILED' ? '回复失败，可重试' : '结果待确认')}}</text>
+        <button wx:if="{{!busy}}" size="mini" data-id="{{turn.requestId}}" bindtap="retry">{{turn.status === 'FAILED' ? '重试' : '查询状态'}}</button>
+      </view>
+      <view wx:for="{{turn.products}}" wx:key="id" wx:for-item="product" class="product" data-id="{{product.id}}" bindtap="product">
+        <image wx:if="{{product.coverSrc}}" src="{{product.coverSrc}}" mode="aspectFill" data-id="{{product.id}}" binderror="imageError"/><view wx:else class="placeholder">好物</view>
+        <view class="product-info"><text class="product-name">{{product.name}}</text><text class="spec">{{product.specText}}</text><text class="price">¥{{product.priceText}}</text><text wx:if="{{product.memberPriceText}}" class="member">会员价 ¥{{product.memberPriceText}}</text></view>
+      </view>
+      <view wx:if="{{turn.products.length}}" class="notice">价格库存以商品详情为准 · 点击查看</view>
+    </view>
+    <view wx:if="{{loading}}" class="status">加载中…</view><button wx:if="{{loadError}}" bindtap="retryLoad">加载失败，点击重试</button>
+    <view id="bottom" class="bottom"/>
+  </scroll-view>
+  <view wx:if="{{errorText}}" class="error">{{errorText}}</view>
+  <view class="footer">
+    <view wx:if="{{!turns.length && !detailId}}" class="quick-questions" aria-label="快捷问题">
+      <view class="quick-question-track {{busy || loading ? 'is-paused' : ''}}">
+        <view wx:for="{{[0, 1]}}" wx:for-item="copy" wx:key="*this" class="quick-question-group">
+          <button wx:for="{{quickQuestions}}" wx:for-item="question" wx:key="*this" class="quick-question"
+            data-text="{{question}}" bindtap="quick" disabled="{{busy || loading}}">{{question}}</button>
+        </view>
+      </view>
+    </view>
+    <view class="composer"><textarea value="{{input}}" maxlength="2000" auto-height placeholder="点击输入你的问题…" placeholder-class="input-placeholder" disabled="{{busy || loading}}" bindinput="input" adjust-position cursor-spacing="24"/><button class="send-button" aria-label="发送问题" disabled="{{busy || loading || !input}}" bindtap="send"><view class="paper-plane"/></button></view>
+    <view class="ai-notice"><text>✦</text> 回答由AI生成，仅供参考 <text>✦</text></view>
+    <view class="privacy">消息及所选宠物的相关档案字段由 DeepSeek 处理，请勿填写隐私信息 · 健康建议不能替代兽医诊疗</view>
+  </view>
+  <view wx:if="{{detailId}}" class="recommendation-overlay">
+    <view class="recommendation-backdrop" bindtap="closeRecommendation"/>
+    <view class="recommendation-sheet">
+      <view class="sheet-heading">
+        <text>商品详情</text>
+        <button class="sheet-close" bindtap="closeRecommendation" aria-label="关闭详情">×</button>
+      </view>
+      <product-detail product-id="{{detailId}}" in-sheet="{{true}}"/>
+    </view>
+  </view>
+</view>

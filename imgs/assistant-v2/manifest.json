@@ -1,0 +1,72 @@
+[
+  {
+    "name": "bowl.png",
+    "objectKey": "miniapp-v1/assistant-v2/bowl.png",
+    "bucket": "itsworld-static",
+    "bytes": 29278,
+    "sha256": "1fbb6339c2d149ee00307aa7bba9f146de1ff587a37ed3003a8d5e926d2bb7b2"
+  },
+  {
+    "name": "bug.png",
+    "objectKey": "miniapp-v1/assistant-v2/bug.png",
+    "bucket": "itsworld-static",
+    "bytes": 29403,
+    "sha256": "c2c956164f6cd1235739a1d3c4bd6d345a9d2de920a66894f45410c61fa44fe6"
+  },
+  {
+    "name": "care.png",
+    "objectKey": "miniapp-v1/assistant-v2/care.png",
+    "bucket": "itsworld-static",
+    "bytes": 35066,
+    "sha256": "0836ae9a161e7e34ea566d6ca4d7dd148a358c1c2b7bb054f4ece29cbcda90f6"
+  },
+  {
+    "name": "comb.png",
+    "objectKey": "miniapp-v1/assistant-v2/comb.png",
+    "bucket": "itsworld-static",
+    "bytes": 30877,
+    "sha256": "9f7861cce18450be1c0e41453920c2e44df57d0d5de9c2e69ddf1fbfc4aedb58"
+  },
+  {
+    "name": "heart.png",
+    "objectKey": "miniapp-v1/assistant-v2/heart.png",
+    "bucket": "itsworld-static",
+    "bytes": 27575,
+    "sha256": "d7364d9f0796e7f3eff192450618771fbfcdebf7b020d57455d5fb81902ae325"
+  },
+  {
+    "name": "paw.png",
+    "objectKey": "miniapp-v1/assistant-v2/paw.png",
+    "bucket": "itsworld-static",
+    "bytes": 26882,
+    "sha256": "16a6eec57d9b31c0df566b45acef9866c26159bdc279d3828e778320f0e88ad0"
+  },
+  {
+    "name": "pill.png",
+    "objectKey": "miniapp-v1/assistant-v2/pill.png",
+    "bucket": "itsworld-static",
+    "bytes": 23275,
+    "sha256": "69b58bc41760c30ddf62127ec454226979a368285c99001190ffdd35c333d3c0"
+  },
+  {
+    "name": "shield.png",
+    "objectKey": "miniapp-v1/assistant-v2/shield.png",
+    "bucket": "itsworld-static",
+    "bytes": 31417,
+    "sha256": "a45dba6ca4cb50b99b847184fd95741f8952988f1da87195d1e5108de6d7e677"
+  },
+  {
+    "name": "shower.png",
+    "objectKey": "miniapp-v1/assistant-v2/shower.png",
+    "bucket": "itsworld-static",
+    "bytes": 28812,
+    "sha256": "fb38366b82e598cb4230d980077d373bf874984ab0771ab17e02b8d26e65c01c"
+  },
+  {
+    "name": "hero.webp",
+    "objectKey": "miniapp-v1/assistant-v2/hero.webp",
+    "bucket": "itsworld-static",
+    "bytes": 181112,
+    "sha256": "40e070c022a3a91f376adf5dcb4ba34e0e62885d9cc2b4f2975a76955f1c8f51"
+  }
+]

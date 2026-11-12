@@ -82,6 +82,11 @@ const MainLayout: React.FC = () => {
       ],
     },
     {
+      key: 'assistant-instructions',
+      label: 'AI 助手',
+      path: '/admin/assistant/instructions',
+    },
+    {
       key: 'commerce',
       icon: <ShopOutlined />,
       label: '商业服务',
