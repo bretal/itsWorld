@@ -1,5 +1,7 @@
 {
-  "navigationBarTitleText": "宠物商城",
+  "navigationBarTitleText": "零食商城",
+  "navigationBarBackgroundColor": "#fcf5ff",
+  "backgroundColor": "#fcf5ff",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark"
 }

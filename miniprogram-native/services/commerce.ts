@@ -182,7 +182,7 @@ export function listShopProducts(
   });
 }
 
-export function getShopProduct(id: number) {
+export function getShopProduct(id: number | string) {
   return request<ShopProductDetail>({ url: `/commerce/shop/products/${id}` });
 }
 

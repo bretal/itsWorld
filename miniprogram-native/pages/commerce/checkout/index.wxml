@@ -1,51 +1,9 @@
-<view wx:if="{{loading}}" class="tip">加载中...</view>
-<view wx:else class="page">
-  <view class="card address-card" bindtap="goAddressList">
-    <view wx:if="{{addresses.length}}">
-      <view class="address-name">{{addresses[addressIndex].recipientName}} {{addresses[addressIndex].mobile}}</view>
-      <view class="address-detail">{{addresses[addressIndex].province || ''}}{{addresses[addressIndex].city || ''}}{{addresses[addressIndex].district || ''}}{{addresses[addressIndex].addressDetail}}</view>
-    </view>
-    <view wx:else class="address-empty">
-      <text>还没有收货地址</text>
-      <text class="link" catchtap="goAddAddress">新增地址</text>
-    </view>
-    <view class="arrow">›</view>
-  </view>
-
-  <view class="card">
-    <view class="section-title">商品清单</view>
-    <view wx:for="{{items}}" wx:key="cartItemId" class="item">
-      <image class="cover" src="{{item.coverSrc || staticAssets['pet-placeholder.png']}}" mode="aspectFill" />
-      <view class="info">
-        <view class="name">{{item.productName}}</view>
-        <view class="spec">{{item.specText || item.skuCode || ''}}</view>
-        <view wx:if="{{item.invalidReason}}" class="invalid">{{item.invalidReason}}</view>
-        <view class="row">
-          <text class="price">¥{{item.priceText}}</text>
-          <text class="qty">x{{item.quantity}}</text>
-        </view>
-      </view>
-      <view class="line-total">¥{{item.lineTotalText}}</view>
-    </view>
-  </view>
-
-  <view class="card">
-    <view class="coupon-row">
-      <text>优惠券</text>
-      <picker mode="selector" range="{{couponLabels}}" value="{{couponIndex}}" bindchange="onCouponChange">
-        <view class="picker-value">{{couponLabels[couponIndex] || '不使用优惠券'}} ›</view>
-      </picker>
-    </view>
-    <view class="amount-row"><text>商品原价</text><text>¥{{originalText}}</text></view>
-    <view class="amount-row"><text>会员优惠</text><text>-¥{{memberDiscountText}}</text></view>
-    <view class="amount-row"><text>优惠券</text><text>-¥{{couponDiscountText}}</text></view>
-    <view class="amount-row"><text>运费</text><text>¥0.00</text></view>
-    <view class="amount-row total"><text>应付</text><text>¥{{payableText}}</text></view>
-    <view class="wallet-tip">钱包可用余额：¥{{walletText}}</view>
-  </view>
-
-  <view class="footer">
-    <view class="footer-total">应付 <text class="total-price">¥{{payableText}}</text></view>
-    <button class="submit-btn" loading="{{submitting}}" bindtap="submitOrder">提交订单</button>
-  </view>
+<view wx:if="{{loading}}" class="tip">正在确认你的宠爱清单…</view>
+<view wx:else class="checkout-page">
+  <view class="checkout-hero"><image src="{{asset}}shop-hero.jpg" mode="aspectFill" /><view class="hero-caption">为它准备的每一份美好<text>确认心意，让宠爱出发</text></view></view>
+  <view class="checkout-card address-card" bindtap="goAddressList"><view class="section-title"><image src="{{asset}}02_08_location_pin.png" mode="aspectFit" />收货地址</view><view wx:if="{{addresses.length}}" class="address-content"><view class="address-name">{{addresses[addressIndex].recipientName}} <text>{{addresses[addressIndex].mobile}}</text></view><view class="address-detail">{{addresses[addressIndex].province || ''}}{{addresses[addressIndex].city || ''}}{{addresses[addressIndex].district || ''}}{{addresses[addressIndex].addressDetail}}</view></view><view wx:else class="address-empty"><text>还没有收货地址</text><text class="link" catchtap="goAddAddress">新增地址 ›</text></view><text wx:if="{{addresses.length}}" class="address-arrow">›</text><view class="postal-stripe"></view></view>
+  <view class="checkout-card"><view class="section-title"><image src="{{asset}}06_03_order_list.png" mode="aspectFit" />商品清单<text class="count">共 {{itemCount}} 件</text></view><view wx:if="{{!items.length}}" class="empty-note">暂无待结算商品，请返回购物车选择</view><view wx:for="{{items}}" wx:key="cartItemId" class="order-item"><view class="cover"><image wx:if="{{item.coverSrc}}" src="{{item.coverSrc}}" mode="aspectFill" data-id="{{item.cartItemId}}" binderror="imageError" /><image wx:else src="{{asset}}01_01_cat_snack.png" mode="aspectFit" /></view><view class="item-info"><view class="name">{{item.productName}}</view><view class="spec">{{item.specText || item.skuCode || '默认规格'}}</view><view wx:if="{{item.invalidReason}}" class="invalid">{{item.invalidReason}}</view><view class="price-line"><text class="price">¥{{item.priceText}}</text><text wx:if="{{item.memberDiscount > 0}}" class="member-tag">♛ 会员价</text></view></view><text class="quantity">×{{item.quantity}}</text></view></view>
+  <view class="checkout-card"><view class="section-title"><image src="{{asset}}05_01_yuan_coupon.png" mode="aspectFit" />优惠与抵扣</view><view class="amount-row"><view class="row-label"><image src="{{asset}}05_01_yuan_coupon.png" mode="aspectFit" />优惠券</view><picker mode="selector" range="{{couponLabels}}" value="{{couponIndex}}" bindchange="onCouponChange"><view class="coupon-value">{{couponIndex > 0 ? couponLabels[couponIndex] : '选择可用优惠券'}} ›</view></picker></view><view class="amount-row"><view class="row-label"><image src="{{asset}}05_02_gold_crown.png" mode="aspectFit" />会员优惠</view><text class="discount">−¥{{memberDiscountText}}</text></view><view class="amount-row"><view class="row-label"><image src="{{asset}}05_03_wallet.png" mode="aspectFit" />钱包余额</view><text class="muted-value">¥{{walletText}}</text></view><view class="payment-note">支付方式及钱包使用将在订单创建后选择</view></view>
+  <view class="checkout-card totals-card"><view class="amount-row"><text>商品总价</text><text>¥{{originalText}}</text></view><view class="amount-row"><text>会员优惠</text><text>−¥{{memberDiscountText}}</text></view><view class="amount-row"><text>优惠券抵扣</text><text>−¥{{couponDiscountText}}</text></view><view class="amount-row"><text>运费</text><text>¥{{shippingText}}</text></view><view class="amount-row final-total"><text>应付金额</text><text>¥{{payableText}}</text></view></view>
+  <view class="footer"><view class="footer-total"><view>实付 <text>¥{{payableText}}</text></view><text class="footer-note">订单金额以系统结算为准</text></view><button class="submit-button" loading="{{submitting}}" disabled="{{submitting || !preview.valid || !items.length}}" bindtap="submitOrder">{{submitting ? '提交中' : '提交订单'}}</button></view>
 </view>

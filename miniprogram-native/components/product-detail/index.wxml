@@ -1,0 +1,32 @@
+<template name="detailContent">
+  <view class="gallery">
+    <swiper wx:if="{{imageUrls.length}}" class="gallery-swiper" circular bindchange="onImageChange">
+      <swiper-item wx:for="{{imageUrls}}" wx:key="*this"><image class="banner" src="{{item}}" mode="aspectFit" data-src="{{item}}" bindtap="previewImage" binderror="onImageError" /></swiper-item>
+    </swiper>
+    <view wx:else class="gallery-placeholder"><image src="{{asset}}01_01_cat_snack.png" mode="aspectFit" /><text>美味好物，等待与你见面</text><text class="placeholder-note">商家暂未提供商品图片</text></view>
+    <view wx:if="{{imageUrls.length}}" class="image-count">{{imageIndex}}/{{imageUrls.length}}</view>
+  </view>
+  <view class="detail-card summary">
+    <view class="price-row"><view class="price"><text>¥</text>{{priceText}}</view><view wx:if="{{memberPriceText}}" class="member">♛ {{memberPriceText}}</view></view>
+    <view class="name">{{detail.name}}</view><view wx:if="{{detail.subtitle}}" class="subtitle">{{detail.subtitle}}</view>
+    <view class="product-tags"><text>{{detail.categoryName || '宠物好物'}}</text><text wx:if="{{skus.length > 1}}">多规格可选</text></view>
+  </view>
+  <view class="detail-card">
+    <view class="selection-row"><text class="field-label">规格</text><view class="sku-list"><view wx:for="{{skus}}" wx:key="id" class="sku {{selectedSkuId === item.id ? 'active' : ''}} {{item.status !== 'ENABLED' || item.availableQty < 1 ? 'disabled' : ''}}" data-id="{{item.id}}" bindtap="selectSku"><text>{{item.specText}}</text><text class="sku-price">¥{{item.priceText}}</text></view><text wx:if="{{!skus.length}}" class="subtitle">暂无可售规格</text></view></view>
+    <view class="quantity-row"><view><text class="field-label">数量</text><text class="stock">库存 {{stockText}}</text></view><view class="stepper"><button data-delta="-1" bindtap="changeQuantity" disabled="{{quantity <= 1}}">−</button><text>{{quantity}}</text><button data-delta="1" bindtap="changeQuantity" disabled="{{quantity >= stockText}}">＋</button></view></view>
+    <view class="member-banner" bindtap="goMember"><image src="{{asset}}05_02_gold_crown.png" mode="aspectFit" /><view><view class="member-title">会员宠爱，更多精彩</view><text class="member-sub">了解会员权益与专属好物</text></view><text class="member-link">去看看 ›</text></view>
+  </view>
+  <view class="detail-card description-card"><view class="detail-tabs"><text class="selected-tab">商品详情</text><text>规格信息</text></view><rich-text wx:if="{{detail.description}}" class="desc" nodes="{{detail.description}}" /><view wx:else class="description-empty">商家暂未补充商品介绍</view><view class="spec-info"><text>商品名称</text><text>{{detail.name}}</text></view><view class="spec-info"><text>已选规格</text><text>{{selectedSpecText || '暂未选择'}}</text></view></view>
+</template>
+<view wx:if="{{loading}}" class="tip">正在加载商品…</view>
+<view wx:elif="{{detail}}" class="detail-page {{inSheet ? 'in-sheet' : ''}}">
+  <scroll-view wx:if="{{inSheet}}" scroll-y class="detail-scroll">
+    <template is="detailContent" data="{{asset, detail, imageUrls, imageIndex, skus, selectedSkuId, priceText, memberPriceText, stockText, selectedSpecText, quantity}}"/>
+  </scroll-view>
+  <template wx:else is="detailContent" data="{{asset, detail, imageUrls, imageIndex, skus, selectedSkuId, priceText, memberPriceText, stockText, selectedSpecText, quantity}}"/>
+  <view class="footer"><view class="footer-links"><button class="footer-icon" bindtap="goShop"><image src="{{asset}}04_01_home.png" mode="aspectFit" /><text>商城</text></button><button class="footer-icon" open-type="contact"><image src="{{asset}}01_08_customer_service.png" mode="aspectFit" /><text>客服</text></button><button class="footer-icon" bindtap="goCart"><image src="{{asset}}03_01_add_to_cart.png" mode="aspectFit" /><text>购物车</text></button></view><button class="add-cart" bindtap="addToCart" disabled="{{!selectedSkuId || submitting}}">加入购物车</button><button class="checkout" data-checkout="true" bindtap="addToCart" disabled="{{!selectedSkuId || submitting}}">去结算</button></view>
+</view>
+<view wx:else class="tip">
+  <text>商品不存在或暂时无法加载</text>
+  <button wx:if="{{loadError}}" class="retry" size="mini" bindtap="retry">重试</button>
+</view>

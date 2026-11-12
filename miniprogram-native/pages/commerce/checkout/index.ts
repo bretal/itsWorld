@@ -23,6 +23,9 @@ interface CheckoutItemView extends CheckoutItem {
 
 Page(withStaticImages({
   data: {
+    asset: '/assets/shop/',
+    shippingText: '0.00',
+    itemCount: 0,
     loading: true,
     submitting: false,
     addresses: [] as ShippingAddress[],
@@ -114,6 +117,8 @@ Page(withStaticImages({
     this.setData({
       preview,
       items,
+      itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+      shippingText: formatMoney(preview.shippingFee),
       couponOptions: options,
       couponLabels: [
         '不使用优惠券',
@@ -131,6 +136,10 @@ Page(withStaticImages({
     });
   },
 
+  imageError(event: any) {
+    const id = Number(event.currentTarget.dataset.id);
+    this.setData({ items: this.data.items.map(item => item.cartItemId === id ? { ...item, coverSrc: '' } : item) });
+  },
   onAddressChange(event: any) {
     this.setData({ addressIndex: Number(event.detail.value) });
   },

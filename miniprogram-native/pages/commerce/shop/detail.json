@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "商品详情",
-  "backgroundTextStyle": "dark"
+  "navigationBarBackgroundColor": "#fcf5ff",
+  "backgroundColor": "#fcf5ff",
+  "usingComponents": {
+    "product-detail": "/components/product-detail/index"
+  }
 }

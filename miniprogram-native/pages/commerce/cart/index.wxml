@@ -1,43 +1,20 @@
-<view class="page">
-  <view wx:if="{{loading}}" class="tip">加载中...</view>
-  <view wx:elif="{{!items.length}}" class="empty">
-    <view class="empty-title">购物车还是空的</view>
-    <button class="shop-btn" bindtap="goShop">去逛逛</button>
-  </view>
-  <view wx:else class="list">
-    <view wx:for="{{items}}" wx:key="id" class="card">
-      <view
-        class="check {{item.selected === 1 ? 'checked' : ''}}"
-        data-id="{{item.id}}"
-        bindtap="toggleSelect"
-      >{{item.selected === 1 ? '✓' : ''}}</view>
-      <image class="cover" src="{{item.coverSrc || staticAssets['pet-placeholder.png']}}" mode="aspectFill" />
-      <view class="info">
-        <view class="name">{{item.productName}}</view>
-        <view class="spec">{{item.specText || item.skuCode || ''}}</view>
-        <view wx:if="{{item.invalidReason}}" class="invalid">{{item.invalidReason}}</view>
-        <view class="bottom">
-          <text class="price">¥{{item.priceText}}</text>
-          <view class="qty">
-            <view class="qty-btn" data-id="{{item.id}}" data-delta="-1" bindtap="changeQty">-</view>
-            <text class="qty-num">{{item.quantity}}</text>
-            <view class="qty-btn" data-id="{{item.id}}" data-delta="1" bindtap="changeQty">+</view>
-          </view>
+<view class="cart-page">
+  <view class="cart-hero"><image class="hero-bg" src="{{asset}}shop-hero.jpg" mode="aspectFill" /><view class="hero-message">挑选它的专属美味！<text>每一份宠爱，都装进购物车</text></view><button wx:if="{{false}}" class="service" open-type="contact"><image src="{{asset}}01_08_customer_service.png" mode="aspectFit" /><text>客服</text></button></view>
+  <view class="cart-content">
+    <view wx:if="{{loading}}" class="empty-state"><text class="empty-title">正在整理你的宠爱清单…</text></view>
+    <view wx:elif="{{loadError}}" class="empty-state"><text class="empty-title">购物车暂时加载失败</text><button class="shop-button" bindtap="loadCart">重新加载</button></view>
+    <view wx:elif="{{!items.length}}" class="empty-state"><image class="empty-art" src="{{asset}}02_07_gift_box.png" mode="aspectFit" /><text class="empty-title">购物车里，还少一点宠爱</text><text class="empty-sub">去发现毛孩子喜欢的美味好物吧</text><button class="shop-button" bindtap="goShop">去商城逛逛 ›</button></view>
+    <block wx:else>
+      <view class="list-heading"><view class="selection-summary" bindtap="toggleAll"><view class="check {{allSelected ? 'checked' : ''}}">{{allSelected ? '✓' : ''}}</view><text>已选 {{selectedCount}} 件商品</text></view><button class="clear-button" bindtap="clearCart" disabled="{{busy}}"><image src="{{asset}}03_04_delete.png" mode="aspectFit" />清空购物车</button></view>
+      <view wx:for="{{items}}" wx:key="id" class="cart-card {{item.invalidReason ? 'invalid-card' : ''}}">
+        <view class="check {{item.selected === 1 && !item.invalidReason && item.availableQty >= item.quantity ? 'checked' : ''}}" data-id="{{item.id}}" bindtap="toggleSelect">{{item.selected === 1 && !item.invalidReason && item.availableQty >= item.quantity ? '✓' : ''}}</view>
+        <view class="cover"><image wx:if="{{item.coverSrc}}" src="{{item.coverSrc}}" mode="aspectFill" data-id="{{item.id}}" binderror="imageError" /><image wx:else class="placeholder" src="{{asset}}01_01_cat_snack.png" mode="aspectFit" /></view>
+        <view class="item-info"><view class="name-row"><view class="name">{{item.productName}}</view><button class="remove" data-id="{{item.id}}" bindtap="removeItem" disabled="{{busy}}" aria-label="删除商品"><image src="{{asset}}03_04_delete.png" mode="aspectFit" /></button></view><text class="spec">{{item.specText || item.skuCode || '默认规格'}}</text><text wx:if="{{item.invalidReason || item.availableQty < item.quantity}}" class="invalid">{{item.invalidReason || '库存不足，请调整数量'}}</text>
+          <view class="item-bottom"><view class="price-block"><text wx:if="{{item.hasDiscount}}" class="member-tag">♛ 会员价</text><text class="price">¥{{item.priceText}}</text><text wx:if="{{item.hasDiscount}}" class="original">¥{{item.originalText}}</text></view><view class="stepper"><button data-id="{{item.id}}" data-delta="-1" bindtap="changeQty" disabled="{{busy || item.quantity <= 1 || item.invalidReason}}">−</button><text>{{item.quantity}}</text><button data-id="{{item.id}}" data-delta="1" bindtap="changeQty" disabled="{{busy || item.quantity >= item.availableQty || item.invalidReason}}">＋</button></view></view>
         </view>
       </view>
-      <view class="remove" data-id="{{item.id}}" bindtap="removeItem">×</view>
-    </view>
+      <view class="benefit-card"><view class="benefit-title"><image src="{{asset}}02_07_gift_box.png" mode="aspectFit" />优惠与权益</view><view class="benefit-row"><image src="{{asset}}05_01_yuan_coupon.png" mode="aspectFit" /><text>优惠券</text><text class="benefit-note">结算时选择可用优惠券</text></view><view class="benefit-row" bindtap="goMember"><image src="{{asset}}05_02_gold_crown.png" mode="aspectFit" /><text>会员专享</text><text class="benefit-note">查看会员权益 ›</text></view></view>
+    </block>
   </view>
-
-  <view wx:if="{{items.length}}" class="footer">
-    <view class="select-all" bindtap="toggleAll">
-      <view class="check {{allSelected ? 'checked' : ''}}">{{allSelected ? '✓' : ''}}</view>
-      <text>全选</text>
-    </view>
-    <view class="total">
-      <text>合计：</text>
-      <text class="total-price">¥{{totalText}}</text>
-    </view>
-    <button class="checkout-btn" bindtap="goCheckout">结算({{selectedCount}})</button>
-  </view>
+  <view wx:if="{{items.length && !loadError && !loading}}" class="cart-footer"><view class="select-all" bindtap="toggleAll"><view class="check {{allSelected ? 'checked' : ''}}">{{allSelected ? '✓' : ''}}</view><text>全选</text></view><view class="total"><view>合计 <text>¥{{totalText}}</text></view><text class="savings">会员已优惠 ¥{{savingsText}}</text></view><button class="checkout-button" bindtap="goCheckout" disabled="{{busy || !selectedCount}}">去结算 ({{selectedCount}})</button></view>
 </view>
