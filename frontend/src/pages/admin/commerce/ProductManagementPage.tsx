@@ -1,5 +1,7 @@
+import ImageUpload from '@/components/ImageUpload';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Button,
   Card,
   Drawer,
@@ -38,9 +40,46 @@ const SALE_STATUS_OPTIONS = [
 ];
 
 const ProductManagementPage: React.FC = () => {
+  const [promptText, setPromptText] = useState<string | null>(null);
+  const [promptBusy, setPromptBusy] = useState(false);
+
+  const openPromptEditor = async () => {
+    setPromptBusy(true);
+    try {
+      const prompts = await commerceService.listAssistantPrompts();
+      setPromptText(prompts.join('\n'));
+    } catch {
+      message.error('读取助手气泡文案失败');
+    } finally {
+      setPromptBusy(false);
+    }
+  };
+
+  const savePromptEditor = async () => {
+    const prompts = (promptText ?? '').split(/\r?\n/).map(text => text.trim()).filter(Boolean);
+    if (!prompts.length || prompts.length > 20 || prompts.some(text => text.length > 40)) {
+      message.warning('请输入 1 到 20 句文案，每句最多 40 字');
+      return;
+    }
+    setPromptBusy(true);
+    try {
+      await commerceService.saveAssistantPrompts(prompts);
+      setPromptText(null);
+      message.success('助手气泡文案已保存');
+    } catch {
+      message.error('保存助手气泡文案失败');
+    } finally {
+      setPromptBusy(false);
+    }
+  };
+
   const [categoryForm] = Form.useForm();
   const [productForm] = Form.useForm();
   const [skuForm] = Form.useForm();
+  const [stockForm] = Form.useForm();
+  const [stockSku, setStockSku] = useState<ShopSkuView | null>(null);
+  const [stockSaving, setStockSaving] = useState(false);
+  const [skuSaving, setSkuSaving] = useState(false);
 
   const [activeTab, setActiveTab] = useState('categories');
   const [loading, setLoading] = useState(false);
@@ -170,8 +209,9 @@ const ProductManagementPage: React.FC = () => {
         await commerceService.updateShopProduct(editingProduct.id, payload);
         message.success('商品已更新');
       } else {
-        await commerceService.createShopProduct(payload);
-        message.success('商品已创建');
+        const created = await commerceService.createShopProduct({ ...payload, saleStatus: 'OFF_SALE' });
+        message.success('草稿已保存，请配置规格和初始库存后上架');
+        await openDetailDrawer(created);
       }
       setProductModalOpen(false);
       await fetchProducts(page);
@@ -216,7 +256,7 @@ const ProductManagementPage: React.FC = () => {
     setEditingSku(null);
     setSkuModalOpen(true);
     skuForm.resetFields();
-    skuForm.setFieldsValue({ salePriceYuan: 0, marketPriceYuan: 0, status: 'ENABLED' });
+    skuForm.setFieldsValue({ salePriceYuan: 0, marketPriceYuan: 0, status: 'ENABLED', initialStock: 0 });
   };
 
   const openEditSku = (sku: ShopSkuView) => {
@@ -234,8 +274,10 @@ const ProductManagementPage: React.FC = () => {
 
   const handleSaveSku = async () => {
     if (!selectedProduct) return;
+    if (skuSaving) return;
     try {
       const values = await skuForm.validateFields();
+      setSkuSaving(true);
       if (values.specJson) {
         try {
           JSON.parse(values.specJson);
@@ -245,6 +287,7 @@ const ProductManagementPage: React.FC = () => {
         }
       }
       const payload = {
+        initialStock: editingSku ? undefined : values.initialStock,
         skuCode: values.skuCode,
         specJson: values.specJson || undefined,
         salePrice: yuanToCents(values.salePriceYuan),
@@ -264,7 +307,7 @@ const ProductManagementPage: React.FC = () => {
     } catch (error: any) {
       if (error?.errorFields) return;
       message.error(error.message || '保存失败');
-    }
+    } finally { setSkuSaving(false); }
   };
 
   const categoryColumns: ColumnsType<ShopCategory> = [
@@ -346,7 +389,7 @@ const ProductManagementPage: React.FC = () => {
             编辑
           </Button>
           <Button type="link" size="small" onClick={() => openDetailDrawer(record)}>
-            图片/SKU
+            图片/规格/库存
           </Button>
           <Button
             type="link"
@@ -397,6 +440,24 @@ const ProductManagementPage: React.FC = () => {
     },
   ];
 
+  const openStock = (sku: ShopSkuView) => {
+    stockForm.resetFields();
+    setStockSku(sku);
+  };
+  const saveStock = async () => {
+    if (!stockSku || stockSaving) return;
+    try {
+      const values = await stockForm.validateFields();
+      setStockSaving(true);
+      await commerceService.adjustInventory({ skuId: stockSku.id, changeQty: values.changeQty, reason: values.reason });
+      setStockSku(null);
+      message.success('库存已调整并记录流水');
+      await refreshDetail();
+    } catch (error: any) {
+      if (!error?.errorFields) message.error(error.message || '库存调整失败');
+    } finally { setStockSaving(false); }
+  };
+
   const skuColumns: ColumnsType<ShopSkuView> = [
     { title: 'SKU编码', dataIndex: 'skuCode', key: 'skuCode' },
     { title: '规格', dataIndex: 'specJson', key: 'specJson', render: (value?: string) => value || '-' },
@@ -412,7 +473,7 @@ const ProductManagementPage: React.FC = () => {
       key: 'marketPrice',
       render: (value: number) => formatMoney(value),
     },
-    { title: '库存', dataIndex: 'availableQty', key: 'availableQty', width: 80 },
+    { title: '可售库存', dataIndex: 'availableQty', key: 'availableQty', width: 100, render: (value: number) => value > 0 ? value : <Tag color="warning">待补货</Tag> },
     {
       title: '状态',
       dataIndex: 'status',
@@ -429,6 +490,7 @@ const ProductManagementPage: React.FC = () => {
           <Button type="link" size="small" onClick={() => openEditSku(record)}>
             编辑
           </Button>
+          <Button type="link" size="small" onClick={() => openStock(record)}>调整库存</Button>
           <Button
             type="link"
             size="small"
@@ -449,7 +511,21 @@ const ProductManagementPage: React.FC = () => {
   ];
 
   return (
-    <Card title="商品管理">
+    <Card title="商品管理" extra={<Button loading={promptBusy && promptText === null} onClick={openPromptEditor}>助手气泡文案</Button>}>
+      <Modal title="助手气泡文案" open={promptText !== null} onOk={savePromptEditor}
+        onCancel={() => { if (!promptBusy) setPromptText(null); }}
+        confirmLoading={promptBusy} okText="保存" cancelText="取消">
+        <p>每行一句，按行轮换。最多 20 句，每句最多 40 字。</p>
+        <Input.TextArea rows={7} value={promptText ?? ''} disabled={promptBusy}
+          onChange={event => setPromptText(event.target.value)} />
+      </Modal>
+      <Modal title={`调整库存：${stockSku?.skuCode || ''}`} open={!!stockSku} onOk={saveStock} onCancel={() => { if (!stockSaving) setStockSku(null); }} confirmLoading={stockSaving} okText="保存库存" cancelText="取消" destroyOnHidden>
+        <p>当前可售库存：{stockSku?.availableQty ?? 0}。调整仅作用于可售库存，保留锁定库存及流水。</p>
+        <Form form={stockForm} layout="vertical">
+          <Form.Item label="调整数量（正数补货，负数减少）" name="changeQty" rules={[{ required: true }, { validator: (_, value) => value != null && Number.isInteger(value) && value !== 0 ? Promise.resolve() : Promise.reject(new Error('请输入非零整数')) }]}><InputNumber precision={0} style={{ width: '100%' }} /></Form.Item>
+          <Form.Item label="调整原因" name="reason" rules={[{ required: true, whitespace: true, message: '请填写调整原因' }]}><Input.TextArea rows={2} /></Form.Item>
+        </Form>
+      </Modal>
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
@@ -533,8 +609,8 @@ const ProductManagementPage: React.FC = () => {
           <Form.Item label="分类名称" name="name" rules={[{ required: true, message: '请输入分类名称' }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="图标URL" name="iconUrl">
-            <Input />
+          <Form.Item label="图标" name="iconUrl">
+            <ImageUpload />
           </Form.Item>
           <Space style={{ display: 'flex' }} align="baseline">
             <Form.Item label="排序" name="sort" style={{ width: 120 }}>
@@ -558,6 +634,7 @@ const ProductManagementPage: React.FC = () => {
         destroyOnHidden
       >
         <Form form={productForm} layout="vertical">
+          {!editingProduct && <Alert type="info" showIcon message="新增商品先存为草稿，保存后会自动打开规格与库存配置。" style={{ marginBottom: 16 }} />}
           <Space style={{ display: 'flex' }} align="baseline">
             <Form.Item label="商品编码" name="productCode" rules={[{ required: true, message: '请输入商品编码' }]} style={{ width: 200 }}>
               <Input />
@@ -574,7 +651,7 @@ const ProductManagementPage: React.FC = () => {
               <Input />
             </Form.Item>
             <Form.Item label="销售状态" name="saleStatus" style={{ width: 140 }}>
-              <Select options={SALE_STATUS_OPTIONS} />
+              <Select options={editingProduct ? SALE_STATUS_OPTIONS : [{ label: '草稿（下架）', value: 'OFF_SALE' }]} />
             </Form.Item>
             <Form.Item label="排序" name="sort" style={{ width: 100 }}>
               <InputNumber min={0} style={{ width: '100%' }} />
@@ -602,13 +679,15 @@ const ProductManagementPage: React.FC = () => {
       </Modal>
 
       <Drawer
-        title={`商品图片与SKU：${selectedProduct?.name || ''}`}
+        title={`商品图片、规格与库存：${selectedProduct?.name || ''}`}
         open={detailDrawerOpen}
         onClose={() => setDetailDrawerOpen(false)}
         width={900}
         destroyOnHidden
       >
+        <Alert type="info" showIcon message="在此完成规格和库存配置后，返回商品列表上架。后续补货也可直接点击规格行的“调整库存”。" style={{ marginBottom: 16 }} />
         <Tabs
+          defaultActiveKey="skus"
           items={[
             {
               key: 'images',
@@ -638,12 +717,12 @@ const ProductManagementPage: React.FC = () => {
             },
             {
               key: 'skus',
-              label: 'SKU',
+              label: '规格与库存',
               children: (
                 <>
                   <div style={{ marginBottom: 12 }}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={openCreateSku}>
-                      新增SKU
+                      新增规格与库存
                     </Button>
                   </div>
                   <Table
@@ -662,14 +741,16 @@ const ProductManagementPage: React.FC = () => {
       <Modal
         title={editingSku ? `编辑SKU：${editingSku.skuCode}` : '新增SKU'}
         open={skuModalOpen}
-        onCancel={() => setSkuModalOpen(false)}
+        onCancel={() => { if (!skuSaving) setSkuModalOpen(false); }}
         onOk={handleSaveSku}
+        confirmLoading={skuSaving}
         okText="保存"
         cancelText="取消"
         width={620}
         destroyOnHidden
       >
         <Form form={skuForm} layout="vertical">
+          {!editingSku && <Form.Item label="初始库存" name="initialStock" extra="与规格一起保存；填 0 可保存草稿，但无法上架。" rules={[{ required: true, message: '请填写初始库存' }]}><InputNumber min={0} precision={0} max={2147483647} style={{ width: '100%' }} /></Form.Item>}
           <Form.Item label="SKU编码" name="skuCode" rules={[{ required: true, message: '请输入SKU编码' }]}>
             <Input />
           </Form.Item>

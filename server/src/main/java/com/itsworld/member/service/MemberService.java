@@ -92,6 +92,14 @@ public class MemberService {
         return account;
     }
 
+    /** Read-only pricing for assistant tools; never creates a member account. */
+    public BigDecimal getExistingDiscountRate(Long userId) {
+        MemberAccount account = memberAccountMapper.selectByUserId(userId);
+        if (account == null || !account.isActive() || account.getLevelId() == null) return BigDecimal.ONE;
+        MemberLevel level = memberLevelMapper.selectById(account.getLevelId());
+        return level != null && level.getDiscountRate() != null ? level.getDiscountRate() : BigDecimal.ONE;
+    }
+
     public BigDecimal getCurrentDiscountRate(Long userId) {
         MemberAccount account = getOrCreateAccount(userId);
         if (!account.isActive() || account.getLevelId() == null) {

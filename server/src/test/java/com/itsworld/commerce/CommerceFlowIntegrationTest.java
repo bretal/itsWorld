@@ -606,6 +606,62 @@ class CommerceFlowIntegrationTest {
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.code").value(org.hamcrest.Matchers.not(0)));
     }
 
+    @Autowired
+    private com.itsworld.commerce.catalog.service.ShopCatalogService catalogService;
+
+    @Test
+    void productDraftInitialStockAndPublicationWorkflow() {
+        var productRequest = com.itsworld.commerce.catalog.dto.ShopProductSaveRequest.builder()
+                .productCode("DRAFT-" + System.nanoTime()).name("草稿库存测试").saleStatus("OFF_SALE").build();
+        var product = catalogService.createProduct(productRequest);
+        assertEquals("OFF_SALE", product.getSaleStatus());
+        assertThrows(BusinessException.class, () -> catalogService.changeProductSaleStatus(product.getId(), "ON_SALE"));
+        productRequest.setSaleStatus("ON_SALE");
+        assertThrows(BusinessException.class, () -> catalogService.updateProduct(product.getId(), productRequest));
+        var skuRequest = com.itsworld.commerce.catalog.dto.ShopSkuSaveRequest.builder()
+                .skuCode("DRAFT-SKU-" + System.nanoTime()).salePrice(3990L).marketPrice(3990L)
+                .status("ENABLED").initialStock(0).build();
+        var emptySku = catalogService.createSku(product.getId(), skuRequest);
+        assertEquals(0, shopInventoryMapper.selectBySkuIdAndWarehouse(emptySku.getId(), 0L).getAvailableQty());
+        assertThrows(BusinessException.class, () -> catalogService.changeProductSaleStatus(product.getId(), "ON_SALE"));
+        long operator = registerUser("stockadmin");
+        String username = memberJdbc.queryForObject("SELECT username FROM sys_user WHERE id=?", String.class, operator);
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(username, "", java.util.List.of()));
+        try {
+            skuRequest.setSkuCode("STOCKED-" + System.nanoTime());
+            skuRequest.setInitialStock(12);
+            var stocked = catalogService.createSku(product.getId(), skuRequest);
+            assertEquals(12, shopInventoryMapper.selectBySkuIdAndWarehouse(stocked.getId(), 0L).getAvailableQty());
+            assertEquals(1, memberJdbc.queryForObject("SELECT COUNT(*) FROM shop_inventory_log WHERE sku_id=? AND change_available=12", Integer.class, stocked.getId()));
+            catalogService.changeProductSaleStatus(product.getId(), "ON_SALE");
+            assertEquals("ON_SALE", shopProductMapper.selectById(product.getId()).getSaleStatus());
+            // 自然售罄的已上架商品仍允许修改资料，不重新触发首次上架检查。
+            memberJdbc.update("UPDATE shop_inventory SET available_qty=0 WHERE sku_id=?", stocked.getId());
+            productRequest.setName("售罄后更新资料");
+            catalogService.updateProduct(product.getId(), productRequest);
+            assertEquals("售罄后更新资料", shopProductMapper.selectById(product.getId()).getName());
+            assertThrows(BusinessException.class, () -> catalogService.updateSku(stocked.getId(), skuRequest));
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    void initialStockFailureRollsBackSkuAndInventory() {
+        var product = catalogService.createProduct(com.itsworld.commerce.catalog.dto.ShopProductSaveRequest.builder()
+                .productCode("ROLLBACK-" + System.nanoTime()).name("库存回滚测试").saleStatus("OFF_SALE").build());
+        var request = com.itsworld.commerce.catalog.dto.ShopSkuSaveRequest.builder()
+                .skuCode("ROLLBACK-SKU-" + System.nanoTime()).salePrice(100L).marketPrice(100L)
+                .status("ENABLED").initialStock(5).build();
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        assertThrows(BusinessException.class, () -> catalogService.createSku(product.getId(), request));
+        assertEquals(0, memberJdbc.queryForObject("SELECT COUNT(*) FROM shop_sku WHERE sku_code=?", Integer.class, request.getSkuCode()));
+        assertEquals(0, memberJdbc.queryForObject("SELECT COUNT(*) FROM shop_inventory i LEFT JOIN shop_sku s ON s.id=i.sku_id WHERE s.id IS NULL", Integer.class));
+        request.setInitialStock(-1);
+        assertThrows(BusinessException.class, () -> catalogService.createSku(product.getId(), request));
+    }
+
     private long registerUser(String prefix) {
         long suffix = USER_SEQ.getAndIncrement();
         String username = prefix + System.nanoTime() + suffix;

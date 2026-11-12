@@ -25,6 +25,10 @@ public class ShopSkuSaveRequest {
 
     private String specJson;
 
+    /** 仅新增 SKU 时生效，留空按零库存草稿处理。 */
+    @Min(value = 0, message = "初始库存不能为负数")
+    private Integer initialStock;
+
     @NotNull(message = "销售价不能为空")
     @Min(value = 0, message = "销售价不能为负数")
     private Long salePrice;

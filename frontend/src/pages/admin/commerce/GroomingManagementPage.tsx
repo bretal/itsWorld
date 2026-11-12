@@ -1,3 +1,4 @@
+import ImageUpload from '@/components/ImageUpload';
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -586,8 +587,8 @@ const GroomingManagementPage: React.FC = () => {
           <Form.Item label="分类名称" name="name" rules={[{ required: true, message: '请输入分类名称' }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="图标URL" name="iconUrl">
-            <Input />
+          <Form.Item label="图标" name="iconUrl">
+            <ImageUpload />
           </Form.Item>
           <Space style={{ display: 'flex' }} align="baseline">
             <Form.Item label="排序" name="sort" style={{ width: 120 }}>

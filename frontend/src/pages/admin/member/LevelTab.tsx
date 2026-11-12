@@ -1,3 +1,4 @@
+import ImageUpload from '@/components/ImageUpload';
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -275,8 +276,8 @@ const LevelTab: React.FC = () => {
                 ]}
               />
             </Form.Item>
-            <Form.Item label="图标URL" name="iconUrl" style={{ width: 240 }}>
-              <Input placeholder="可选" />
+            <Form.Item label="图标" name="iconUrl" style={{ width: 240 }}>
+            <ImageUpload />
             </Form.Item>
           </Space>
           <Form.Item label="等级说明" name="description">

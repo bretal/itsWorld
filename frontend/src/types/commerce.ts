@@ -246,6 +246,7 @@ export interface ShopProductSaveRequest {
 }
 
 export interface ShopSkuSaveRequest {
+  initialStock?: number;
   skuCode: string;
   specJson?: string;
   salePrice: number;

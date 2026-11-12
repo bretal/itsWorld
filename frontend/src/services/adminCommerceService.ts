@@ -555,3 +555,6 @@ export default {
   hideReview,
   replyReview,
 };
+
+export const listAssistantPrompts = () => get<string[]>('/api/admin/assistant/prompts');
+export const saveAssistantPrompts = (prompts: string[]) => put<string[]>('/api/admin/assistant/prompts', prompts);

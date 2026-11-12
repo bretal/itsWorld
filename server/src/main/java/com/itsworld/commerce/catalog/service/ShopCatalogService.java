@@ -19,6 +19,9 @@ import com.itsworld.commerce.catalog.mapper.ShopProductMapper;
 import com.itsworld.commerce.catalog.mapper.ShopSkuMapper;
 import com.itsworld.commerce.common.CommercePriceUtils;
 import com.itsworld.commerce.inventory.entity.ShopInventory;
+import com.itsworld.commerce.inventory.service.InventoryService;
+import com.itsworld.commerce.inventory.dto.InventoryAdjustRequest;
+import com.itsworld.security.service.CurrentUserService;
 import com.itsworld.commerce.inventory.mapper.ShopInventoryMapper;
 import com.itsworld.common.exception.BusinessException;
 import com.itsworld.common.result.ErrorCode;
@@ -61,6 +64,8 @@ public class ShopCatalogService {
     private final ShopSkuMapper skuMapper;
     private final ShopInventoryMapper inventoryMapper;
     private final MemberService memberService;
+    private final InventoryService inventoryService;
+    private final CurrentUserService currentUserService;
 
     public List<ShopCategory> listEnabledCategories() {
         return categoryMapper.selectList(new LambdaQueryWrapper<ShopCategory>()
@@ -71,6 +76,11 @@ public class ShopCatalogService {
 
     public PageResult<ShopProductView> pageProducts(Long categoryId, String keyword,
                                                     long pageNum, long pageSize, Long userId) {
+        return pageProducts(categoryId, keyword, pageNum, pageSize, userId, false);
+    }
+
+    public PageResult<ShopProductView> pageProducts(Long categoryId, String keyword,
+            long pageNum, long pageSize, Long userId, boolean readOnly) {
         Page<ShopProduct> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<ShopProduct> wrapper = new LambdaQueryWrapper<ShopProduct>()
                 .eq(ShopProduct::getSaleStatus, ON_SALE)
@@ -86,7 +96,7 @@ public class ShopCatalogService {
                     .or().like(ShopProduct::getProductCode, value));
         }
         Page<ShopProduct> result = productMapper.selectPage(page, wrapper);
-        BigDecimal discountRate = memberService.getCurrentDiscountRate(userId);
+        BigDecimal discountRate = readOnly ? memberService.getExistingDiscountRate(userId) : memberService.getCurrentDiscountRate(userId);
         Map<Long, String> categoryNames = categoryNameMap();
         List<ShopProductView> records = new ArrayList<>();
         for (ShopProduct product : result.getRecords()) {
@@ -123,11 +133,16 @@ public class ShopCatalogService {
     }
 
     public ShopProductDetailView getProductDetail(Long productId, Long userId) {
+        return getProductDetail(productId, userId, false);
+    }
+
+    public ShopProductDetailView getProductDetail(Long productId, Long userId, boolean readOnly) {
         ShopProduct product = requireProduct(productId);
         if (!ON_SALE.equals(product.getSaleStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND.getCode(), "商品已下架");
         }
-        return buildProductDetail(product, memberService.getCurrentDiscountRate(userId), true);
+        return buildProductDetail(product, readOnly ? memberService.getExistingDiscountRate(userId)
+                : memberService.getCurrentDiscountRate(userId), true);
     }
 
     public List<ShopCategory> listAdminCategories() {
@@ -203,6 +218,9 @@ public class ShopCatalogService {
 
     @Transactional
     public ShopProduct createProduct(ShopProductSaveRequest request) {
+        if (ON_SALE.equals(normalizeSaleStatus(request.getSaleStatus()))) {
+            throw new BusinessException("请先保存商品草稿，配置规格及库存后再上架");
+        }
         validateCategory(request.getCategoryId());
         validateProductCode(request.getProductCode(), null);
         ShopProduct product = ShopProduct.builder()
@@ -232,7 +250,11 @@ public class ShopCatalogService {
         product.setSubtitle(request.getSubtitle());
         product.setDescription(request.getDescription());
         product.setCoverUrl(request.getCoverUrl());
-        product.setSaleStatus(normalizeSaleStatus(request.getSaleStatus()));
+        String nextStatus = normalizeSaleStatus(request.getSaleStatus());
+        if (ON_SALE.equals(nextStatus) && !ON_SALE.equals(product.getSaleStatus())) {
+            validateReadyForSale(productId);
+        }
+        product.setSaleStatus(nextStatus);
         product.setSort(request.getSort() != null ? request.getSort() : product.getSort());
         product.setUpdatedAt(LocalDateTime.now());
         productMapper.updateById(product);
@@ -242,7 +264,11 @@ public class ShopCatalogService {
     @Transactional
     public void changeProductSaleStatus(Long productId, String saleStatus) {
         ShopProduct product = requireProduct(productId);
-        product.setSaleStatus(normalizeSaleStatus(saleStatus));
+        String nextStatus = normalizeSaleStatus(saleStatus);
+        if (ON_SALE.equals(nextStatus) && !ON_SALE.equals(product.getSaleStatus())) {
+            validateReadyForSale(productId);
+        }
+        product.setSaleStatus(nextStatus);
         product.setUpdatedAt(LocalDateTime.now());
         productMapper.updateById(product);
     }
@@ -275,6 +301,9 @@ public class ShopCatalogService {
 
     @Transactional
     public ShopSku createSku(Long productId, ShopSkuSaveRequest request) {
+        if (request.getInitialStock() != null && request.getInitialStock() < 0) {
+            throw new BusinessException("初始库存不能为负数");
+        }
         requireProduct(productId);
         validateSkuCode(request.getSkuCode(), null);
         ShopSku sku = ShopSku.builder()
@@ -305,11 +334,18 @@ public class ShopCatalogService {
         } catch (DuplicateKeyException e) {
             log.info("SKU库存已存在: skuId={}", sku.getId());
         }
+        if (request.getInitialStock() != null && request.getInitialStock() > 0) {
+            inventoryService.adjustStock(currentUserService.getUserId(), InventoryAdjustRequest.builder()
+                    .skuId(sku.getId()).changeQty(request.getInitialStock()).reason("新增SKU初始入库").build());
+        }
         return sku;
     }
 
     @Transactional
     public ShopSku updateSku(Long skuId, ShopSkuSaveRequest request) {
+        if (request.getInitialStock() != null) {
+            throw new BusinessException("编辑规格不能覆盖库存，请使用库存调整功能");
+        }
         ShopSku sku = requireSku(skuId);
         validateSkuCode(request.getSkuCode(), skuId);
         sku.setSkuCode(request.getSkuCode().trim());
@@ -458,6 +494,18 @@ public class ShopCatalogService {
             throw new BusinessException(ErrorCode.INVALID_PARAM.getCode(), "状态仅支持 ENABLED/DISABLED");
         }
         return value;
+    }
+
+    private void validateReadyForSale(Long productId) {
+        List<ShopSku> enabled = skuMapper.selectList(new LambdaQueryWrapper<ShopSku>()
+                .eq(ShopSku::getProductId, productId).eq(ShopSku::getStatus, ENABLED));
+        for (ShopSku sku : enabled) {
+            ShopInventory inventory = inventoryMapper.selectBySkuIdAndWarehouse(sku.getId(), DEFAULT_WAREHOUSE_ID);
+            if (inventory != null && inventory.getAvailableQty() != null && inventory.getAvailableQty() > 0) {
+                return;
+            }
+        }
+        throw new BusinessException("无法上架：请至少配置一个启用且有可售库存的规格");
     }
 
     private String normalizeSaleStatus(String saleStatus) {
