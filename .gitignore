@@ -2,9 +2,6 @@ CLAUDE.md
 PROGRESS.md
 docs_local/
 
-# Graphify 生成的知识图谱、总结、缓存与备份
-graphify-out/
-
 # Claude 本机设置
 .claude/settings.local.json
 

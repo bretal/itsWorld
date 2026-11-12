@@ -45,7 +45,7 @@
 
 ### 4.1 建立清单
 
-先执行 `git status --short`，保留已有修改。遵循 AGENTS.md：存在图谱时先运行 `graphify query "<模块> service impl mapper"`，用 path 查询跨模块关系；再定向查阅已定位文件。
+先执行 `git status --short`，保留已有修改。使用 `rg` 定位目标模块的 Service、Mapper 和调用点，再定向查阅相关文件。
 
 扫描并记录：Service 接口及所有实现、注入点、直接引用 Impl 的生产代码和测试、Bean 名称及 Qualifier、继承关系、JdbcTemplate/原始 SQL 使用、事务、Mapper/XML namespace、自定义 SQL Provider。
 
@@ -84,7 +84,6 @@ mvn -f server/pom.xml '-Dcheckstyle.skip=true' '-Dtest=CommerceFlowIntegrationTe
 # admin 回归需要时执行
 mvn -f server/pom.xml '-Dcheckstyle.skip=true' '-Dtest=AdminManagementIntegrationTest' test
 git diff --check
-graphify update .
 ```
 
 接口改为具体类后必须执行一次 clean，清除旧生产/测试 class；否则增量编译可能出现 IncompatibleClassChangeError（旧字节码仍按接口调用新类）。
@@ -98,7 +97,7 @@ graphify update .
 - 应用上下文可启动，注入唯一，无遗留实现类引用及 Bean 名错误。
 - 正常 CRUD、归属校验、异常分支、分页及事务回滚经过相关验证。
 - 地址类场景需覆盖跨用户拒绝访问、默认地址切换；资金/库存类场景需额外验证并发、幂等、事务回滚。
-- 已执行编译、相关测试、diff 检查和图谱更新，并记录命令及结果。
+- 已执行编译、相关测试、diff 检查，并记录命令及结果。
 
 ## 6. 交付与回退
 
