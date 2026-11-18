@@ -42,6 +42,7 @@ import ReportManagementPage from '@/pages/admin/data/ReportManagementPage';
 
 // Admin Pages
 import AdminRoute from '@/components/AdminRoute';
+import MiniProgramAssetsPage from '@/pages/admin/MiniProgramAssetsPage';
 import UserManagementPage from '@/pages/admin/users/UserManagementPage';
 import MemberAdminPage from '@/pages/admin/member/MemberAdminPage';
 import WalletAdminPage from '@/pages/admin/wallet/WalletAdminPage';
@@ -148,6 +149,7 @@ const App: React.FC = () => {
             }
           />
           <Route path="/admin/assistant/instructions" element={<AdminRoute><AssistantInstructionsPage /></AdminRoute>} />
+          <Route path="/admin/miniprogram-assets" element={<AdminRoute><MiniProgramAssetsPage /></AdminRoute>} />
           <Route
             path="/admin/commerce/shop"
             element={

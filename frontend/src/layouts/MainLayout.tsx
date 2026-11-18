@@ -87,6 +87,13 @@ const MainLayout: React.FC = () => {
       path: '/admin/assistant/instructions',
     },
     {
+      key: 'development',
+      label: '开发工具',
+      children: [
+        { key: 'miniprogram-assets', label: '小程序素材', path: '/admin/miniprogram-assets' },
+      ],
+    },
+    {
       key: 'commerce',
       icon: <ShopOutlined />,
       label: '商业服务',

@@ -78,7 +78,16 @@ public class MinIOUtils {
         try {
             // 确保bucket存在
             ensureBucketExists(bucketName);
+            return uploadToExistingBucket(bucketName, objectName, inputStream, contentType);
+        } catch (Exception e) {
+            log.error("准备上传失败：bucket={}, object={}", bucketName, objectName, e);
+            return null;
+        }
+    }
 
+    public String uploadToExistingBucket(
+            String bucketName, String objectName, InputStream inputStream, String contentType) {
+        try {
             // 上传文件
             getMinioClient().putObject(
                     PutObjectArgs.builder()

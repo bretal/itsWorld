@@ -75,12 +75,13 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.6.4",
-  "appid": "wx9cbf4bd42d871d41",
+  "appid": "wx1c12437586791fb0",
   "projectname": "itsworld-miniprogram-native",
   "condition": {},
   "editorSetting": {
     "tabIndent": "insertSpaces",
     "tabSize": 2
   },
-  "simulatorPluginLibVersion": {}
+  "simulatorPluginLibVersion": {},
+  "isGameTourist": false
 }
