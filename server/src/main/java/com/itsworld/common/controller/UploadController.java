@@ -85,7 +85,8 @@ public class UploadController {
         }
 
         String bucketName = resolveBucket(type);
-        String objectName = buildObjectName(type, extension);
+        String folder = "assistant".equals(type) ? type + "/" + currentUserService.getUserId() : type;
+        String objectName = buildObjectName(folder, extension);
 
         try (InputStream inputStream = file.getInputStream()) {
             String url = minIOUtils.uploadFile(bucketName, objectName, inputStream, file.getContentType());
@@ -108,7 +109,7 @@ public class UploadController {
     private String resolveBucket(String type) {
         return switch (type) {
             case TYPE_AVATAR, TYPE_PET -> avatarBucket;
-            case TYPE_DIARY -> diaryBucket;
+            case TYPE_DIARY, "assistant" -> diaryBucket;
             case TYPE_COMMUNITY, TYPE_STORE, TYPE_SHOP, TYPE_REVIEW -> communityBucket;
             default -> throw new BusinessException(ErrorCode.INVALID_PARAM.getCode(), "不支持的上传类型");
         };

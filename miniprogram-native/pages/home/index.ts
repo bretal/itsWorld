@@ -6,6 +6,7 @@ import type { Pet } from '../../services/pet';
 import { listDiariesPage } from '../../services/diary';
 import type { Diary } from '../../services/diary';
 import {
+  DIARY_MOOD_LABELS,
   formatAge,
   formatDateTime,
   genderText,
@@ -31,13 +32,14 @@ Page(withStaticImages({
   data: {
     assistantPrompt: defaultPrompts[0],
     assistantPromptVisible: false,
-    moodLabels: { happy: '开心', calm: '平静', tired: '疲惫', sad: '难过' } as Record<string, string>,
+    moodLabels: DIARY_MOOD_LABELS,
     statusBarHeight: 20,
     user: null as any,
     pets: [] as HomePet[],
     currentPet: null as HomePet | null,
     petAvatarSrc: '',
     todayDiary: null as Diary | null,
+    showRecordPrompt: false,
     todayPhotos: [] as string[],
     todayDiaryTime: '',
     loading: true,
@@ -155,6 +157,7 @@ Page(withStaticImages({
       }
 
       let todayDiary: Diary | null = null;
+      let showRecordPrompt = false;
       if (currentPet) {
         const diaryPage = await listDiariesPage(currentPet.id, 1, 10).catch(
           () => null,
@@ -164,20 +167,21 @@ Page(withStaticImages({
           return;
         }
         const today = todayString();
-        todayDiary =
-          (diaries || []).find(
-            (diary) => (diary.diaryDate || '').slice(0, 10) === today,
-          ) ||
-          (diaries || [])[0] ||
-          null;
+        const recordedToday = diaries.find(
+          (diary) => (diary.diaryDate || '').slice(0, 10) === today,
+        );
+        showRecordPrompt = !!diaryPage && !recordedToday;
+        todayDiary = recordedToday || diaries[0] || null;
       }
 
       const todayPhotos = await resolveImages(todayDiary?.photoUrls || []);
+      if (sequence !== loadSequence) return;
       this.setData({
         pets: displayPets,
         currentPet,
         petAvatarSrc: currentPet?.avatarSrc || '',
         todayDiary,
+        showRecordPrompt,
         todayPhotos,
         todayDiaryTime: todayDiary?.createdAt
           ? formatDateTime(todayDiary.createdAt)
@@ -213,6 +217,7 @@ Page(withStaticImages({
     if (!currentPet) {
       return;
     }
+    const sequence = ++loadSequence;
 
     wx.setStorageSync('currentPetId', petId);
     try {
@@ -227,6 +232,8 @@ Page(withStaticImages({
       petAvatarSrc: currentPet.avatarSrc || '',
       petPickerVisible: false,
       todayDiary: null,
+      showRecordPrompt: false,
+      loading: false,
       todayPhotos: [],
       todayDiaryTime: '',
     });
@@ -234,15 +241,16 @@ Page(withStaticImages({
     const diaryPage = await listDiariesPage(petId, 1, 10).catch(() => null);
     const diaries = diaryPage?.records || [];
     const today = todayString();
-    const todayDiary =
-      (diaries || []).find(
-        (diary) => (diary.diaryDate || '').slice(0, 10) === today,
-      ) ||
-      (diaries || [])[0] ||
-      null;
+    const recordedToday = diaries.find(
+      (diary) => (diary.diaryDate || '').slice(0, 10) === today,
+    );
+    const todayDiary = recordedToday || diaries[0] || null;
+    const todayPhotos = await resolveImages(todayDiary?.photoUrls || []);
+    if (sequence !== loadSequence) return;
     this.setData({
       todayDiary,
-      todayPhotos: await resolveImages(todayDiary?.photoUrls || []),
+      showRecordPrompt: !!diaryPage && !recordedToday,
+      todayPhotos,
       todayDiaryTime: todayDiary?.createdAt
         ? formatDateTime(todayDiary.createdAt)
         : '',

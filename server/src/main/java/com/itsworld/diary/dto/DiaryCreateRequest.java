@@ -33,6 +33,7 @@ public class DiaryCreateRequest {
      */
     @NotBlank(message = "日期不能为空")
     private String diaryDate;
+    private java.time.LocalDateTime occurredAt;
 
     /**
      * 日记分类（daily-日常, food-饮食, health-健康）

@@ -1,25 +1,34 @@
 <view class="page">
-  <view wx:if="{{loading}}" class="tip">加载中...</view>
-  <view wx:elif="{{!addresses.length}}" class="empty">
-    <view class="empty-title">还没有收货地址</view>
-    <button class="add-btn" bindtap="goAdd">新增地址</button>
+  <view wx:if="{{loading}}" class="tip">正在加载地址…</view>
+  <view wx:elif="{{loadFailed}}" class="tip">
+    <view>地址加载失败</view>
+    <button class="retry" bindtap="loadAddresses">重试</button>
   </view>
+  <view wx:elif="{{!addresses.length}}" class="tip empty-title">还没有收货地址</view>
   <view wx:else class="list">
-    <view wx:for="{{addresses}}" wx:key="id" class="card">
-      <view class="top">
-        <text class="name">{{item.recipientName}}</text>
-        <text class="mobile">{{item.mobile}}</text>
-        <text wx:if="{{item.isDefault === 1}}" class="default">默认</text>
+    <view wx:for="{{addresses}}" wx:key="id" class="card {{selecting && selectedId === item.id ? 'selected' : ''}}">
+      <view class="address-body" data-id="{{item.id}}" bindtap="selectAddress">
+        <view class="address-content">
+          <view class="top">
+            <text class="name">{{item.recipientName}}</text>
+            <text class="mobile">{{item.mobile}}</text>
+            <text wx:if="{{item.isDefault === 1}}" class="default">默认</text>
+          </view>
+          <view wx:if="{{item.region}}" class="region">{{item.region}}</view>
+          <view class="detail">{{item.addressDetail}}</view>
+        </view>
+        <view wx:if="{{selecting}}" class="radio" aria-label="{{selectedId === item.id ? '已选中' : '选择此地址'}}">
+          <text wx:if="{{selectedId === item.id}}">✓</text>
+        </view>
       </view>
-      <view class="address">{{item.fullAddress}}</view>
       <view class="actions">
-        <text wx:if="{{item.isDefault !== 1}}" class="action" data-id="{{item.id}}" bindtap="setDefault">设为默认</text>
-        <text class="action" data-id="{{item.id}}" bindtap="goEdit">编辑</text>
-        <text class="action danger" data-id="{{item.id}}" bindtap="remove">删除</text>
+        <button wx:if="{{item.isDefault !== 1}}" class="action set-default" data-id="{{item.id}}" bindtap="setDefault">设为默认</button>
+        <button class="action" data-id="{{item.id}}" bindtap="goEdit">编辑</button>
+        <button class="action danger" data-id="{{item.id}}" bindtap="remove">删除</button>
       </view>
     </view>
   </view>
-  <view wx:if="{{addresses.length}}" class="footer">
+  <view wx:if="{{!loading && !loadFailed}}" class="footer">
     <button class="add-btn" bindtap="goAdd">新增地址</button>
   </view>
 </view>

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -46,21 +47,13 @@ public class DiaryService {
         // 1. 验证宠物是否存在
         petService.getPetInfo(userId, createRequest.getPetId());
 
-        // 2. 检查该日期是否已有日记
-        Diary existingDiary = diaryMapper.selectByUserIdPetIdAndDate(
-                userId,
-                createRequest.getPetId(),
-                createRequest.getDiaryDate()
-        );
-        if (existingDiary != null) {
-            throw new BusinessException(ErrorCode.DIARY_ALREADY_EXISTS);
-        }
-
+        // 同一宠物同一天可创建多条独立记录。
         // 3. 创建日记
         Diary diary = Diary.builder()
                 .userId(userId)
                 .petId(createRequest.getPetId())
                 .diaryDate(createRequest.getDiaryDate())
+                .occurredAt(createRequest.getOccurredAt())
                 .category(createRequest.getCategory())
                 .morningMood(createRequest.getMood())
                 .question1(createRequest.getLocation())
@@ -97,9 +90,7 @@ public class DiaryService {
         petService.getPetInfo(userId, petId);
 
         List<Diary> diaries = diaryMapper.selectByUserIdAndPetId(userId, petId);
-        return diaries.stream()
-                .map(this::convertToDiaryResponse)
-                .collect(Collectors.toList());
+        return convertWithLikes(userId, diaries);
     }
 
     public PageResult<DiaryResponse> getDiaryPage(Long userId, Long petId, long pageNum,
@@ -119,9 +110,7 @@ public class DiaryService {
         }
 
         Page<Diary> resultPage = diaryMapper.selectPage(page, wrapper);
-        List<DiaryResponse> records = resultPage.getRecords().stream()
-                .map(this::convertToDiaryResponse)
-                .collect(Collectors.toList());
+        List<DiaryResponse> records = convertWithLikes(userId, resultPage.getRecords());
         return PageResult.of(records, resultPage.getTotal(),
                 resultPage.getCurrent(), resultPage.getSize());
     }
@@ -134,7 +123,9 @@ public class DiaryService {
         if (diary == null || !diary.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.DIARY_NOT_FOUND);
         }
-        return convertToDiaryResponse(diary);
+        var response = convertToDiaryResponse(diary);
+        response.setLiked(diaryMapper.liked(diaryId, userId) > 0);
+        return response;
     }
 
     /**
@@ -148,7 +139,9 @@ public class DiaryService {
         if (diary == null) {
             throw new BusinessException(ErrorCode.DIARY_NOT_FOUND);
         }
-        return convertToDiaryResponse(diary);
+        var response = convertToDiaryResponse(diary);
+        response.setLiked(diaryMapper.liked(diary.getId(), userId) > 0);
+        return response;
     }
 
     /**
@@ -163,6 +156,10 @@ public class DiaryService {
 
         if (createRequest.getContent() != null) {
             diary.setContent(createRequest.getContent());
+        }
+        if (createRequest.getOccurredAt() != null) {
+            diary.setOccurredAt(createRequest.getOccurredAt());
+            diary.setDiaryDate(createRequest.getOccurredAt().toLocalDate().toString());
         }
         if (createRequest.getCategory() != null) {
             diary.setCategory(createRequest.getCategory());
@@ -214,15 +211,23 @@ public class DiaryService {
      */
     @Transactional
     public void likeDiary(Long userId, Long diaryId) {
-        Diary diary = diaryMapper.selectById(diaryId);
+        Diary diary = diaryMapper.lockDiary(diaryId);
         if (diary == null) {
             throw new BusinessException(ErrorCode.DIARY_NOT_FOUND);
         }
 
-        diary.setLikeCount((diary.getLikeCount() != null ? diary.getLikeCount() : 0) + 1);
-        diaryMapper.updateById(diary);
+        if (diaryMapper.liked(diaryId, userId) == 0) {
+            diaryMapper.addLike(diaryId, userId);
+            diaryMapper.changeLikeCount(diaryId, 1);
+        }
 
         log.info("日记点赞成功: diaryId={}", diaryId);
+    }
+
+    @Transactional
+    public void unlikeDiary(Long userId, Long diaryId) {
+        if (diaryMapper.lockDiary(diaryId) == null) throw new BusinessException(ErrorCode.DIARY_NOT_FOUND);
+        if (diaryMapper.removeLike(diaryId, userId) > 0) diaryMapper.changeLikeCount(diaryId, -1);
     }
 
     /**
@@ -230,9 +235,18 @@ public class DiaryService {
      */
     public List<DiaryResponse> getUserDiaries(Long userId) {
         List<Diary> diaries = diaryMapper.selectByUserId(userId);
-        return diaries.stream()
-                .map(this::convertToDiaryResponse)
-                .collect(Collectors.toList());
+        return convertWithLikes(userId, diaries);
+    }
+
+    private List<DiaryResponse> convertWithLikes(Long userId, List<Diary> diaries) {
+        if (diaries.isEmpty()) return List.of();
+        var ids = diaries.stream().map(Diary::getId).collect(Collectors.toList());
+        var likedIds = new HashSet<>(diaryMapper.selectLikedDiaryIds(userId, ids));
+        return diaries.stream().map(diary -> {
+            var response = convertToDiaryResponse(diary);
+            response.setLiked(likedIds.contains(diary.getId()));
+            return response;
+        }).collect(Collectors.toList());
     }
 
     private String joinActivities(List<String> activities) {
@@ -289,6 +303,8 @@ public class DiaryService {
                 .userId(diary.getUserId())
                 .petId(diary.getPetId())
                 .diaryDate(diary.getDiaryDate())
+                .occurredAt(diary.getOccurredAt())
+                .location(diary.getQuestion1())
                 .category(diary.getCategory())
                 .greeting(buildGreeting(diary))
                 .healthScore(parseHealthScore(diary.getQuestion3()))

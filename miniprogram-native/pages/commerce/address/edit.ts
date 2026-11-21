@@ -10,6 +10,7 @@ Page({
   data: {
     id: 0,
     loading: false,
+    addressLoaded: true,
     saving: false,
     form: {
       recipientName: '',
@@ -34,6 +35,7 @@ Page({
   },
 
   async loadAddress(id: number) {
+    this.setData({ loading: true, addressLoaded: false });
     try {
       const addresses = await listAddresses();
       const address = addresses.find((item) => item.id === id);
@@ -42,6 +44,7 @@ Page({
         return;
       }
       this.setData({
+        addressLoaded: true,
         form: {
           recipientName: address.recipientName,
           mobile: address.mobile,
@@ -54,6 +57,8 @@ Page({
       });
     } catch (error) {
       // request 已提示
+    } finally {
+      this.setData({ loading: false });
     }
   },
 
@@ -66,7 +71,13 @@ Page({
     this.setData({ 'form.isDefault': event.detail.value ? 1 : 0 });
   },
 
+  onRegionChange(event: { detail: { value: [string, string, string] } }) {
+    const [province, city, district] = event.detail.value;
+    this.setData({ 'form.province': province, 'form.city': city, 'form.district': district });
+  },
+
   async save() {
+    if (this.data.loading || !this.data.addressLoaded || this.data.saving) return;
     const form = this.data.form;
     if (!form.recipientName.trim()) {
       wx.showToast({ title: '请填写收货人', icon: 'none' });
@@ -91,7 +102,6 @@ Page({
       setTimeout(() => wx.navigateBack(), 400);
     } catch (error) {
       // request 已提示
-    } finally {
       this.setData({ saving: false });
     }
   },

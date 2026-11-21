@@ -219,4 +219,12 @@ public class DiaryController {
         return Result.success(diaries);
     }
 
+    @DeleteMapping("/{diaryId}/like")
+    public Result<Void> unlikeDiary(@PathVariable Long diaryId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+        diaryService.unlikeDiary(user.getId(), diaryId);
+        return Result.success(null, "已取消点赞");
+    }
+
 }

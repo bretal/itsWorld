@@ -42,7 +42,7 @@ jobs:
           npm run build
       - name: Build backend
         working-directory: server
-        run: mvn --batch-mode -Pprod -DskipTests package
+        run: mvn --batch-mode -Pprod -Dtest=DiaryLikeTest,FlywayMigrationTest package
       - name: Package release
         run: |
           mkdir release

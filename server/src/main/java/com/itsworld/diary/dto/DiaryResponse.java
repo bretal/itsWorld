@@ -39,6 +39,8 @@ public class DiaryResponse {
      * 日记日期
      */
     private String diaryDate;
+    private LocalDateTime occurredAt;
+    private String location;
 
     /**
      * 日记分类
@@ -69,6 +71,7 @@ public class DiaryResponse {
      * 点赞数
      */
     private Integer likeCount;
+    private boolean liked;
 
     /**
      * 评论数

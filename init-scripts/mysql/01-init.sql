@@ -164,6 +164,7 @@ CREATE TABLE IF NOT EXISTS pet_diary (
   pet_id BIGINT NOT NULL COMMENT '宠物ID',
   user_id BIGINT NOT NULL COMMENT '主人ID',
   diary_date DATE NOT NULL COMMENT '日记日期',
+  occurred_at DATETIME NULL COMMENT '事件发生时间',
   category VARCHAR(20) COMMENT '日记分类 (daily-日常, food-饮食, health-健康)',
 
   -- 6步唤醒问候数据
@@ -188,7 +189,7 @@ CREATE TABLE IF NOT EXISTS pet_diary (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  UNIQUE KEY uk_pet_date (pet_id, diary_date),
+  KEY idx_pet_date (pet_id, diary_date, id),
   KEY idx_user_id (user_id),
   KEY idx_is_published (is_published),
   KEY idx_diary_date (diary_date),

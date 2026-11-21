@@ -10,10 +10,10 @@
         <view class="head-info">
           <view class="pet-name">{{pet.petName || '我的宠物'}}</view>
           <view class="detail-date">
-            {{dateText}} · {{timeText}}{{categoryLabel ? ' · ' + categoryLabel : ''}}
+            {{dateText}}{{categoryLabel ? (dateText ? ' · ' : '') + categoryLabel : ''}}
           </view>
         </view>
-        <view wx:if="{{diary.greeting}}" class="greeting-chip">{{diary.greeting}}</view>
+        <view wx:if="{{moodLabel}}" class="greeting-chip">{{moodLabel}}</view>
       </view>
 
       <view class="detail-content">
@@ -32,13 +32,11 @@
 
       <view class="detail-foot">
         <view class="foot-action" bindtap="like">
-          <text class="foot-icon {{liked ? 'liked' : ''}}">
-            {{liked ? '♥' : '♡'}}
-          </text>
+          <image class="foot-icon {{liked ? '' : 'not-liked'}}" src="{{staticAssets['community/like.png']}}" mode="aspectFit" />
           <text>{{diary.likeCount || 0}}</text>
         </view>
         <view class="foot-action">
-          <text class="foot-icon">💬</text>
+          <image class="foot-icon" src="{{staticAssets['community/comment.png']}}" mode="aspectFit" />
           <text>{{diary.commentCount || 0}}</text>
         </view>
         <view wx:if="{{diary.healthScore}}" class="health-chip">

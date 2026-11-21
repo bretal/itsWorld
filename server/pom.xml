@@ -38,6 +38,14 @@
 
     <!-- 依赖列表 -->
     <dependencies>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
         <!-- ========================================
              Spring Boot 核心依赖
              ======================================== -->

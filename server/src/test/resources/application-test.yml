@@ -1,5 +1,8 @@
 # 测试环境配置：数据源由 Testcontainers @DynamicPropertySource 注入
 spring:
+  # 既有业务测试自带 schema-test.sql；Flyway 另用独立空库集成测试。
+  flyway:
+    enabled: false
   main:
     banner-mode: "off"
 

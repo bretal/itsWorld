@@ -9,6 +9,93 @@ function load(file, dependencies, globals = {}) {
   vm.runInNewContext(source, { exports, require: name => dependencies[name], ...globals });
   return exports;
 }
+test('PCM amplitude follows silence and actual sample energy', () => {
+  const { pcmLevel } = load('utils/speech.ts', {}, { wx: {}, DataView });
+  const silent = new Int16Array(3200);
+  const quiet = new Int16Array(3200).fill(200);
+  const loud = new Int16Array(3200).fill(10000);
+  assert.equal(pcmLevel(silent.buffer), 0);
+  assert.ok(pcmLevel(quiet.buffer) > 0);
+  assert.ok(pcmLevel(loud.buffer) > pcmLevel(quiet.buffer));
+  assert.equal(pcmLevel(new ArrayBuffer(0)), 0);
+});
+test('release enables editing and editing detaches late transcription without changing chat busy state', () => {
+  let page;
+  load('pages/assistant/chat.ts', {}, { Page: options => page = options });
+  let stopped = 0;
+  let cancelled = 0;
+  const context = {
+    ...page,
+    data: { ...page.data, recording: true, busy: true, voicePhase: 'listening', input: '识别文字' },
+    _holding: true,
+    _speech: { stop: () => stopped++, cancel: () => cancelled++ },
+    setData(changes) { Object.assign(this.data, changes); },
+  };
+  context.endVoice();
+  assert.equal(stopped, 1);
+  assert.equal(context.data.recording, false);
+  assert.equal(context.data.busy, false);
+  assert.equal(context.data.inputMode, 'text');
+  assert.equal(context.data.input, '识别文字');
+  context.data.busy = true;
+  context.input({ detail: { value: '用户修正后的文字' } });
+  assert.equal(cancelled, 1);
+  assert.equal(context._speech, null);
+  assert.equal(context.data.voicePhase, '');
+  assert.equal(context.data.input, '用户修正后的文字');
+  assert.equal(context.data.busy, true);
+});
+test('recorder without off APIs stops safely and reuses listeners across recordings', async () => {
+  const events = {};
+  const messages = [];
+  let stops = 0;
+  let startedOptions;
+  let registrations = 0;
+  let completed = 0;
+  let closes = 0;
+  const recorder = {
+    onStart: fn => { registrations++; events.start = fn; },
+    onFrameRecorded: fn => { registrations++; events.frame = fn; },
+    onStop: fn => { registrations++; events.stop = fn; },
+    onError: () => registrations++,
+    start: options => startedOptions = options,
+    stop: () => { stops++; events.stop?.(); },
+  };
+  const socket = {
+    onOpen: fn => events.open = fn,
+    onMessage: fn => events.message = fn, onError() {}, onClose() {},
+    send: options => messages.push(options.data),
+    close: options => { closes++; options.fail({ errMsg: 'closeSocket:fail wcwss taskID not exist' }); },
+  };
+  const { StreamingSpeech } = load('utils/speech.ts', {
+    './request': { request: async () => 'wss://example.test' },
+  }, { wx: { getRecorderManager: () => recorder, connectSocket: () => socket }, setTimeout, clearTimeout });
+  const speech = new StreamingSpeech(() => {}, () => completed++);
+  await speech.start();
+  events.open();
+  events.message({ data: JSON.stringify({ code: 0 }) });
+  assert.equal(startedOptions.format, 'PCM');
+  speech.stop();
+  assert.equal(stops, 0);
+  events.start();
+  assert.equal(stops, 1);
+  assert.deepEqual(messages, [JSON.stringify({ type: 'end' })]);
+  speech.stop();
+  assert.equal(stops, 1);
+  speech.cancel();
+  assert.equal(completed, 1);
+  assert.equal(closes, 1);
+  speech.cancel();
+  assert.equal(closes, 1);
+  const next = new StreamingSpeech(() => {}, () => completed++);
+  await next.start();
+  next.cancel();
+  assert.equal(closes, 1);
+  events.open();
+  assert.equal(closes, 2);
+  assert.equal(completed, 2);
+  assert.equal(registrations, 4);
+});
 test('assistant uses service paths and only message sends override timeout', async () => {
   const calls = [];
   const api = load('services/assistant.ts', { '../utils/request': { request: options => { calls.push(options); return Promise.resolve({}); } } });

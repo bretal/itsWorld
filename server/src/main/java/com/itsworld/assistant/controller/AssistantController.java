@@ -21,4 +21,9 @@ public class AssistantController {
     @PostMapping("/{id}/messages") public Result<TurnView> send(@PathVariable Long id,@Valid @RequestBody SendRequest request) {
         return Result.success(assistant.send(currentUser.getUserId(),id,request));
     }
+    @PostMapping("/{id}/messages/{turnId}/album")
+    public Result<AlbumDraft> saveAlbum(@PathVariable Long id, @PathVariable Long turnId,
+                                        @Valid @RequestBody AlbumDraft draft) {
+        return Result.success(assistant.saveAlbum(currentUser.getUserId(), id, turnId, draft));
+    }
 }

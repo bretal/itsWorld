@@ -52,7 +52,11 @@ export function formatDate(value?: string): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-export function formatDateTime(value?: string): string {
+export const DIARY_MOOD_LABELS: Record<string, string> = {
+  happy: '开心', calm: '平静', tired: '疲惫', sad: '难过',
+};
+
+export function formatDateTime(value?: string, includeYear = false): string {
   const date = parseDate(value);
   if (!date) {
     return '';
@@ -61,7 +65,8 @@ export function formatDateTime(value?: string): string {
   const day = String(date.getDate()).padStart(2, '0');
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
-  return `${month}月${day}日 ${hour}:${minute}`;
+  const dayText = includeYear ? `${date.getFullYear()}-${month}-${day}` : `${month}月${day}日`;
+  return `${dayText} ${hour}:${minute}`;
 }
 
 export function relativeTime(value?: string): string {

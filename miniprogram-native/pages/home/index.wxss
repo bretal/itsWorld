@@ -616,3 +616,12 @@
   line-height: 1;
 }
 .assistant-speech-close::after { border: 0; }
+.moments-panel .section-head {
+  margin: 0 16rpx 20rpx;
+}
+
+.moments-panel .diary-card,
+.moments-panel .empty-diary {
+  box-shadow: none;
+  background: #faf5fc;
+}

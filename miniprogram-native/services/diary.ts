@@ -6,11 +6,14 @@ export interface Diary {
   userId?: number;
   petId: number;
   diaryDate: string;
+  occurredAt?: string;
+  location?: string;
   greeting?: string;
   healthScore?: number;
   content?: string;
   photoUrls?: string[];
   likeCount?: number;
+  liked?: boolean;
   commentCount?: number;
   isPublic?: number;
   createdAt?: string;
@@ -75,4 +78,7 @@ export function deleteDiary(diaryId: number): Promise<void> {
 
 export function likeDiary(diaryId: number): Promise<void> {
   return request<void>({ url: `/diary/${diaryId}/like`, method: 'POST' });
+}
+export function unlikeDiary(diaryId: number): Promise<void> {
+  return request<void>({ url: `/diary/${diaryId}/like`, method: 'DELETE' });
 }

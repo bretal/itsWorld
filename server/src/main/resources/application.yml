@@ -2,6 +2,14 @@ spring:
   application:
     name: itsworld
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    baseline-version: "18"
+    clean-disabled: true
+    validate-on-migrate: true
+
   config:
     import: optional:classpath:application-local.yml,optional:file:./application-local.yml,optional:file:./server/application-local.yml
 

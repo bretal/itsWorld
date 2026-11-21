@@ -26,6 +26,15 @@ mkdir "$backup"
 cp -p app.jar "$backup/app.jar"
 cp -a dist "$backup/dist"
 
+# 迁移失败时保留旧应用运行。pipefail 确保备份失败时中断发布。
+docker compose exec -T mysql sh -c \
+  'export MYSQL_PWD="$MYSQL_ROOT_PASSWORD"; exec mysqldump -uroot --single-transaction --routines --triggers --set-gtid-purged=OFF --no-tablespaces "$MYSQL_DATABASE"' \
+  | gzip > "$backup/database.sql.gz"
+gzip -t "$backup/database.sql.gz"
+docker compose run --rm --no-deps -v "$release/app.jar:/migration/app.jar:ro" server \
+  java -Xmx128m -Dloader.main=com.itsworld.migration.MigrationRunner \
+  -cp /migration/app.jar org.springframework.boot.loader.launch.PropertiesLauncher migrate
+
 deploy() {
   local jar=$1 assets=$2
   # Preserve bind mount paths and inodes while replacing their contents.
@@ -52,7 +61,7 @@ probe() {
 if deploy "$release/app.jar" "$release/staged/dist" && probe "$release/staged/dist"; then
   printf 'Deployment verified. Backup: %s\n' "$backup"
 else
-  echo 'Deployment failed. Restoring previous release.' >&2
+  echo 'Deployment failed. Restoring application files; database migrations remain applied.' >&2
   deploy "$backup/app.jar" "$backup/dist" && probe "$backup/dist"
   exit 1
 fi

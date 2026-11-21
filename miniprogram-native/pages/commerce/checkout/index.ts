@@ -31,6 +31,7 @@ Page(withStaticImages({
     addresses: [] as ShippingAddress[],
     addressNames: [] as string[],
     addressIndex: 0,
+    selectedAddressId: 0,
     preview: null as CheckoutPreview | null,
     items: [] as CheckoutItemView[],
     couponOptions: [] as CouponOption[],
@@ -67,7 +68,10 @@ Page(withStaticImages({
   async loadAddresses() {
     try {
       const addresses = await listAddresses();
-      let addressIndex = addresses.findIndex((address) => address.isDefault === 1);
+      let addressIndex = addresses.findIndex((address) => address.id === this.data.selectedAddressId);
+      if (addressIndex < 0) {
+        addressIndex = addresses.findIndex((address) => address.isDefault === 1);
+      }
       if (addressIndex < 0) {
         addressIndex = addresses.length ? 0 : -1;
       }
@@ -77,6 +81,8 @@ Page(withStaticImages({
           `${address.recipientName} ${address.mobile} ${address.province || ''}${address.city || ''}${address.district || ''}${address.addressDetail}`,
         ),
         addressIndex,
+        selectedAddressId: addresses.some((address) => address.id === this.data.selectedAddressId)
+          ? this.data.selectedAddressId : 0,
       });
     } catch (error) {
       // request 已提示
@@ -155,7 +161,18 @@ Page(withStaticImages({
   },
 
   goAddressList() {
-    wx.navigateTo({ url: '/pages/commerce/address/index?from=checkout' });
+    const selectedId = this.data.addresses[this.data.addressIndex]?.id || 0;
+    wx.navigateTo({
+      url: `/pages/commerce/address/index?from=checkout&selectedId=${selectedId}`,
+      events: {
+        addressSelected: (id: number) => {
+          this.setData({
+            selectedAddressId: id,
+            addressIndex: this.data.addresses.findIndex((address) => address.id === id),
+          });
+        },
+      },
+    });
   },
 
   goAddAddress() {

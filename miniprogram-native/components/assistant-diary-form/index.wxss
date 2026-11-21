@@ -1,0 +1,11 @@
+@import "../../pages/diary/edit.wxss";
+
+.diary-edit-page {
+  min-height: auto;
+  padding: 16rpx 8rpx;
+  background: transparent;
+}
+.form-card { padding-left: 20rpx; padding-right: 20rpx; }
+.form-label { width: 100rpx; }
+.mood-label { font-size: 20rpx; }
+.save-btn { width: 100%; }

@@ -82,3 +82,138 @@ page{height:100%;background:#f9edff;color:#19152d}button::after{border:0}button{
   border-bottom: 2rpx solid currentColor;
   transform: translateY(-2rpx) rotate(45deg);
 }
+.composer .composer-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 60rpx;
+  width: 60rpx;
+  height: 74rpx;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+.composer .voice-icon { margin-left: 4rpx; }
+.composer-icon image, .send-button image { width: 40rpx; height: 40rpx; }
+.assistant-photo-strip { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
+.assistant-photo-strip image { display: block; width: 94rpx; height: 94rpx; border-radius: 14rpx; }
+.composer-photos { margin: 0 0 14rpx; }
+.composer-photo { position: relative; }
+.composer-photo .photo-remove {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  width: 38rpx;
+  height: 38rpx;
+  padding: 0;
+  line-height: 38rpx;
+  border-radius: 50%;
+  background: #523861;
+  color: #fff;
+  font-size: 26rpx;
+}
+.album-draft {
+  margin: 14rpx 26rpx 24rpx 0;
+  padding: 20rpx;
+  border-radius: 30rpx;
+  background: #fff;
+  color: #34253d;
+  box-shadow: 0 12rpx 32rpx #a984c126;
+}
+.album-draft-label {
+  padding: 12rpx 16rpx;
+  border-radius: 16rpx;
+  background: #f3e9fb;
+  color: #654177;
+  font-size: 24rpx;
+  font-weight: 650;
+}
+.album-draft-cover { display: block; width: 100%; height: 236rpx; margin-top: 14rpx; border-radius: 20rpx; }
+.album-draft-title { margin-top: 16rpx; font-size: 34rpx; font-weight: 700; }
+.album-draft-copy { margin-top: 8rpx; font-size: 27rpx; line-height: 1.55; white-space: pre-wrap; }
+.album-draft-meta { margin-top: 10rpx; color: #75617e; font-size: 24rpx; }
+.album-save {
+  margin: 20rpx 0 0;
+  border-radius: 18rpx;
+  color: #fff;
+  background: #7e45b4;
+  font-size: 28rpx;
+}
+.album-edit { margin: 8rpx 0 0; color: #71469a; background: transparent; font-size: 26rpx; }
+.album-editor-mask {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  background: #35244260;
+}
+.album-editor {
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 82vh;
+  padding: 26rpx 26rpx calc(24rpx + env(safe-area-inset-bottom));
+  border-radius: 34rpx 34rpx 0 0;
+  background: #fff;
+  color: #34253d;
+}
+.album-editor-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+.album-editor-head .album-edit { padding: 0 10rpx; }
+.album-editor-field {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #eee6f3;
+  font-size: 27rpx;
+}
+.album-editor-field > text { flex: 0 0 100rpx; }
+.album-editor-field input, .album-editor-field textarea { flex: 1; min-width: 0; }
+.album-editor-field textarea { height: 135rpx; }
+.album-date-time { display: flex; gap: 26rpx; }
+.composer .composer-icon {
+  flex-basis: 88rpx;
+  width: 88rpx;
+  height: 96rpx;
+}
+.composer-icon image,
+.send-button image {
+  width: 70rpx;
+  height: 70rpx;
+}
+.composer .send-button { width: 80rpx; height: 80rpx; }
+.composer textarea { padding: 18rpx 10rpx; }
+.hold-to-talk {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  font-size: 30rpx;
+  color: #4e2e60;
+  font-weight: 650;
+  user-select: none;
+}
+.hold-to-talk.is-recording { background: #edddfa; border-radius: 40rpx; }
+.voice-panel {
+  padding: 38rpx 28rpx;
+  margin-bottom: 16rpx;
+  border: 2rpx solid #ffffffaa;
+  border-radius: 36rpx;
+  background: radial-gradient(ellipse at center, #e9ceff, #f8eafbed);
+  color: #4e2e60;
+}
+.voice-panel.voice-cancel { background: #f8dde7; color: #943f64; }
+.voice-transcript { min-height: 80rpx; max-height: 180rpx; overflow-y: auto; text-align: center; font-size: 32rpx; line-height: 1.6; }
+.voice-wave { display: flex; justify-content: center; align-items: center; gap: 8rpx; height: 90rpx; margin: 18rpx 0; }
+.voice-wave-bar { width: 7rpx; border-radius: 8rpx; background: #ae72e8; transition: height 100ms linear; }
+.voice-hint { text-align: center; font-size: 26rpx; }
+.voice-finishing {
+  padding: 8rpx 18rpx 14rpx;
+  color: #795b8b;
+  font-size: 23rpx;
+}
+.composer-icon image.compact-icon {
+  width: 48rpx;
+  height: 48rpx;
+}

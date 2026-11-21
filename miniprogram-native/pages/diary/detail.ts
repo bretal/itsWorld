@@ -1,10 +1,10 @@
 import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
-import { deleteDiary, getDiary, likeDiary } from '../../services/diary';
+import { deleteDiary, getDiary, likeDiary, unlikeDiary } from '../../services/diary';
 import type { Diary } from '../../services/diary';
 import { getPet } from '../../services/pet';
 import type { Pet } from '../../services/pet';
-import { formatDate, formatDateTime } from '../../utils/format';
+import { DIARY_MOOD_LABELS, formatDate, formatDateTime } from '../../utils/format';
 import { resolveImage, resolveImages } from '../../utils/image';
 
 Page(withStaticImages({
@@ -14,10 +14,11 @@ Page(withStaticImages({
     pet: null as Pet | null,
     photos: [] as string[],
     dateText: '',
-    timeText: '',
+    moodLabel: '',
     categoryLabel: '',
     petAvatarSrc: '',
     liked: false,
+    liking: false,
     loading: true,
   },
 
@@ -46,14 +47,15 @@ Page(withStaticImages({
       const petAvatarSrc = await resolveImage(pet?.avatarUrl);
       this.setData({
         diary,
+        liked: !!diary.liked,
         pet,
         petAvatarSrc,
         photos: await resolveImages(diary.photoUrls || []),
         categoryLabel: diary.category
           ? categoryLabels[diary.category] || diary.category
           : '',
-        dateText: formatDate(diary.diaryDate),
-        timeText: formatDateTime(diary.createdAt),
+        dateText: formatDateTime(diary.occurredAt || diary.createdAt, true) || formatDate(diary.diaryDate),
+        moodLabel: diary.greeting ? DIARY_MOOD_LABELS[diary.greeting] || diary.greeting : '',
         loading: false,
       });
     } catch (error) {
@@ -63,21 +65,23 @@ Page(withStaticImages({
 
   async like() {
     const { diary, liked } = this.data;
-    if (!diary || liked) {
+    if (!diary || this.data.liking) {
       return;
     }
 
     try {
-      await likeDiary(diary.id);
+      this.setData({ liking: true });
+      if (liked) await unlikeDiary(diary.id);
+      else await likeDiary(diary.id);
+      const updated = await getDiary(diary.id);
       this.setData({
-        liked: true,
-        diary: {
-          ...diary,
-          likeCount: (diary.likeCount || 0) + 1,
-        },
+        liked: !!updated.liked,
+        diary: updated,
       });
     } catch (error) {
       // request 已统一提示
+    } finally {
+      this.setData({ liking: false });
     }
   },
 
@@ -106,4 +110,4 @@ Page(withStaticImages({
       },
     });
   },
-}, ["pet-placeholder.png"]));
+}, ["pet-placeholder.png", "community/like.png", "community/comment.png"]));

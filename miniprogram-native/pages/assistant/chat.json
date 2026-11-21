@@ -2,6 +2,7 @@
   "navigationBarTitleText": "宠物助手",
   "backgroundColor": "#f8f1fa",
   "usingComponents": {
+    "assistant-diary-form": "/components/assistant-diary-form/index",
     "product-detail": "/components/product-detail/index"
   },
   "navigationStyle": "custom"

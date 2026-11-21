@@ -2,7 +2,7 @@ import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { listPets } from '../../services/pet';
 import type { Pet } from '../../services/pet';
-import { likeDiary, listDiariesPage } from '../../services/diary';
+import { getDiary, likeDiary, unlikeDiary, listDiariesPage } from '../../services/diary';
 import type { Diary } from '../../services/diary';
 import {
   formatAge,
@@ -17,6 +17,7 @@ interface DiaryItem extends Diary {
   timeText?: string;
   photos: string[];
   liked?: boolean;
+  liking?: boolean;
 }
 
 interface AlbumPet extends Pet {
@@ -131,10 +132,10 @@ Page(withStaticImages({
         (result.records || []).map(async (diary) => ({
           ...diary,
           dateText: formatDate(diary.diaryDate),
-          timeText: (diary.createdAt || '').replace('T', ' ').slice(11, 16),
+          timeText: (diary.occurredAt || diary.createdAt || '').replace('T', ' ').slice(11, 16),
           moodText: ({ happy: '开心', calm: '平静', tired: '疲惫', sad: '难过' } as Record<string, string>)[diary.greeting || ''] || diary.greeting || '今日记录',
           photos: await resolveImages(diary.photoUrls || []),
-          liked: false,
+          liked: !!diary.liked,
         })),
       );
 
@@ -168,20 +169,26 @@ Page(withStaticImages({
   async like(event: any) {
     const index = Number(event.currentTarget.dataset.index);
     const item = this.data.diaries[index];
-    if (!item || item.liked) {
+    if (!item || item.liking) {
       return;
     }
 
+    this.setData({ [`diaries[${index}].liking`]: true });
     try {
-      await likeDiary(item.id);
+      if (item.liked) await unlikeDiary(item.id);
+      else await likeDiary(item.id);
+      const updated = await getDiary(item.id);
       if (this.data.diaries[index]?.id !== item.id) return;
-      const diaries = this.data.diaries.slice();
-      const target = diaries[index];
-      target.likeCount = (target.likeCount || 0) + 1;
-      target.liked = true;
-      this.setData({ diaries });
+      this.setData({
+        [`diaries[${index}].likeCount`]: updated.likeCount || 0,
+        [`diaries[${index}].liked`]: !!updated.liked,
+      });
     } catch (error) {
       // request 已统一提示
+    } finally {
+      if (this.data.diaries[index]?.id === item.id) {
+        this.setData({ [`diaries[${index}].liking`]: false });
+      }
     }
   },
 

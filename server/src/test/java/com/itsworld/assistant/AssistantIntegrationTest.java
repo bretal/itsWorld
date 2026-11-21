@@ -175,7 +175,7 @@ class AssistantIntegrationTest {
         jdbc.update("INSERT INTO shop_sku(id,product_id,sku_code,sale_price,status) VALUES(990002,990002,'SMOKE_SKU',3990,'ENABLED')");
         jdbc.update("INSERT INTO shop_inventory(sku_id,warehouse_id,available_qty) VALUES(990002,0,12)");
         var actualClient=new DeepSeekClient(json,true,key,"https://api.deepseek.com","deepseek-flash");
-        var actual=new AssistantService(sessionMapper,turns,transactions,productService,actualClient,json,instructions);
+        var actual=new AssistantService(sessionMapper,turns,transactions,productService,actualClient,json,instructions,null,null);
         long id=Long.parseLong(actual.create(999998L).id());
         var result=actual.send(999998L,id,new SendRequest("live_smoke_123","请查询商城100元以内的测试冻干零食，只看当前在售有货的商品，不需要适龄或医疗建议。"));
         assertEquals("SUCCEEDED",result.status()); assertFalse(result.content().isBlank());

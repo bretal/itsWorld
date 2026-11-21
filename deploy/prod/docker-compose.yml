@@ -19,7 +19,6 @@ services:
       - --max-connections=80
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init-scripts/mysql:/docker-entrypoint-initdb.d:ro
     networks:
       - itsworld-net
     healthcheck:
@@ -116,6 +115,12 @@ services:
       DEEPSEEK_ENABLED: ${DEEPSEEK_ENABLED:-false}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}
+      SPEECH_TENCENT_SECRET_ID: ${SPEECH_TENCENT_SECRET_ID:-}
+      SPEECH_TENCENT_APP_ID: ${SPEECH_TENCENT_APP_ID:-}
+      SPEECH_TENCENT_SECRET_KEY: ${SPEECH_TENCENT_SECRET_KEY:-}
+      ASSISTANT_VISION_BASE_URL: ${ASSISTANT_VISION_BASE_URL:-}
+      ASSISTANT_VISION_API_KEY: ${ASSISTANT_VISION_API_KEY:-}
+      ASSISTANT_VISION_MODEL: ${ASSISTANT_VISION_MODEL:-}
       LOGGING_LEVEL_COM_ITSWORLD: INFO
       TZ: Asia/Shanghai
     extra_hosts:

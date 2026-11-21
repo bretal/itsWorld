@@ -88,12 +88,16 @@
 }
 
 .foot-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
   margin-right: 6rpx;
-  font-size: 30rpx;
 }
 
-.foot-icon.liked {
-  color: #ff7a9e;
+.foot-icon.not-liked {
+  filter: grayscale(1);
+  opacity: .55;
 }
 
 .health-chip {

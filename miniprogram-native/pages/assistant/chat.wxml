@@ -27,7 +27,14 @@
     <view wx:if="{{greeting}}" class="message-row message-greeting"><view class="message-bubble message-assistant"><text selectable>{{greeting}}</text></view></view>
     <button wx:if="{{hasMore}}" class="history-button" size="mini" disabled="{{busy || loading}}" bindtap="older">加载更早消息</button>
     <view wx:for="{{turns}}" wx:key="requestId" wx:for-item="turn" id="turn-{{turn.requestId}}" class="turn">
-      <view class="message-row message-row-user"><view class="message-bubble message-user"><text selectable>{{turn.question}}</text></view></view>
+      <view class="message-row message-row-user">
+        <view class="message-bubble message-user">
+          <text selectable>{{turn.question}}</text>
+          <view wx:if="{{turn.photoSources.length}}" class="assistant-photo-strip">
+            <image wx:for="{{turn.photoSources}}" wx:for-item="photo" wx:key="*this" src="{{photo}}" mode="aspectFill"/>
+          </view>
+        </view>
+      </view>
       <view wx:if="{{turn.status === 'SUCCEEDED'}}" class="message-row"><view class="message-bubble message-assistant"><text selectable>{{turn.content}}</text></view></view>
       <view wx:else class="status"><text>{{busy ? '助手正在查询 / 回复…' : (turn.status === 'FAILED' ? '回复失败，可重试' : '结果待确认')}}</text>
         <button wx:if="{{!busy}}" size="mini" data-id="{{turn.requestId}}" bindtap="retry">{{turn.status === 'FAILED' ? '重试' : '查询状态'}}</button>
@@ -37,13 +44,34 @@
         <view class="product-info"><text class="product-name">{{product.name}}</text><text class="spec">{{product.specText}}</text><text class="price">¥{{product.priceText}}</text><text wx:if="{{product.memberPriceText}}" class="member">会员价 ¥{{product.memberPriceText}}</text></view>
       </view>
       <view wx:if="{{turn.products.length}}" class="notice">价格库存以商品详情为准 · 点击查看</view>
+      <view wx:if="{{turn.draft}}" class="album-draft">
+        <view class="album-draft-label">{{turn.draft.diaryId ? '已保存到成长相册' : '相册草稿'}}</view>
+        <assistant-diary-form wx:if="{{!turn.draft.diaryId}}" draft="{{turn.draft}}"
+          pets="{{diaryPetChoices}}" busy="{{busy || loading}}" data-id="{{turn.requestId}}"
+          bind:change="changeInlineDiary" bind:save="confirmAlbum" bind:uploadstate="inlineDiaryUploading"/>
+        <block wx:else>
+        <image wx:if="{{turn.draft.photoUrls.length}}" class="album-draft-cover" src="{{turn.draft.photoUrls[0]}}" mode="aspectFill"/>
+        <view class="album-draft-title">{{turn.draft.title}}</view>
+        <view class="album-draft-copy">{{turn.draft.content}}</view>
+        <view class="album-draft-meta">{{turn.draftTimeText}}{{turn.draft.location ? ' · ' + turn.draft.location : ''}}</view>
+        <button wx:if="{{turn.draft.diaryId}}" class="album-save" data-id="{{turn.draft.diaryId}}" bindtap="viewAlbumRecord">查看记录</button>
+        </block>
+      </view>
     </view>
     <view wx:if="{{loading}}" class="status">加载中…</view><button wx:if="{{loadError}}" bindtap="retryLoad">加载失败，点击重试</button>
     <view id="bottom" class="bottom"/>
   </scroll-view>
   <view wx:if="{{errorText}}" class="error">{{errorText}}</view>
   <view class="footer">
-    <view wx:if="{{!turns.length && !detailId}}" class="quick-questions" aria-label="快捷问题">
+    <view wx:if="{{voicePhase === 'finishing'}}" class="voice-finishing">正在补齐末尾文字…</view>
+    <view wx:if="{{recording}}" class="voice-panel {{cancelRecording ? 'voice-cancel' : ''}}">
+      <view class="voice-transcript">{{voiceText || (voicePhase === 'connecting' ? '正在连接…' : '正在聆听…')}}</view>
+      <view class="voice-wave" aria-hidden="true">
+        <view wx:for="{{waveBars}}" wx:key="index" class="voice-wave-bar" style="height: {{item}}rpx"></view>
+      </view>
+      <view class="voice-hint">{{cancelRecording ? '松手取消' : voicePhase === 'finishing' ? '正在确认识别结果…' : '松手结束，上滑取消'}}</view>
+    </view>
+    <view wx:if="{{!turns.length && !detailId && !photos.length}}" class="quick-questions" aria-label="快捷问题">
       <view class="quick-question-track {{busy || loading ? 'is-paused' : ''}}">
         <view wx:for="{{[0, 1]}}" wx:for-item="copy" wx:key="*this" class="quick-question-group">
           <button wx:for="{{quickQuestions}}" wx:for-item="question" wx:key="*this" class="quick-question"
@@ -51,7 +79,24 @@
         </view>
       </view>
     </view>
-    <view class="composer"><textarea value="{{input}}" maxlength="2000" auto-height placeholder="点击输入你的问题…" placeholder-class="input-placeholder" disabled="{{busy || loading}}" bindinput="input" adjust-position cursor-spacing="24"/><button class="send-button" aria-label="发送问题" disabled="{{busy || loading || !input}}" bindtap="send"><view class="paper-plane"/></button></view>
+    <view wx:if="{{photos.length}}" class="assistant-photo-strip composer-photos">
+      <view wx:for="{{photos}}" wx:key="url" class="composer-photo">
+        <image src="{{item.path}}" mode="aspectFill"/>
+        <button class="photo-remove" data-index="{{index}}" bindtap="removePhoto" aria-label="移除照片">×</button>
+      </view>
+    </view>
+    <view class="composer">
+      <button class="composer-icon" aria-label="拍摄或选择照片" disabled="{{busy || loading || photos.length >= 3}}" bindtap="choosePhotos"><image class="compact-icon" src="{{artwork.camera}}" mode="aspectFit"/></button>
+      <view wx:if="{{inputMode === 'voice'}}" class="hold-to-talk {{recording ? 'is-recording' : ''}}"
+        role="button" aria-label="按住说话" bindtouchstart="beginVoice" catchtouchmove="moveVoice"
+        bindtouchend="endVoice" bindtouchcancel="cancelVoice">
+        {{recording ? (cancelRecording ? '松手取消' : voicePhase === 'finishing' ? '识别中…' : '松手结束') : '按住说话'}}
+      </view>
+      <textarea wx:else value="{{input}}" maxlength="2000" auto-height placeholder="输入消息…" placeholder-class="input-placeholder" disabled="{{busy || loading}}" bindfocus="finishVoiceDraft" bindinput="input" adjust-position cursor-spacing="24"/>
+      <button class="composer-icon" aria-label="{{inputMode === 'voice' ? '切换文字输入' : '切换语音输入'}}"
+        disabled="{{busy || loading}}" bindtap="toggleInputMode"><image class="compact-icon" src="{{inputMode === 'voice' ? artwork.keyboard : artwork.voice}}" mode="aspectFit"/></button>
+      <button wx:if="{{inputMode === 'text' && input}}" class="send-button" aria-label="发送消息" disabled="{{busy || loading}}" bindtap="send"><image src="{{artwork.send}}" mode="aspectFit"/></button>
+    </view>
     <view class="ai-notice"><text>✦</text> 回答由AI生成，仅供参考 <text>✦</text></view>
     <view class="privacy">消息及所选宠物的相关档案字段由 DeepSeek 处理，请勿填写隐私信息 · 健康建议不能替代兽医诊疗</view>
   </view>

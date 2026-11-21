@@ -48,6 +48,7 @@ public class Diary implements Serializable {
      * 日记日期（YYYY-MM-DD）
      */
     private String diaryDate;
+    private LocalDateTime occurredAt;
 
     /**
      * 日记分类（daily-日常, food-饮食, health-健康）

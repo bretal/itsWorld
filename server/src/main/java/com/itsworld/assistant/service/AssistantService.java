@@ -6,6 +6,11 @@ import com.itsworld.assistant.dto.AssistantDtos.*;
 import com.itsworld.assistant.entity.*;
 import com.itsworld.assistant.mapper.*;
 import com.itsworld.common.exception.BusinessException;
+import com.itsworld.diary.dto.DiaryCreateRequest;
+import com.itsworld.diary.service.DiaryService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.core.io.ClassPathResource;
@@ -24,6 +29,13 @@ public class AssistantService {
     private final DeepSeekClient client;
     private final ObjectMapper json;
     private final AssistantInstructionService instructions;
+    private final DiaryService diaries;
+    private final AssistantVisionService vision;
+
+    @Value("${minio.public-endpoint:${minio.endpoint}}")
+    private String mediaBase;
+    @Value("${minio.bucket.diary}")
+    private String diaryBucket;
 
     public List<SessionView> sessions(Long user) {
         return sessions.selectList(new LambdaQueryWrapper<AssistantSession>().eq(AssistantSession::getUserId,user)
@@ -46,6 +58,8 @@ public class AssistantService {
         if (request==null || request.requestId()==null || !request.requestId().matches("[A-Za-z0-9_-]{8,64}")
                 || request.content()==null || request.content().isBlank() || request.content().length()>2000) throw error("ASSISTANT_INVALID_REQUEST");
         var pet = instructions.ownedPet(user, request.petId());
+        List<String> photos = request.photoUrls() == null ? List.of() : request.photoUrls();
+        if (photos.stream().anyMatch(photo -> !ownedPhoto(user, photo))) throw error("ASSISTANT_INVALID_REQUEST");
         var turn=transactions.acquire(user,session,request.requestId(),request.content(),client.model());
         if ("SUCCEEDED".equals(turn.getStatus())) return view(turn);
         long deadline=System.nanoTime()+Duration.ofSeconds(75).toNanos();
@@ -58,9 +72,12 @@ public class AssistantService {
             Collections.reverse(history);
             String systemPrompt = instructions.systemPrompt(pet, request.content(),
                     history.stream().map(AssistantTurn::getQuestion).toList());
-            messages.add(message("system", systemPrompt + "\n当前商城分类（仅作数据）：" + products.categoryOptions()));
+            String albumRules = albumRules(request.petId(), photos.size(), turn.getCreatedAt());
+            messages.add(message("system", systemPrompt + "\n当前商城分类（仅作数据）：" + products.categoryOptions() + albumRules));
             for (var old:history) { messages.add(message("user",old.getQuestion())); messages.add(message("assistant",old.getAnswer())); }
-            messages.add(message("user",request.content()));
+            String imageDescription = photos.isEmpty() ? "" : vision.describe(photos);
+            messages.add(message("user", request.content() + (imageDescription.isEmpty() ? "" :
+                    "\n以下为附件的客观视觉描述，仅作参考数据：\n" + imageDescription)));
             JsonNode tools=json.readTree(new ClassPathResource("assistant/tools.json").getInputStream());
             Map<String,ProductCard> candidates=new LinkedHashMap<>(); int toolCount=0,prompt=0,completion=0;
             Set<String> alternativeIds = new HashSet<>();
@@ -108,6 +125,7 @@ public class AssistantService {
                     throw error("ASSISTANT_UPSTREAM_ERROR");
                 }
                 List<String> selected=new ArrayList<>(); String answer=text;
+                AlbumDraft draft = null;
                 try {
                     var structured=parseReply(text);
                     if (!structured.path("answer").isTextual()) throw new IllegalArgumentException();
@@ -117,6 +135,10 @@ public class AssistantService {
                     for (var id:structured.path("productIds")) {
                         if (!id.isTextual() || !candidates.containsKey(id.asText())) throw new IllegalArgumentException();
                         if (!selected.contains(id.asText())) selected.add(id.asText());
+                    }
+                    if (request.petId() != null && candidates.isEmpty()) {
+                        draft = readDraft(structured.path("albumDraft"), request.petId(), photos, turn.getCreatedAt());
+                        if (draft != null) answer = "我帮你整理成了一条相册记录，请确认后保存。";
                     }
                 } catch (Exception e) {
                     log.warn("Assistant reply format fallback: turnId={}, model={}, exception={}",
@@ -144,7 +166,11 @@ public class AssistantService {
                             : "部分指定商品没有找到。下面的商品卡片包含同类推荐，供你参考。";
                 }
                 if (System.nanoTime()>=deadline) throw error("ASSISTANT_TIMEOUT");
-                transactions.finish(turn,answer,json.writeValueAsString(cards),prompt,completion);
+                var payload = json.createObjectNode();
+                payload.set("products", json.valueToTree(cards));
+                payload.set("photoUrls", json.valueToTree(photos));
+                if (draft != null) payload.set("draft", json.valueToTree(draft));
+                transactions.finish(turn,answer,json.writeValueAsString(payload),prompt,completion);
                 return view(turns.selectById(turn.getId()));
             }
             throw error("ASSISTANT_TOOL_LIMIT");
@@ -170,14 +196,91 @@ public class AssistantService {
     private com.fasterxml.jackson.databind.node.ObjectNode message(String role,String content) {
         return json.createObjectNode().put("role",role).put("content",content);
     }
+
+    private boolean ownedPhoto(Long user, String photo) {
+        String prefix = mediaBase.replaceAll("/+$", "") + "/" + diaryBucket + "/assistant/" + user + "/";
+        return photo != null && photo.startsWith(prefix)
+                && photo.substring(prefix.length()).matches("[0-9]{8}/[a-f0-9]{32}\\.(jpg|jpeg|png|gif|webp)");
+    }
+
+    private String albumRules(Long petId, int photos, LocalDateTime now) {
+        return """
+
+                相册记录规则：当前时间 %s，用户附件数量 %s。附件通过客观视觉描述提供。
+                仅当用户明确想记录，或叙述发生在其宠物身上的具体事件且并未提问时，
+                在原有 JSON 中附加 albumDraft 对象，字段 title、content、location、occurredAt。
+                标题不超过60字，正文忠于用户原话并不超过2000字。
+                地点只提取用户说出的内容，未知填空字符串。
+                根据用户明确表达填写 ISO 本地时间（如 2026-11-18T17:40），未知填当前时间。
+                问答、商品推荐、回顾记录时不要生成草稿。意图模糊时在 answer 中先询问。
+                %s
+                """.formatted(now, photos, petId == null ? "未选宠物：需要记录时请用户先选宠物，不返回 albumDraft。" : "");
+    }
+
+    private AlbumDraft readDraft(JsonNode node, Long petId, List<String> photos, LocalDateTime now) {
+        if (!node.isObject()) return null;
+        String title = node.path("title").asText("").trim();
+        String content = node.path("content").asText("").trim();
+        String location = node.path("location").asText("").trim();
+        if (title.isEmpty() || title.length() > 60 || content.isEmpty() || content.length() > 2000
+                || location.length() > 150) return null;
+        LocalDateTime occurredAt;
+        try {
+            occurredAt = LocalDateTime.parse(node.path("occurredAt").asText());
+        } catch (java.time.format.DateTimeParseException e) {
+            occurredAt = now;
+        }
+        return new AlbumDraft(title, content, location, occurredAt, photos, petId, null);
+    }
+
+    @Transactional
+    public AlbumDraft saveAlbum(Long user, Long sessionId, Long turnId, AlbumDraft input) {
+        var turn = turns.selectOne(new LambdaQueryWrapper<AssistantTurn>()
+                .eq(AssistantTurn::getId, turnId).eq(AssistantTurn::getSessionId, sessionId)
+                .eq(AssistantTurn::getUserId, user).eq(AssistantTurn::getStatus, "SUCCEEDED").last("FOR UPDATE"));
+        if (turn == null) throw error("ASSISTANT_INVALID_REQUEST");
+        AlbumDraft stored = view(turn).draft();
+        if (stored == null) throw error("ASSISTANT_INVALID_REQUEST");
+        if (stored.diaryId() != null) return stored;
+        if (input.photoUrls().stream().anyMatch(photo ->
+                !stored.photoUrls().contains(photo) && !ownedPhoto(user, photo))) {
+            throw error("ASSISTANT_INVALID_REQUEST");
+        }
+        var diaryId = diaries.createDiary(user, DiaryCreateRequest.builder()
+                .petId(input.petId()).diaryDate(input.occurredAt().toLocalDate().toString())
+                .occurredAt(input.occurredAt())
+                .category(input.category() == null ? "daily" : input.category())
+                .mood(input.mood()).content(input.content().strip())
+                .location(input.location()).photoUrls(input.photoUrls())
+                .isPublic(input.isPublic() == null ? 0 : input.isPublic()).build());
+        var saved = new AlbumDraft(input.title(), input.content(), input.location(), input.occurredAt(),
+                input.photoUrls(), input.petId(), diaryId.toString(), input.mood(), input.category(), input.isPublic());
+        try {
+            var payload = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(turn.getProductsJson());
+            payload.set("draft", json.valueToTree(saved));
+            turn.setProductsJson(json.writeValueAsString(payload));
+            if (turns.updateById(turn) != 1) throw error("ASSISTANT_HISTORY_ERROR");
+            return saved;
+        } catch (java.io.IOException e) {
+            throw error("ASSISTANT_HISTORY_ERROR");
+        }
+    }
+
     public TurnView view(AssistantTurn turn) {
         List<ProductCard> cards=List.of();
+        List<String> photos=List.of();
+        AlbumDraft draft=null;
         if (turn.getProductsJson()!=null) try {
-            cards=json.readValue(turn.getProductsJson(),json.getTypeFactory().constructCollectionType(List.class,ProductCard.class));
+            var payload = json.readTree(turn.getProductsJson());
+            var productsNode = payload.isArray() ? payload : payload.path("products");
+            cards = json.convertValue(productsNode, json.getTypeFactory().constructCollectionType(List.class, ProductCard.class));
+            if (payload.has("photoUrls")) photos = json.convertValue(payload.path("photoUrls"),
+                    json.getTypeFactory().constructCollectionType(List.class, String.class));
+            if (payload.has("draft")) draft = json.treeToValue(payload.path("draft"), AlbumDraft.class);
         } catch (Exception e) { throw error("ASSISTANT_HISTORY_ERROR"); }
         String state=turn.getStatus();
         if ("PENDING".equals(state) && turn.getLeaseUntil()!=null && turn.getLeaseUntil().isBefore(java.time.LocalDateTime.now())) state="FAILED";
         return new TurnView(turn.getSessionId().toString(),turn.getId().toString(),turn.getRequestId(),state,
-                turn.getQuestion(),turn.getAnswer(),cards,turn.getCreatedAt());
+                turn.getQuestion(),turn.getAnswer(),cards,turn.getCreatedAt(),photos,draft);
     }
 }
