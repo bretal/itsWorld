@@ -8,6 +8,7 @@ import { listPets } from '../../services/pet';
 import { assetUrl } from '../../utils/assets';
 import { createAssistantSession, getAssistantHistory, saveAssistantAlbum, sendAssistantMessage } from '../../services/assistant';
 import type { AlbumDraft, AssistantSession, AssistantTurn } from '../../services/assistant';
+import { startAgent, agentHasTask } from '../../utils/agent-runner';
 
 const emptyConversation = () => ({
   sessionId: '', sessions: [] as AssistantSession[], turns: [] as AssistantTurn[],
@@ -17,6 +18,7 @@ const emptyConversation = () => ({
 
 Page({
   data: {
+    agentMode: false,
     statusBarHeight: 20,
     navHeight: 44,
     petChoices: [{ id: 0, label: '通用咨询' }],
@@ -341,10 +343,36 @@ Page({
     this.setData({ input: question });
     await this.send();
   },
+  toggleAgentMode(event: any) {
+    this.setData({ agentMode: !!event.detail.value });
+  },
   async send() {
     const content = this.data.input.trim();
     if (!content || content.length > 2000 || this.data.busy || this.data.loading) return;
     this.finishVoiceDraft();
+    if (this.data.agentMode) {
+      if (agentHasTask()) {
+        wx.showToast({ title: '请先结束当前操作任务', icon: 'none' });
+        return;
+      }
+      if (this.data.photos.length) {
+        wx.showToast({ title: '体重记录请使用文字或语音输入', icon: 'none' });
+        return;
+      }
+      if (!this.data.sessionId) {
+        await this.newSession(true);
+        if (!this.data.sessionId) return;
+      }
+      this.setData({ input: '', busy: true });
+      try {
+        await startAgent(content, this.data.sessionId, this.data.petChoices[this.data.petChoiceIndex]?.id || undefined);
+      } catch (error) {
+        wx.showToast({ title: error instanceof Error ? error.message : '操作启动失败', icon: 'none' });
+      } finally {
+        if (this._alive) this.setData({ busy: false });
+      }
+      return;
+    }
     if (/^(保存这条|确认保存|保存到成长相册)[。！!？?]?$/.test(content) && !this.data.photos.length) {
       const pending = this.data.turns.filter(turn => turn.draft && !turn.draft.diaryId);
       if (pending.length === 1) {

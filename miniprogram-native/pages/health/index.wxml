@@ -1,4 +1,5 @@
 <view class="health-page">
+  <agent-progress />
   <view class="health-hero">
     <view class="hero-circle circle-a"></view>
     <view class="hero-circle circle-b"></view>

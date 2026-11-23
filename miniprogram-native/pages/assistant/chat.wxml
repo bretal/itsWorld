@@ -13,6 +13,8 @@
     </view>
   </picker>
   <view class="ambient cloud-one"/><view class="ambient cloud-two"/>
+  <view class="agent-mode"><text>页面操作 · 记录体重</text><switch checked="{{agentMode}}" bindchange="toggleAgentMode" color="#ad7cd7"/></view>
+  <agent-progress />
   <view wx:if="{{turns.length || sessions.length}}" class="session-bar">
     <button size="mini" disabled="{{busy || loading}}" bindtap="newSession">＋ 新对话</button>
     <scroll-view scroll-x class="sessions"><text wx:for="{{sessions}}" wx:key="id" class="session {{sessionId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="chooseSession">{{item.title}}</text></scroll-view>

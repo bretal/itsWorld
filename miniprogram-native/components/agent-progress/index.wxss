@@ -1,0 +1,13 @@
+.agent-progress {
+  margin: 16rpx 24rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: #fff;
+  color: #69477e;
+  font-size: 26rpx;
+}
+.agent-question, .agent-status { display: block; white-space: pre-wrap; }
+.agent-question { margin-bottom: 10rpx; color: #51455a; }
+.agent-actions, .agent-reply { display: flex; gap: 16rpx; margin-top: 16rpx; align-items: center; }
+.agent-actions button, .agent-reply button { margin: 0; background: #f0e6f6; color: #69477e; }
+.agent-reply input { flex: 1; min-width: 0; padding: 12rpx; background: #f8f4fa; }

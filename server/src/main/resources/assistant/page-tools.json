@@ -1,0 +1,10 @@
+[
+  {"type":"function","function":{"name":"navigate","description":"打开小程序健康管理页，等待加载完成。","parameters":{"type":"object","properties":{"page":{"type":"string","enum":["health"]}},"required":["page"],"additionalProperties":false}}},
+  {"type":"function","function":{"name":"get_page_state","description":"读取当前健康页宠物、Tab、表单值、页面版本和可用动作。填写后必须读取核对再保存。","parameters":{"type":"object","properties":{},"additionalProperties":false}}},
+  {"type":"function","function":{"name":"select_pet","description":"选择用户的宠物，加载其健康记录。","parameters":{"type":"object","properties":{"petId":{"type":"string","description":"宠物ID"}},"required":["petId"],"additionalProperties":false}}},
+  {"type":"function","function":{"name":"select_tab","description":"选择体重Tab。","parameters":{"type":"object","properties":{"tab":{"type":"string","enum":["weight"]}},"required":["tab"],"additionalProperties":false}}},
+  {"type":"function","function":{"name":"open_record_form","description":"打开新增体重记录表单。","parameters":{"type":"object","properties":{},"additionalProperties":false}}},
+  {"type":"function","function":{"name":"set_form_fields","description":"填写已打开的体重表单，单位公斤，日期YYYY-MM-DD。","parameters":{"type":"object","properties":{"weightKg":{"type":"number","minimum":0.01,"maximum":999.99},"date":{"type":"string"}},"required":["weightKg","date"],"additionalProperties":false}}},
+  {"type":"function","function":{"name":"submit_record","description":"保存刚核对的页面表单。参数必须与get_page_state最新返回的宠物、体重、日期和revision完全一致。","parameters":{"type":"object","properties":{"petId":{"type":"string"},"weightKg":{"type":"number"},"date":{"type":"string"},"revision":{"type":"integer"}},"required":["petId","weightKg","date","revision"],"additionalProperties":false}}},
+  {"type":"function","function":{"name":"ask_user","description":"信息不足、有歧义、用户取消或超出体重记录能力时向用户说明并询问。","parameters":{"type":"object","properties":{"question":{"type":"string"}},"required":["question"],"additionalProperties":false}}}
+]

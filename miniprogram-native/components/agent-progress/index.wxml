@@ -1,0 +1,12 @@
+<view wx:if="{{text}}" class="agent-progress" aria-live="polite">
+  <text wx:if="{{task.question}}" class="agent-question">{{task.question}}</text>
+  <text class="agent-status">{{text}}</text>
+  <view wx:if="{{task.status === 'ASK_USER'}}" class="agent-reply">
+    <input value="{{reply}}" bindinput="input" placeholder="补充信息" maxlength="2000" disabled="{{running || paused}}"/>
+    <button size="mini" bindtap="reply" disabled="{{running || paused || !reply}}">回复</button>
+  </view>
+  <view wx:if="{{!task || task.status === 'ACTION' || task.status === 'ASK_USER'}}" class="agent-actions">
+    <button wx:if="{{paused}}" size="mini" bindtap="resume" disabled="{{running}}">继续</button>
+    <button size="mini" bindtap="stop">停止</button>
+  </view>
+</view>

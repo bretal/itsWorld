@@ -29,6 +29,10 @@ import {
   todayString,
 } from '../../utils/format';
 import { resolveImage } from '../../utils/image';
+import { registerHealthPage, unregisterHealthPage, takeOverAgent, assertAgentAction } from '../../utils/agent-runner';
+import type { HealthAdapter } from '../../utils/agent-runner';
+import type { PageAction } from '../../services/agent';
+import { saveAgentWeight } from '../../services/agent';
 
 interface WeightItem extends WeightRecord {
   dateText?: string;
@@ -63,6 +67,9 @@ const FEED_TYPE_LABELS: Record<string, string> = {
 };
 
 Page(withStaticImages({
+  _agentAdapter: null as HealthAdapter | null,
+  _agentRevision: 0,
+  _pageVisible: false,
   data: {
     tabs: [
       { key: 'weight', label: '体重' },
@@ -121,11 +128,91 @@ Page(withStaticImages({
     this.setData({ chartWidth: info.windowWidth - 64 });
   },
 
-  onShow() {
+  async onShow() {
     if (!requireLogin()) {
       return;
     }
-    this.loadPage();
+    this._pageVisible = true;
+    await this.loadPage();
+    if (!this._pageVisible) return;
+    this._agentRevision++;
+    this._agentAdapter = {
+      state: () => this.agentPageState(),
+      execute: (action, taskId) => this.executeAgentAction(action, taskId),
+    };
+    registerHealthPage(this._agentAdapter);
+  },
+
+  onHide() {
+    this._pageVisible = false;
+    if (this._agentAdapter) unregisterHealthPage(this._agentAdapter);
+  },
+  onUnload() {
+    this._pageVisible = false;
+    if (this._agentAdapter) unregisterHealthPage(this._agentAdapter);
+  },
+  agentPageState() {
+    return {
+      page: 'health', loading: this.data.loading, revision: this._agentRevision,
+      petId: this.data.currentPet ? String(this.data.currentPet.id) : '',
+      petName: this.data.currentPet?.petName || '', tab: this.data.activeTab,
+      formOpen: this.data.sheetVisible && this.data.sheetType === 'weight',
+      weightKg: Number(this.data.weightValue) || null, date: this.data.weightDate,
+      availableActions: ['select_pet', 'select_tab', 'open_record_form', 'set_form_fields', 'submit_record'],
+    };
+  },
+  async executeAgentAction(action: PageAction, taskId: string) {
+    assertAgentAction(taskId, action.id);
+    const args = action.args;
+    const update = (values: Record<string, any>) => new Promise<void>(resolve => {
+      this._agentRevision++;
+      this.setData(values, resolve);
+    });
+    switch (action.name) {
+      case 'get_page_state': break;
+      case 'select_pet': {
+        const choices = await listPets();
+        assertAgentAction(taskId, action.id);
+        const pet = choices.find(item => String(item.id) === String(args.petId));
+        if (!pet) return { ok: false, error: '找不到该宠物，请向用户确认', state: this.agentPageState() };
+        const avatar = await resolveImage(pet.avatarUrl);
+        assertAgentAction(taskId, action.id);
+        await update({ currentPet: pet, petAvatarSrc: avatar, sheetVisible: false });
+        await this.loadTab(this.data.activeTab, pet.id, true, true);
+        break;
+      }
+      case 'select_tab':
+        if (args.tab !== 'weight') return { ok: false, error: '当前仅支持体重记录' };
+        await update({ activeTab: 'weight', sheetVisible: false });
+        await this.loadTab('weight', undefined, true, true);
+        break;
+      case 'open_record_form':
+        if (!this.data.currentPet || this.data.activeTab !== 'weight') return { ok: false, error: '请先选择宠物并切换体重Tab' };
+        this.openSheet({ currentTarget: { dataset: { type: 'weight' } }, agent: true });
+        await new Promise<void>(resolve => this.setData({}, resolve));
+        break;
+      case 'set_form_fields': {
+        const date = String(args.date || '');
+        const weight = Number(args.weightKg);
+        if (!this.data.sheetVisible || this.data.sheetType !== 'weight') return { ok: false, error: '请先打开体重表单' };
+        if (!Number.isFinite(weight) || weight < 0.01 || weight > 999.99 || Math.abs(weight * 100 - Math.round(weight * 100)) > 0.00001
+            || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))
+            || new Date(date).toISOString().slice(0, 10) !== date) return { ok: false, error: '体重或日期无效，请核对后重新填写' };
+        await update({ weightValue: String(weight), weightDate: date });
+        break;
+      }
+      case 'submit_record': {
+        const state = this.agentPageState();
+        if (!state.formOpen || state.tab !== 'weight' || args.revision !== state.revision
+            || String(args.petId) !== state.petId || Number(args.weightKg) !== state.weightKg || args.date !== state.date) {
+          return { ok: false, error: '页面状态已变化，请重新读取并核对表单', state };
+        }
+        const recordId = await this.saveRecord(undefined, { taskId, actionId: action.id });
+        return { ok: true, recordId, state: this.agentPageState() };
+      }
+      default: return { ok: false, error: '不支持的页面动作' };
+    }
+    return { ok: true, state: this.agentPageState() };
   },
 
   onReachBottom() {
@@ -350,6 +437,8 @@ Page(withStaticImages({
   },
 
   switchTab(event: any) {
+    takeOverAgent();
+    this._agentRevision++;
     const key = event.currentTarget.dataset.key;
     if (key === this.data.activeTab) {
       return;
@@ -359,6 +448,8 @@ Page(withStaticImages({
   },
 
   openSheet(event: any) {
+    if (!event.agent) takeOverAgent();
+    this._agentRevision++;
     const type = event.currentTarget.dataset.type;
     const today = todayString();
     const now = new Date();
@@ -402,6 +493,8 @@ Page(withStaticImages({
   },
 
   closeSheet() {
+    takeOverAgent();
+    this._agentRevision++;
     this.setData({ sheetVisible: false });
   },
 
@@ -410,6 +503,8 @@ Page(withStaticImages({
   },
 
   onFormInput(event: any) {
+    takeOverAgent();
+    this._agentRevision++;
     const field = event.currentTarget.dataset.field;
     if (!field) {
       return;
@@ -418,6 +513,8 @@ Page(withStaticImages({
   },
 
   onWeightDateChange(event: any) {
+    takeOverAgent();
+    this._agentRevision++;
     this.setData({ weightDate: event.detail.value });
   },
 
@@ -441,25 +538,36 @@ Page(withStaticImages({
     this.setData({ checkupDate: event.detail.value });
   },
 
-  async saveRecord() {
+  async saveRecord(_event?: any, agent?: { taskId: string; actionId: string }) {
+    if (!agent) takeOverAgent();
     const { currentPet, sheetType, saving } = this.data;
     if (!currentPet || saving) {
+      if (agent) throw new Error('页面尚未就绪或正在保存，请稍后继续');
       return;
     }
 
     this.setData({ saving: true });
+    let savedRecordId: string | undefined;
     try {
       if (sheetType === 'weight') {
         const weight = Number(this.data.weightValue);
-        if (!weight || weight <= 0) {
+        if (!Number.isFinite(weight) || weight < 0.01 || weight > 999.99
+            || Math.abs(weight * 100 - Math.round(weight * 100)) > 0.00001) {
+          if (agent) throw new Error('请输入0.01至999.99公斤的体重，最多两位小数');
           wx.showToast({ title: '请输入正确的体重', icon: 'none' });
           return;
         }
-        await addWeightRecord({
+        const payload = {
           petId: currentPet.id,
           weightKg: weight,
           recordedAt: `${this.data.weightDate || todayString()} 00:00:00`,
-        });
+        };
+        if (agent) {
+          assertAgentAction(agent.taskId, agent.actionId);
+          savedRecordId = await saveAgentWeight(agent.taskId, agent.actionId, payload);
+        } else {
+          savedRecordId = String(await addWeightRecord(payload));
+        }
       } else if (sheetType === 'feeding') {
         const amount = this.data.feedingAmount
           ? Number(this.data.feedingAmount)
@@ -498,6 +606,7 @@ Page(withStaticImages({
       }
 
       this.setData({ sheetVisible: false });
+      this._agentRevision++;
       wx.showToast({ title: '保存成功', icon: 'success' });
 
       if (sheetType === 'weight') {
@@ -515,7 +624,12 @@ Page(withStaticImages({
         }
       }
       await this.loadTab(this.data.activeTab, currentPet.id, true, true);
+      return savedRecordId;
     } catch (error) {
+      if (agent) {
+        if (savedRecordId) return savedRecordId;
+        throw error;
+      }
       // request 已统一提示
     } finally {
       this.setData({ saving: false });

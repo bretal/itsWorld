@@ -1,4 +1,5 @@
 {
+  "usingComponents": { "agent-progress": "/components/agent-progress/index" },
   "navigationBarTitleText": "健康管理",
   "backgroundTextStyle": "dark",
   "navigationBarBackgroundColor": "#fcebf4",

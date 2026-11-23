@@ -1,0 +1,6 @@
+# 与本机其他项目的 MinIO 共存。
+services:
+  minio:
+    ports: !override
+      - "19000:9000"
+      - "19001:9001"

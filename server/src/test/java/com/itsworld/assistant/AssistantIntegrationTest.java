@@ -44,6 +44,7 @@ class AssistantIntegrationTest {
     @Autowired AssistantTurnService transactions;
     @Autowired AssistantProductService productService;
     @Autowired AssistantInstructionService instructions;
+    @Autowired AssistantPageTaskService pageTasks;
     @Autowired AssistantSessionMapper sessionMapper;
     @Autowired AssistantTurnMapper turns;
     @Autowired DataSource datasource;
@@ -57,9 +58,84 @@ class AssistantIntegrationTest {
         try (var c=datasource.getConnection()) {
             ScriptUtils.executeSqlScript(c,migration); ScriptUtils.executeSqlScript(c,migration);
             ScriptUtils.executeSqlScript(c,new FileSystemResource(migration.getFile().toPath().resolveSibling("17-assistant-instructions.sql")));
+            c.createStatement().execute("DROP TABLE IF EXISTS assistant_page_task");
+            ScriptUtils.executeSqlScript(c, new org.springframework.core.io.ClassPathResource("db/migration/V19__assistant_page_tasks.sql"));
         }
         jdbc.update("DELETE FROM assistant_turn"); jdbc.update("DELETE FROM assistant_session"); jdbc.update("DELETE FROM assistant_user_quota");
         when(client.model()).thenReturn("test-model");
+    }
+    private com.fasterxml.jackson.databind.JsonNode pageTool(String id, String name, String args) {
+        var response = json.createObjectNode();
+        var message = response.putArray("choices").addObject().putObject("message").put("role", "assistant");
+        message.putArray("tool_calls").addObject().put("id", id).put("type", "function")
+                .putObject("function").put("name", name).put("arguments", args);
+        return response;
+    }
+
+    @Test void pageTaskResultReplayOwnershipAndCancellation() {
+        long session = Long.parseLong(service.create(1L).id());
+        when(client.complete(any(), any(), anyLong())).thenReturn(
+                pageTool("page_nav", "navigate", "{\"page\":\"health\"}"),
+                pageTool("page_ask", "ask_user", "{\"question\":\"请提供体重\"}"));
+        var request = new AssistantPageTaskService.CreateRequest("page_request_001", session, "记录体重", null);
+        var task = pageTasks.create(1L, request);
+        String id = task.path("id").asText();
+        assertEquals(id, pageTasks.create(1L, request).path("id").asText());
+        assertThrows(BusinessException.class, () -> pageTasks.get(2L, id));
+        var result = new AssistantPageTaskService.StepRequest("page_result_001", task.path("action").path("id").asText(), json.createObjectNode().put("ok", true), null);
+        assertEquals("ASK_USER", pageTasks.advance(1L, id, result).path("status").asText());
+        assertEquals("ASK_USER", pageTasks.advance(1L, id, result).path("status").asText());
+        verify(client, times(2)).complete(any(), any(), anyLong());
+        assertEquals("CANCELLED", pageTasks.cancel(1L, id).path("status").asText());
+        assertEquals("CANCELLED", pageTasks.advance(1L, id, result).path("status").asText());
+    }
+
+    @Test void pageWeightSaveIsIdempotentUnderConcurrentRetries() throws Exception {
+        jdbc.update("INSERT INTO sys_user(id,username,password_hash,status) VALUES(887766,'page_task_user','test',1)");
+        jdbc.update("INSERT INTO pet_profile(id,user_id,pet_name,pet_type) VALUES(887766,887766,'测试猫','cat')");
+        try {
+            long session = Long.parseLong(service.create(887766L).id());
+            when(client.complete(any(), any(), anyLong())).thenReturn(pageTool("page_save", "submit_record",
+                    "{\"petId\":\"887766\",\"weightKg\":4.2,\"date\":\"2026-11-23\",\"revision\":3}"));
+            var task = pageTasks.create(887766L, new AssistantPageTaskService.CreateRequest(
+                    "page_save_request", session, "记录测试猫体重4.2公斤", 887766L));
+            String id = task.path("id").asText();
+            String actionId = task.path("action").path("id").asText();
+            var request = com.itsworld.health.dto.WeightRecordCreateRequest.builder().petId(887766L)
+                    .weightKg(new java.math.BigDecimal("4.20"))
+                    .recordedAt(java.time.LocalDateTime.of(2026, 11, 23, 0, 0)).build();
+            assertThrows(BusinessException.class, () -> pageTasks.saveWeight(887766L, id, "wrong_action", request));
+            var executor = Executors.newFixedThreadPool(2);
+            try {
+                var first = executor.submit(() -> pageTasks.saveWeight(887766L, id, actionId, request));
+                var second = executor.submit(() -> pageTasks.saveWeight(887766L, id, actionId, request));
+                assertEquals(first.get(15, TimeUnit.SECONDS), second.get(15, TimeUnit.SECONDS));
+            } finally { executor.shutdownNow(); }
+            assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM pet_weight_record WHERE pet_id=887766", Integer.class));
+            assertEquals("COMPLETED", pageTasks.get(887766L, id).path("status").asText());
+        } finally {
+            jdbc.update("DELETE FROM pet_weight_record WHERE pet_id=887766");
+            jdbc.update("DELETE FROM pet_profile WHERE id=887766");
+            jdbc.update("DELETE FROM sys_user WHERE id=887766");
+        }
+    }
+
+    @Test void pageTaskNormalizesParallelCallsAndPlainTextQuestions() {
+        long session = Long.parseLong(service.create(1L).id());
+        var plain = json.createObjectNode();
+        plain.putArray("choices").addObject().putObject("message").put("role", "assistant").put("content", "体重是多少？");
+        var parallel = pageTool("parallel_first", "navigate", "{\"page\":\"health\"}");
+        var calls = (com.fasterxml.jackson.databind.node.ArrayNode) parallel.path("choices").path(0).path("message").path("tool_calls");
+        calls.add(calls.get(0).deepCopy());
+        when(client.complete(any(), any(), anyLong())).thenReturn(plain, parallel,
+                pageTool("parallel_ask", "ask_user", "{\"question\":\"体重是多少？\"}"), plain, plain);
+        var task = pageTasks.create(1L, new AssistantPageTaskService.CreateRequest("parallel_request_001", session, "记录体重", null));
+        assertEquals("navigate", task.path("action").path("name").asText());
+        var next = pageTasks.advance(1L, task.path("id").asText(), new AssistantPageTaskService.StepRequest(
+                "parallel_result_001", task.path("action").path("id").asText(), json.createObjectNode().put("ok", true), null));
+        assertEquals("ASK_USER", next.path("status").asText());
+        var fallback = pageTasks.create(1L, new AssistantPageTaskService.CreateRequest("plaintext_request_001", session, "记录体重", null));
+        assertEquals("ASK_USER", fallback.path("status").asText());
     }
     @Test void authenticationAndOwnership() throws Exception {
         mvc.perform(get("/api/assistant/sessions")).andExpect(status().isUnauthorized());

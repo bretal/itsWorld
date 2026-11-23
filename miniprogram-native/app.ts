@@ -1,6 +1,9 @@
 import { getUser } from './utils/auth';
+import { setAgentForeground } from './utils/agent-runner';
 
 App({
+  onShow() { setAgentForeground(true); },
+  onHide() { setAgentForeground(false); },
   globalData: {
     user: null,
     currentPetId: null,

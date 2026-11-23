@@ -39,15 +39,26 @@
 
 4. 使用本地开发账号登录：`admin / Admin12345`（见 `docs_local/progress/reviews/开发账号.md`）。
 
-5. 环境地址由 `config/env.ts` 自动切换：
-   - 开发版（`develop`）：`http://192.168.31.25:8080/api`，真机需与电脑同一 Wi-Fi；
-   - 体验版/正式版（`trial` / `release`）：`https://lvhaorankk.top/api`。
-   电脑 IP 变化时只需修改开发环境常量；生产域名需配置微信 request/uploadFile/downloadFile 合法域名。
+5. `config/env.ts` 中开发版、体验版和正式版统一连接 `https://lvhaorankk.top/api`。
+   生产域名需配置微信 request/uploadFile/downloadFile 合法域名。
    生产图片已走同域名 `https://lvhaorankk.top/files`；历史 9000 端口图片 URL 由 `utils/image.ts` 自动改写。
    启动背景、logo、Tab 图标和发布按钮已上传到 MinIO `itsworld-static`，通过 `utils/assets.ts` 的 `assetUrl` 读取：
-   - 开发：`http://192.168.31.25:9000/itsworld-static/...`
-   - 生产：`https://lvhaorankk.top/files/itsworld-static/...`
+   - 各版本：`https://lvhaorankk.top/files/itsworld-static/...`
    我的页两个方形统计卡片背景同样来自 `itsworld-static/profile/`；本地仅保留 `avatar-placeholder.png`、`pet-placeholder.png` 两个小占位图。
+
+## Agent 调试
+
+当前各版本连接生产接口。本地联调时，将 `config/env.ts` 的 API 地址改为 `http://192.168.31.25:8080/api`，图片地址改为 `http://192.168.31.25:19000` 对应路径。
+本项目本地 MinIO 使用 `19000` 端口。
+运行 `docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --no-deps minio` 可启动对应端口映射。
+后端使用 dev 配置启动后会自动执行 V19 任务表迁移，模型密钥沿用本地 DeepSeek 配置。
+
+在宠物助手页开启「页面操作 · 记录体重」，输入「帮团团记录今天体重4.2公斤」。
+任务会逐步打开健康页、填写表单并保存，可在进度卡片回复追问、停止或继续。
+进入后台、离开健康页后暂停，重新打开小程序后需点击继续恢复。
+手动操作表单会停止当前 Agent 任务。
+
+执行 `npm run test:agent` 可检查执行器的重试、后台暂停、停止和登录令牌变化行为。
 
 ## 类型检查
 
