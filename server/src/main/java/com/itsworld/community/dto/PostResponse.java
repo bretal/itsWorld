@@ -75,6 +75,8 @@ public class PostResponse {
      */
     private Boolean isLiked;
 
+    private Boolean isFollowing;
+
     /**
      * 创建时间
      */

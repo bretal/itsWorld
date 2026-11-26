@@ -1,4 +1,4 @@
-import { subscribeAgent, resumeAgent, stopAgent, replyAgent } from '../../utils/agent-runner';
+import { subscribeAgent, resumeAgent, stopAgent, replyAgent, provideAgentPhotos } from '../../utils/agent-runner';
 
 Component({
   data: { task: null, text: '', paused: true, running: false, reply: '' },
@@ -11,6 +11,8 @@ Component({
   methods: {
     resume() { void resumeAgent(); },
     stop() { void stopAgent(); },
+    photos() { void provideAgentPhotos(); },
+    skipPhotos() { void provideAgentPhotos(true); },
     input(e: any) { this.setData({ reply: e.detail.value }); },
     async reply() {
       const text = this.data.reply;

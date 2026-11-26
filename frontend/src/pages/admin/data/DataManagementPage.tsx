@@ -6,7 +6,7 @@ import type { PageData } from '@/types/common';
 type Row = Record<string, any>;
 type Field = [string, string];
 const fields: Record<string, Field[]> = {
-  pets: [['pet_name','宠物名称'],['pet_type','类型'],['breed','品种'],['gender','性别'],['birth_date','出生日期'],['weight_kg','体重(kg)'],['height_cm','身高(cm)'],['bio','简介']],
+  pets: [['pet_name','宠物名称'],['pet_type','类型'],['breed','品种'],['gender','性别'],['birth_date','出生日期'],['weight_kg','体重(kg)']],
   diaries: [['pet_id','宠物ID'],['diary_date','日记日期'],['category','分类'],['morning_mood','心情'],['content','内容'],['is_published','公开状态']],
   posts: [['pet_id','宠物ID'],['title','标题'],['content','内容'],['status','发布状态'],['like_count','点赞数'],['comment_count','评论数']],
   comments: [['post_id','帖子ID'],['parent_comment_id','父评论ID'],['content','评论内容'],['like_count','点赞数']],

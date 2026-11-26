@@ -1,9 +1,9 @@
 import { withStaticImages } from '../../utils/static-images';
-import { requireLogin } from '../../utils/auth';
-import { getPostPage, likePost, unlikePost } from '../../services/community';
+import { getUser, requireLogin } from '../../utils/auth';
+import { confirmUnfollow, getPostPage, likePost, setUserFollowing, unlikePost } from '../../services/community';
 import type { CommunityTab, Post } from '../../services/community';
 import { relativeTime } from '../../utils/format';
-import { resolveImage, resolveImages } from '../../utils/image';
+import { normalizeMinioUrl } from '../../utils/image';
 
 interface PostItem extends Post {
   timeText?: string;
@@ -27,7 +27,12 @@ Page(withStaticImages({
     total: 0,
     hasMore: true,
     emptyText: '还没有帖子，来发第一条吧',
+    currentUserId: 0,
+    pendingUserId: 0,
+    loadFailed: '' as '' | 'refresh' | 'more',
   },
+
+  feedRequest: 0,
 
   onShow() {
     const tabBar = (this as any).getTabBar?.();
@@ -37,6 +42,7 @@ Page(withStaticImages({
     if (!requireLogin()) {
       return;
     }
+    this.setData({ currentUserId: getUser()?.id || 0 });
     this.loadData(this.data.activeTab, true);
   },
 
@@ -47,23 +53,23 @@ Page(withStaticImages({
   },
 
   onReachBottom() {
-    if (this.data.hasMore && !this.data.loading && !this.data.loadingMore) {
+    if (this.data.hasMore && !this.data.loading && !this.data.loadingMore && !this.data.pendingUserId) {
       this.loadData(this.data.activeTab, false);
     }
   },
 
   async loadData(tab: string, reset: boolean) {
+    const request = ++this.feedRequest;
     const page = reset ? 1 : this.data.page + 1;
-    if (reset) {
-      this.setData({ loading: true });
-    } else {
-      this.setData({ loadingMore: true });
-    }
+    this.setData({ loading: reset, loadingMore: !reset, loadFailed: '' });
 
     try {
       const type: CommunityTab = tab === 'follow' ? 'following' : 'recommend';
       const result = await getPostPage(type, page, this.data.size);
-      const items = await this.mapPosts(result.records || []);
+      if (request !== this.feedRequest) {
+        return;
+      }
+      const items = this.mapPosts(result.records || []);
       this.setData({
         posts: reset ? items : this.data.posts.concat(items),
         page: result.pageNum,
@@ -71,26 +77,71 @@ Page(withStaticImages({
         hasMore: result.pageNum < result.totalPages,
         emptyText:
           tab === 'follow'
-            ? '还没有关注的人，去推荐里看看吧'
+            ? '暂无关注动态，去推荐里看看吧'
             : '还没有帖子，来发第一条吧',
         loading: false,
         loadingMore: false,
       });
-    } catch (error) {
-      this.setData({ loading: false, loadingMore: false });
+    } catch {
+      if (request === this.feedRequest) {
+        this.setData({ loading: false, loadingMore: false, loadFailed: reset ? 'refresh' : 'more' });
+      }
     }
   },
 
-  async mapPosts(list: Post[]): Promise<PostItem[]> {
-    return Promise.all(
-      (list || []).map(async (post) => ({
-        ...post,
-        timeText: relativeTime(post.createdAt),
-        photos: await resolveImages(post.photoUrls || []),
-        liked: Boolean(post.isLiked),
-        avatarSrc: await resolveImage(post.userAvatar),
-      })),
+  retryFeed() {
+    this.loadData(this.data.activeTab, this.data.loadFailed !== 'more');
+  },
+
+  async toggleFollow(event: { currentTarget: { dataset: { id: number } } }) {
+    const post = this.data.posts.find((item: PostItem) => item.id === Number(event.currentTarget.dataset.id));
+    if (!post || post.userId === this.data.currentUserId || this.data.pendingUserId) {
+      return;
+    }
+    this.setData({ pendingUserId: post.userId });
+    try {
+      if (post.isFollowing && !(await confirmUnfollow(post.username || '这位宠友'))) {
+        return;
+      }
+      const following = !post.isFollowing;
+      await setUserFollowing(post.userId, following);
+      const posts: PostItem[] = this.data.posts;
+      const { activeTab, loading, loadingMore } = this.data;
+      const remove = activeTab === 'follow' && !following;
+      this.setData({
+        posts: remove
+          ? posts.filter((item) => item.userId !== post.userId)
+          : posts.map((item) => item.userId === post.userId ? { ...item, isFollowing: following } : item),
+      });
+      wx.showToast({ title: following ? '已关注' : '已取消关注', icon: 'success' });
+      if (activeTab === 'follow' || loading || loadingMore) {
+        await this.loadData(activeTab, true);
+      }
+    } catch {
+      // 连接中断时服务端可能已完成操作，重新读取关系状态。
+      await this.loadData(this.data.activeTab, true);
+    } finally {
+      this.setData({ pendingUserId: 0 });
+    }
+  },
+
+  mapPosts(list: Post[]): PostItem[] {
+    return list.map((post) => ({
+      ...post,
+      timeText: relativeTime(post.createdAt),
+      photos: (post.photoUrls || []).map(normalizeMinioUrl).filter(Boolean),
+      liked: Boolean(post.isLiked),
+      avatarSrc: normalizeMinioUrl(post.userAvatar),
+    }));
+  },
+
+  onAvatarError(event: { currentTarget: { dataset: { id: number } } }) {
+    const index = this.data.posts.findIndex((item: PostItem) =>
+      item.id === Number(event.currentTarget.dataset.id) && item.avatarSrc,
     );
+    if (index !== -1) {
+      this.setData({ [`posts[${index}].avatarSrc`]: '' });
+    }
   },
 
   switchTab(event: any) {
@@ -126,9 +177,11 @@ Page(withStaticImages({
       }
     } catch (error) {
       // 失败时回滚
-      const rollback = this.data.posts.slice();
-      rollback[index] = post;
-      this.setData({ posts: rollback });
+      this.setData({
+        posts: this.data.posts.map((item: PostItem) => item.id === post.id && item.liked === nextLiked
+          ? { ...item, liked: post.liked, likeCount: post.likeCount }
+          : item),
+      });
     }
   },
 
@@ -142,6 +195,10 @@ Page(withStaticImages({
 
   goCreatePost() {
     wx.navigateTo({ url: '/pages/community/create' });
+  },
+
+  goSearchUsers() {
+    wx.navigateTo({ url: '/pages/community/search' });
   },
 
   stopCardTap() {},

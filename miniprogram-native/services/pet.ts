@@ -11,8 +11,6 @@ export interface Pet {
   gender?: number;
   birthDate?: string;
   weight?: number;
-  height?: number;
-  description?: string;
 }
 
 export interface PetPayload {
@@ -23,8 +21,6 @@ export interface PetPayload {
   gender?: number;
   birthDate?: string;
   weight?: number;
-  height?: number;
-  description?: string;
 }
 
 export function listPets(): Promise<Pet[]> {

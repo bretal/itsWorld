@@ -111,12 +111,21 @@ Page(withStaticImages({
     wx.navigateTo({ url: `/pages/pet/detail?id=${id}` });
   },
 
-  goEdit(event: any) {
+  openActions(event: any) {
     const id = Number(event.currentTarget.dataset.id);
     if (!id) {
       return;
     }
-    wx.navigateTo({ url: `/pages/pet/edit?id=${id}` });
+    wx.showActionSheet({
+      itemList: ['编辑宠物', '删除宠物'],
+      success: ({ tapIndex }: { tapIndex: number }) => {
+        if (tapIndex === 0) {
+          wx.navigateTo({ url: `/pages/pet/edit?id=${id}` });
+        } else if (tapIndex === 1) {
+          this.remove(id);
+        }
+      },
+    });
   },
 
   setCurrent(event: any) {
@@ -141,8 +150,7 @@ Page(withStaticImages({
     wx.showToast({ title: '已设为当前宠物', icon: 'success' });
   },
 
-  remove(event: any) {
-    const id = Number(event.currentTarget.dataset.id);
+  remove(id: number) {
     const pet = this.data.pets.find((item) => item.id === id);
     if (!pet) {
       return;
@@ -170,4 +178,4 @@ Page(withStaticImages({
       },
     });
   },
-}, ["pet-placeholder.png"]));
+}, ['pet-placeholder.png']));

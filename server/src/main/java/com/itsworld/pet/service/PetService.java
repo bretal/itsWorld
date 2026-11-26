@@ -55,8 +55,6 @@ public class PetService {
                 .gender(createRequest.getGender())
                 .birthDate(createRequest.getBirthDate())
                 .weight(createRequest.getWeight())
-                .height(createRequest.getHeight())
-                .description(createRequest.getDescription())
                 .isActive(1)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -150,12 +148,6 @@ public class PetService {
         if (updateRequest.getWeight() != null) {
             pet.setWeight(updateRequest.getWeight());
         }
-        if (updateRequest.getHeight() != null) {
-            pet.setHeight(updateRequest.getHeight());
-        }
-        if (updateRequest.getDescription() != null) {
-            pet.setDescription(updateRequest.getDescription());
-        }
 
         pet.setUpdatedAt(LocalDateTime.now());
         petMapper.updateById(pet);
@@ -205,8 +197,6 @@ public class PetService {
                 .gender(pet.getGender())
                 .birthDate(pet.getBirthDate())
                 .weight(pet.getWeight())
-                .height(pet.getHeight())
-                .description(pet.getDescription())
                 .build();
     }
 

@@ -1,0 +1,12 @@
+<template name="followRow">
+  <view class="follow-row">
+    <image wx:if="{{item.avatarSrc}}" class="follow-avatar" src="{{item.avatarSrc}}" mode="aspectFill" />
+    <view wx:else class="follow-avatar follow-initial">{{item.initial}}</view>
+    <view class="follow-user">
+      <view class="follow-name">{{item.displayName}}</view>
+      <view wx:if="{{item.bio}}" class="follow-bio">{{item.bio}}</view>
+    </view>
+    <button class="follow-action {{item.isFollowing ? '' : 'primary'}}"
+      data-id="{{item.id}}" bindtap="toggleFollow" disabled="{{disabled}}">{{item.actionText}}</button>
+  </view>
+</template>

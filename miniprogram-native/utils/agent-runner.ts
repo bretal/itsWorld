@@ -4,10 +4,11 @@ import {
 } from '../services/agent';
 import type { AgentTask, CreateTask, PageAction, TaskResult } from '../services/agent';
 
-export interface HealthAdapter {
+export interface PageAdapter {
   state(): Record<string, any>;
   execute(action: PageAction, taskId: string): Promise<Record<string, any>>;
 }
+export type HealthAdapter = PageAdapter;
 export interface AgentProgress {
   task?: AgentTask;
   text: string;
@@ -28,7 +29,10 @@ let foreground = true;
 let epoch = 0;
 let text = '';
 let executionToken = '';
-let healthPage: HealthAdapter | undefined;
+const pages = new Map<string, PageAdapter>();
+const pageRoutes: Record<string, string> = { health: 'pages/health/index', diary: 'pages/diary/edit' };
+let navigating = false;
+let choosingPhotos = false;
 const listeners = new Set<(state: AgentProgress) => void>();
 const terminal = (task?: AgentTask) => !!task && ['COMPLETED', 'CANCELLED', 'FAILED'].includes(task.status);
 const requestId = () => `agent_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -62,17 +66,23 @@ export function agentHasTask() {
   return !!saved.create || (!!saved.task && !terminal(saved.task));
 }
 export function registerHealthPage(adapter: HealthAdapter) {
-  healthPage = adapter;
+  registerAgentPage('health', adapter);
 }
 export function unregisterHealthPage(adapter: HealthAdapter) {
-  if (healthPage === adapter) {
-    healthPage = undefined;
-    pauseAgent('已离开健康页，操作暂停');
+  unregisterAgentPage('health', adapter);
+}
+export function registerAgentPage(name: string, adapter: PageAdapter) {
+  pages.set(name, adapter);
+}
+export function unregisterAgentPage(name: string, adapter: PageAdapter) {
+  if (pages.get(name) === adapter) {
+    pages.delete(name);
+    if (!navigating && !choosingPhotos) pauseAgent('已离开操作页面，任务暂停');
   }
 }
 export function setAgentForeground(visible: boolean) {
   foreground = visible;
-  if (!visible) pauseAgent('小程序已进入后台，操作暂停');
+  if (!visible && !choosingPhotos) pauseAgent('小程序已进入后台，操作暂停');
 }
 export function pauseAgent(reason = '操作已暂停') {
   paused = true;
@@ -133,18 +143,71 @@ export async function replyAgent(reply: string) {
   await resumeAgent();
 }
 
-async function openHealthPage(valid: () => boolean) {
-  if (getCurrentPages().slice(-1)[0]?.route !== 'pages/health/index') {
-    await new Promise<void>((resolve, reject) => wx.navigateTo({
-      url: '/pages/health/index', success: () => resolve(), fail: reject,
-    }));
+async function openAgentPage(name: string, valid: () => boolean) {
+  const route = pageRoutes[name];
+  if (!route) throw new Error('不支持的目标页面');
+  navigating = true;
+  try {
+    if (getCurrentPages().slice(-1)[0]?.route !== route) {
+      await new Promise<void>((resolve, reject) => wx.navigateTo({
+        url: `/${route}`, success: () => resolve(), fail: reject,
+      }));
+    }
+    const deadline = Date.now() + 12000;
+    while (!pages.get(name) || pages.get(name)!.state().loading) {
+      if (!valid()) throw new Error('操作已暂停');
+      if (Date.now() > deadline) throw new Error('页面加载超时，请检查网络后继续');
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  } finally {
+    navigating = false;
   }
-  const deadline = Date.now() + 12000;
-  while (!healthPage || healthPage.state().loading) {
-    if (!valid()) throw new Error('操作已暂停');
-    if (Date.now() > deadline) throw new Error('健康页加载超时，请检查网络后继续');
-    await new Promise(resolve => setTimeout(resolve, 50));
+}
+function currentAdapter() {
+  const route = getCurrentPages().slice(-1)[0]?.route;
+  const name = Object.keys(pageRoutes).find(key => pageRoutes[key] === route);
+  return name ? pages.get(name) : undefined;
+}
+export function agentWaitingForPhotos() {
+  loadOwner();
+  return saved.task?.status === 'WAITING_PHOTOS' && !saved.result;
+}
+export async function provideAgentPhotos(skip = false) {
+  loadOwner();
+  if (!agentWaitingForPhotos() || running || !foreground || !getToken()) return;
+  const adapter = currentAdapter();
+  if (!adapter || adapter !== pages.get('diary')) {
+    paused = true;
+    text = '请返回日记编辑页后上传照片';
+    publish();
+    return;
   }
+  const currentEpoch = epoch;
+  const token = getToken();
+  paused = false;
+  running = true;
+  executionToken = token;
+  choosingPhotos = true;
+  publish();
+  try {
+    const action = saved.task!.action!;
+    const result = await adapter.execute({ ...action, name: skip ? 'skip_photos' : 'upload_photos' }, saved.task!.id);
+    if (currentEpoch !== epoch || token !== getToken()) return;
+    if (result.ok) {
+      saved.result = { requestId: requestId(), actionId: action.id, result };
+      persist();
+    } else {
+      text = result.error || '请选择照片，或点击暂不上传';
+    }
+  } catch (error) {
+    if (currentEpoch === epoch) text = error instanceof Error ? error.message : '上传失败，请重试';
+  } finally {
+    choosingPhotos = false;
+    running = false;
+    if (currentEpoch === epoch) persist();
+    else publish();
+  }
+  if (currentEpoch === epoch && token === getToken() && saved.result && foreground) await resumeAgent();
 }
 
 export async function resumeAgent() {
@@ -180,21 +243,36 @@ export async function resumeAgent() {
         continue;
       }
       if (saved.task.status === 'ASK_USER') break;
+      if (saved.task.status === 'WAITING_PHOTOS') {
+        await openAgentPage('diary', valid);
+        if (!valid()) break;
+        if (saved.task.action) {
+          const restored = await pages.get('diary')!.execute({ ...saved.task.action, name: 'restore_diary', args: { state: saved.task.pageState } }, saved.task.id);
+          if (!restored.ok) throw new Error(restored.error || '日记恢复失败');
+        }
+        break;
+      }
       const action = saved.task.action;
       if (!action) throw new Error('任务缺少页面动作');
       text = saved.task.text;
       publish();
       let result: Record<string, any>;
       if (action.name === 'navigate') {
-        if (action.args.page !== 'health') throw new Error('不支持的目标页面');
-        await openHealthPage(valid);
+        await openAgentPage(action.args.page, valid);
         if (!valid()) break;
-        result = { ok: true, state: healthPage!.state() };
+        result = { ok: true, state: pages.get(action.args.page)!.state() };
       } else {
-        if (!healthPage || getCurrentPages().slice(-1)[0]?.route !== 'pages/health/index') {
-          throw new Error('请回到健康页后继续');
+        if (saved.task.pageState?.page === 'diary') {
+          await openAgentPage('diary', valid);
+          if (!valid()) break;
+          const restored = await pages.get('diary')!.execute({
+            ...action, name: 'restore_diary', args: { state: saved.task.pageState },
+          }, saved.task.id);
+          if (!restored.ok) throw new Error(restored.error || '日记恢复失败');
         }
-        result = await healthPage.execute(action, saved.task.id);
+        const adapter = currentAdapter();
+        if (!adapter) throw new Error('请回到任务对应页面后继续');
+        result = await adapter.execute(action, saved.task.id);
       }
       // 即使执行过程中暂停，也保留动作结果，恢复时先上报，避免重复执行。
       if (currentEpoch !== epoch || token !== getToken()) return;
@@ -203,8 +281,10 @@ export async function resumeAgent() {
     }
     if (terminal(saved.task)) text = saved.task!.text;
   } catch (error) {
-    paused = true;
-    text = error instanceof Error ? error.message : '执行失败，请检查网络后继续';
+    if (currentEpoch === epoch && token === getToken()) {
+      paused = true;
+      text = error instanceof Error ? error.message : '执行失败，请检查网络后继续';
+    }
   } finally {
     running = false;
     if (currentEpoch === epoch) persist();

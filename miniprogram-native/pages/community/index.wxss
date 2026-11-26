@@ -3,6 +3,10 @@ page{background:#fff7fb;color:#2c2633;}
 .community-head{display:flex;align-items:center;justify-content:space-between;gap:20rpx;padding:28rpx 34rpx 14rpx;}
 .community-title{font-size:44rpx;font-weight:800;letter-spacing:1rpx;}
 .community-sub{margin-top:7rpx;font-size:24rpx;color:#9b8ba3;}
+button.community-search{display:flex;align-items:center;gap:18rpx;box-sizing:border-box;width:calc(100% - 56rpx);max-width:none;margin:8rpx 28rpx 10rpx;padding:16rpx 26rpx;border-radius:32rpx;background:#ffffffd9;color:#75647e;text-align:left;font-size:26rpx;line-height:36rpx;}
+.community-search::after{border:0;}
+.community-search-icon{position:relative;width:20rpx;height:20rpx;border:3rpx solid currentColor;border-radius:50%;}
+.community-search-icon::after{content:'';position:absolute;right:-8rpx;bottom:-5rpx;width:12rpx;height:3rpx;border-radius:2rpx;background:currentColor;transform:rotate(45deg);}
 .head-paw{width:76rpx;height:76rpx;flex-shrink:0;border-radius:50%;border:2rpx solid white;background:#ffffffb8;display:flex;align-items:center;justify-content:center;font-size:35rpx;color:#ad76d9;box-shadow:0 6rpx 18rpx #c3a3d528;}
 .tabs{display:flex;align-items:center;gap:40rpx;padding:6rpx 38rpx 24rpx;}
 .tab{position:relative;padding:12rpx 4rpx;font-size:29rpx;color:#9a8b9f;}
@@ -15,7 +19,11 @@ page{background:#fff7fb;color:#2c2633;}
 .post-author{flex:1;min-width:0;padding-left:16rpx;}
 .author-name{font-size:28rpx;font-weight:650;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .post-time{font-size:22rpx;color:#a395ad;margin-top:3rpx;}
-.post-more{font-size:29rpx;color:#b4a3bf;letter-spacing:2rpx;}
+.post-follow{flex-shrink:0;min-width:138rpx;min-height:62rpx;margin:0 0 0 12rpx;padding:9rpx 16rpx;border-radius:40rpx;background:#f4edf6;color:#6e3d94;font-size:25rpx;line-height:44rpx;}
+.post-follow.primary{background:#e9d6f8;}
+.post-follow::after{border:0;}
+.post-follow[disabled]{opacity:.65;}
+.retry-feed{color:#773ba0;}
 .post-title{margin-top:17rpx;font-size:31rpx;font-weight:750;line-height:1.5;word-break:break-all;}
 .post-content{margin-top:7rpx;font-size:27rpx;line-height:1.7;color:#645a6c;white-space:pre-wrap;word-break:break-all;}
 .post-photos{margin-top:17rpx;display:flex;flex-wrap:wrap;gap:10rpx;}

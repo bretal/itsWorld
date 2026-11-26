@@ -198,9 +198,7 @@ public class AssistantService {
     }
 
     private boolean ownedPhoto(Long user, String photo) {
-        String prefix = mediaBase.replaceAll("/+$", "") + "/" + diaryBucket + "/assistant/" + user + "/";
-        return photo != null && photo.startsWith(prefix)
-                && photo.substring(prefix.length()).matches("[0-9]{8}/[a-f0-9]{32}\\.(jpg|jpeg|png|gif|webp)");
+        return AssistantPhotos.owned(mediaBase, diaryBucket, user, photo);
     }
 
     private String albumRules(Long petId, int photos, LocalDateTime now) {

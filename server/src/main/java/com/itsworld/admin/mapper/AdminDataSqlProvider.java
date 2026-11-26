@@ -38,16 +38,22 @@ public class AdminDataSqlProvider {
         }
         return " FROM " + resource.table() + " r" + join + where;
     }
+    private static String columns(Map<String, Object> params) {
+        return "pets".equals(params.get("kind"))
+            ? "r.id,r.user_id,r.pet_name,r.pet_type,r.breed,r.birth_date,r.gender,r.weight_kg,"
+                + "r.avatar_url,r.is_active,r.care_notes,r.created_at,r.updated_at,r.deleted_at"
+            : "r.*";
+    }
     public static String count(Map<String, Object> params) { return "SELECT COUNT(*)" + from(params); }
     public static String list(Map<String, Object> params) {
         Resource resource = resource((String) params.get("kind"));
         String owner = resource.owner() == null ? "p.user_id" : "r." + resource.owner();
-        return "SELECT r.*,u.username AS owner_name," + owner + " AS owner_id" + from(params)
+        return "SELECT " + columns(params) + ",u.username AS owner_name," + owner + " AS owner_id" + from(params)
             + " ORDER BY r.id DESC LIMIT #{limit} OFFSET #{offset}";
     }
     public static String detail(Map<String, Object> params) {
         Resource resource = resource((String) params.get("kind"));
-        return "SELECT * FROM " + resource.table() + " WHERE id=#{id}"
+        return "SELECT " + columns(params) + " FROM " + resource.table() + " r WHERE id=#{id}"
             + (resource.softDelete() ? " AND deleted_at IS NULL" : "");
     }
     private static Resource resource(String kind) {

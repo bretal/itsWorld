@@ -5,6 +5,7 @@ import com.itsworld.assistant.service.AssistantPageTaskService;
 import com.itsworld.assistant.service.AssistantPageTaskService.*;
 import com.itsworld.common.result.Result;
 import com.itsworld.health.dto.WeightRecordCreateRequest;
+import com.itsworld.diary.dto.DiaryCreateRequest;
 import com.itsworld.security.service.CurrentUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,10 @@ public class AssistantPageTaskController {
     public Result<String> saveWeight(@PathVariable String id, @PathVariable String actionId,
                                      @Valid @RequestBody WeightRecordCreateRequest request) {
         return Result.success(tasks.saveWeight(currentUser.getUserId(), id, actionId, request));
+    }
+    @PostMapping("/{id}/actions/{actionId}/diary")
+    public Result<String> saveDiary(@PathVariable String id, @PathVariable String actionId,
+                                    @Valid @RequestBody DiaryCreateRequest request) {
+        return Result.success(tasks.saveDiary(currentUser.getUserId(), id, actionId, request));
     }
 }

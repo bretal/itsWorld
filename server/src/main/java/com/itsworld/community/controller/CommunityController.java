@@ -5,6 +5,8 @@ import com.itsworld.common.result.Result;
 import com.itsworld.common.util.PageUtils;
 import com.itsworld.community.dto.CommentRequest;
 import com.itsworld.community.dto.CommentResponse;
+import com.itsworld.community.dto.FollowStatsResponse;
+import com.itsworld.community.dto.FollowUserResponse;
 import com.itsworld.community.dto.PostCreateRequest;
 import com.itsworld.community.dto.PostResponse;
 import com.itsworld.community.service.CommunityService;
@@ -33,6 +35,36 @@ public class CommunityController {
 
     private final CommunityService communityService;
     private final UserService userService;
+
+    @GetMapping("/users/search")
+    public Result<PageResult<FollowUserResponse>> searchUsers(
+            @RequestParam String keyword,
+            @RequestParam(required = false) Long page,
+            @RequestParam(required = false) Long size) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userId = userService.getUserByUsername(username).getId();
+        return Result.success(communityService.searchFollowUsers(userId, keyword,
+                PageUtils.normalizePageNum(page), PageUtils.normalizePageSize(size)));
+    }
+
+    @GetMapping("/follow/stats")
+    public Result<FollowStatsResponse> getFollowStats() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userId = userService.getUserByUsername(username).getId();
+        return Result.success(communityService.getFollowStats(userId));
+    }
+
+    @GetMapping("/{direction:following|followers}/page")
+    public Result<PageResult<FollowUserResponse>> getFollowUsers(
+            @PathVariable String direction,
+            @RequestParam(required = false) Long page,
+            @RequestParam(required = false) Long size) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userId = userService.getUserByUsername(username).getId();
+        return Result.success(communityService.getFollowUsers(userId,
+                "followers".equals(direction),
+                PageUtils.normalizePageNum(page), PageUtils.normalizePageSize(size)));
+    }
 
     /**
      * 发布帖子

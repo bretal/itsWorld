@@ -73,13 +73,6 @@
   font-size: 24rpx;
 }
 
-.hero-bio {
-  position: relative;
-  z-index: 2;
-  margin-top: 12rpx;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 23rpx;
-}
 
 .stat-row {
   position: relative;
@@ -311,10 +304,6 @@
   border-bottom: none;
 }
 
-.info-row-column {
-  flex-direction: column;
-  align-items: flex-start;
-}
 
 .info-label {
   font-size: 25rpx;
@@ -326,11 +315,6 @@
   color: #1f2329;
 }
 
-.info-bio {
-  margin-top: 10rpx;
-  line-height: 1.7;
-  color: #3a3f46;
-}
 
 .empty-title {
   margin-top: 4rpx;

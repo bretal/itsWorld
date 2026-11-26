@@ -1,4 +1,3 @@
-import { withStaticImages } from '../../utils/static-images';
 import { requireLogin } from '../../utils/auth';
 import { createPet, getPet, updatePet } from '../../services/pet';
 import type { PetPayload } from '../../services/pet';
@@ -6,23 +5,19 @@ import { uploadImage } from '../../utils/upload';
 import { todayString } from '../../utils/format';
 import { resolveImage } from '../../utils/image';
 
-Page(withStaticImages({
+Page({
   data: {
     id: 0,
     isEdit: false,
     petName: '',
-    petTypes: ['请选择宠物类型', '狗狗', '猫咪', '其他'],
+    petTypes: ['请选择', '狗狗', '猫咪', '其他'],
     petTypeValues: ['', 'dog', 'cat', 'other'],
     petTypeIndex: 0,
-    genders: ['未知', '公', '母'],
-    genderValues: [0, 1, 2],
-    genderIndex: 0,
+    gender: 0,
     breed: '',
     birthDate: '',
     today: '',
     weight: '',
-    height: '',
-    description: '',
     avatarUrl: '',
     avatarPreviewSrc: '',
     saving: false,
@@ -54,26 +49,17 @@ Page(withStaticImages({
         this.data.petTypeValues.indexOf(pet.petType || 'dog'),
         0,
       );
-      const genderIndex = Math.max(
-        this.data.genderValues.indexOf(pet.gender ?? 0),
-        0,
-      );
 
       this.setData({
         petName: pet.petName || '',
         petTypeIndex,
-        genderIndex,
+        gender: pet.gender === 1 || pet.gender === 2 ? pet.gender : 0,
         breed: pet.breed || '',
         birthDate: pet.birthDate || '',
         weight:
           pet.weight === undefined || pet.weight === null
             ? ''
             : String(pet.weight),
-        height:
-          pet.height === undefined || pet.height === null
-            ? ''
-            : String(pet.height),
-        description: pet.description || '',
         avatarUrl: pet.avatarUrl || '',
         avatarPreviewSrc: await resolveImage(pet.avatarUrl),
       });
@@ -95,7 +81,7 @@ Page(withStaticImages({
   },
 
   onGenderChange(event: any) {
-    this.setData({ genderIndex: Number(event.detail.value) });
+    this.setData({ gender: Number(event.currentTarget.dataset.value) });
   },
 
   onBirthDateChange(event: any) {
@@ -103,7 +89,7 @@ Page(withStaticImages({
   },
 
   async chooseAvatar() {
-    if (this.data.uploading) {
+    if (this.data.uploading || this.data.saving) {
       return;
     }
 
@@ -135,8 +121,8 @@ Page(withStaticImages({
   },
 
   async onSave() {
-    const { petName, petTypeIndex, genderIndex, saving } = this.data;
-    if (saving) {
+    const { petName, petTypeIndex, gender, saving, uploading } = this.data;
+    if (saving || uploading) {
       return;
     }
     if (!petName.trim()) {
@@ -154,13 +140,10 @@ Page(withStaticImages({
       petType: this.data.petTypeValues[petTypeIndex],
       avatarUrl: this.data.avatarUrl || undefined,
       breed: this.data.breed.trim() || undefined,
-      gender: this.data.genderValues[genderIndex],
+      gender,
       birthDate: this.data.birthDate || undefined,
       weight:
         this.data.weight === '' ? undefined : Number(this.data.weight),
-      height:
-        this.data.height === '' ? undefined : Number(this.data.height),
-      description: this.data.description.trim() || undefined,
     };
 
     this.setData({ saving: true });
@@ -192,4 +175,4 @@ Page(withStaticImages({
       this.setData({ saving: false });
     }
   },
-}, ["pet-placeholder.png"]));
+});

@@ -1,5 +1,6 @@
 import { request } from '../utils/request';
 import type { WeightRecordPayload } from './health';
+import type { DiaryPayload } from './diary';
 
 export interface PageAction {
   id: string;
@@ -10,10 +11,12 @@ export interface AgentTask {
   id: string;
   sessionId: string;
   question: string;
-  status: 'ACTION' | 'ASK_USER' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
+  status: 'ACTION' | 'ASK_USER' | 'WAITING_PHOTOS' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
   text: string;
   action?: PageAction;
   recordId?: string;
+  diaryId?: string;
+  pageState?: Record<string, any>;
 }
 export interface CreateTask {
   requestId: string;
@@ -39,4 +42,7 @@ export const cancelAgentTask = (id: string) => request<AgentTask>({
 });
 export const saveAgentWeight = (taskId: string, actionId: string, data: WeightRecordPayload) => request<string>({
   url: `/assistant/tasks/${taskId}/actions/${actionId}/weight`, method: 'POST', data,
+});
+export const saveAgentDiary = (taskId: string, actionId: string, data: DiaryPayload) => request<string>({
+  url: `/assistant/tasks/${taskId}/actions/${actionId}/diary`, method: 'POST', data,
 });

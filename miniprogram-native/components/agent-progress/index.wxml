@@ -5,7 +5,11 @@
     <input value="{{reply}}" bindinput="input" placeholder="补充信息" maxlength="2000" disabled="{{running || paused}}"/>
     <button size="mini" bindtap="reply" disabled="{{running || paused || !reply}}">回复</button>
   </view>
-  <view wx:if="{{!task || task.status === 'ACTION' || task.status === 'ASK_USER'}}" class="agent-actions">
+  <view wx:if="{{task.status === 'WAITING_PHOTOS'}}" class="agent-actions">
+    <button size="mini" bindtap="photos" disabled="{{running || paused}}">选择照片并上传</button>
+    <button size="mini" bindtap="skipPhotos" disabled="{{running || paused}}">暂不上传</button>
+  </view>
+  <view wx:if="{{!task || task.status === 'ACTION' || task.status === 'ASK_USER' || task.status === 'WAITING_PHOTOS'}}" class="agent-actions">
     <button wx:if="{{paused}}" size="mini" bindtap="resume" disabled="{{running}}">继续</button>
     <button size="mini" bindtap="stop">停止</button>
   </view>

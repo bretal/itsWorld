@@ -1,4 +1,5 @@
 <view class="diary-edit-page">
+  <agent-progress />
   <view wx:if="{{noPets}}" class="empty-pet card">
     <view class="empty-emoji">🐾</view>
     <view class="empty-title">还没有宠物档案</view>
@@ -81,6 +82,7 @@
         placeholder="记录TA今天的可爱瞬间、小情绪或小进步…"
         placeholder-class="placeholder"
         maxlength="1000"
+        disabled="{{saving || !!savedDiaryId}}"
         auto-height
         bindinput="onContentInput"
       />
@@ -128,10 +130,10 @@
     <button
       class="btn-primary save-btn"
       loading="{{saving}}"
-      disabled="{{saving}}"
+      disabled="{{saving || uploading || !!savedDiaryId}}"
       bindtap="onSave"
     >
-      保存这份美好
+      {{savedDiaryId ? '日记已保存' : '保存这份美好'}}
     </button>
   </block>
 </view>

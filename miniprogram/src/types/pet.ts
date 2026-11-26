@@ -12,7 +12,6 @@ export interface Pet {
   weight?: number;
   color?: string;
   microchipId?: string;
-  description?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -26,7 +25,6 @@ export interface PetCreateRequest {
   weight?: number;
   color?: string;
   microchipId?: string;
-  description?: string;
 }
 
 export interface PetUpdateRequest {
@@ -38,6 +36,5 @@ export interface PetUpdateRequest {
   weight?: number;
   color?: string;
   microchipId?: string;
-  description?: string;
   avatarUrl?: string;
 }

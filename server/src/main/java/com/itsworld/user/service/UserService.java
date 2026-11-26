@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 用户业务实现
@@ -182,6 +183,10 @@ public class UserService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
         return user;
+    }
+
+    public List<User> getUsersByIds(List<Long> userIds) {
+        return userIds.isEmpty() ? List.of() : userMapper.selectBatchIds(userIds);
     }
 
     /**

@@ -9,6 +9,8 @@ import com.itsworld.common.result.PageResult;
 import com.itsworld.common.exception.BusinessException;
 import com.itsworld.community.dto.CommentRequest;
 import com.itsworld.community.dto.CommentResponse;
+import com.itsworld.community.dto.FollowStatsResponse;
+import com.itsworld.community.dto.FollowUserResponse;
 import com.itsworld.community.dto.PostCreateRequest;
 import com.itsworld.community.dto.PostResponse;
 import com.itsworld.community.entity.Follow;
@@ -29,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -100,9 +104,10 @@ public class CommunityService {
     public List<PostResponse> getUserPosts(Long userId) {
         List<Post> posts = postMapper.selectByUserId(userId);
         User user = userService.getUserById(userId);
+        Set<Long> likedPosts = getLikedPostIds(userId, posts);
 
         return posts.stream()
-                .map(post -> convertToPostResponse(post, user, userId))
+                .map(post -> convertToPostResponse(post, user, likedPosts.contains(post.getId()), false))
                 .collect(Collectors.toList());
     }
 
@@ -116,7 +121,8 @@ public class CommunityService {
         }
 
         User user = userService.getUserById(post.getUserId());
-        return convertToPostResponse(post, user, currentUserId);
+        return convertToPostResponse(post, user, getLikedPostIds(currentUserId, List.of(post)).contains(postId),
+                getFollowedAuthors(currentUserId, List.of(post)).contains(post.getUserId()));
     }
 
     /**
@@ -124,12 +130,7 @@ public class CommunityService {
      */
     public List<PostResponse> getHotPosts(Long currentUserId) {
         List<Post> posts = postMapper.selectHotPosts();
-        return posts.stream()
-                .map(post -> {
-                    User user = userService.getUserById(post.getUserId());
-                    return convertToPostResponse(post, user, currentUserId);
-                })
-                .collect(Collectors.toList());
+        return toPostResponses(posts, currentUserId);
     }
 
     /**
@@ -137,56 +138,30 @@ public class CommunityService {
      */
     public List<PostResponse> getRecommendPosts(Long currentUserId) {
         List<Post> posts = postMapper.selectRecommendPosts();
-        return posts.stream()
-                .map(post -> {
-                    User user = userService.getUserById(post.getUserId());
-                    return convertToPostResponse(post, user, currentUserId);
-                })
-                .collect(Collectors.toList());
+        return toPostResponses(posts, currentUserId);
     }
 
     public List<PostResponse> getFollowingFeed(Long currentUserId) {
-        List<Follow> follows = followMapper.selectFollowing(currentUserId);
-        if (follows.isEmpty()) {
-            return List.of();
-        }
-
-        List<Long> followingIds = follows.stream()
-                .map(Follow::getFollowingId)
-                .collect(Collectors.toList());
-
-        List<Post> posts = postMapper.selectList(new LambdaQueryWrapper<Post>()
-                .in(Post::getUserId, followingIds)
+        List<Post> posts = postMapper.selectList(followingPosts(currentUserId)
                 .eq(Post::getStatus, 1)
                 .isNull(Post::getDeletedAt)
                 .orderByDesc(Post::getCreatedAt)
                 .last("LIMIT 20"));
 
-        return posts.stream()
-                .map(post -> {
-                    User user = userService.getUserById(post.getUserId());
-                    return convertToPostResponse(post, user, currentUserId);
-                })
-                .collect(Collectors.toList());
+        return toPostResponses(posts, currentUserId);
     }
 
     public PageResult<PostResponse> getPostPage(Long currentUserId, String type,
                                                 long pageNum, long pageSize) {
         Page<Post> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<Post>()
+        boolean following = "following".equals(type);
+        LambdaQueryWrapper<Post> wrapper = (following
+                ? followingPosts(currentUserId) : new LambdaQueryWrapper<Post>())
                 .eq(Post::getStatus, 1)
                 .isNull(Post::getDeletedAt);
 
-        if ("following".equals(type)) {
-            List<Follow> follows = followMapper.selectFollowing(currentUserId);
-            if (follows.isEmpty()) {
-                return PageResult.of(List.of(), 0L, pageNum, pageSize);
-            }
-            List<Long> followingIds = follows.stream()
-                    .map(Follow::getFollowingId)
-                    .collect(Collectors.toList());
-            wrapper.in(Post::getUserId, followingIds)
-                    .orderByDesc(Post::getCreatedAt)
+        if (following) {
+            wrapper.orderByDesc(Post::getCreatedAt)
                     .orderByDesc(Post::getId);
         } else {
             // hot 与 recommend 当前排序相同，后续可接入推荐策略
@@ -196,14 +171,14 @@ public class CommunityService {
         }
 
         Page<Post> resultPage = postMapper.selectPage(page, wrapper);
-        List<PostResponse> records = resultPage.getRecords().stream()
-                .map(post -> {
-                    User user = userService.getUserById(post.getUserId());
-                    return convertToPostResponse(post, user, currentUserId);
-                })
-                .collect(Collectors.toList());
+        List<PostResponse> records = toPostResponses(resultPage.getRecords(), currentUserId);
         return PageResult.of(records, resultPage.getTotal(),
                 resultPage.getCurrent(), resultPage.getSize());
+    }
+
+    private LambdaQueryWrapper<Post> followingPosts(Long currentUserId) {
+        return new LambdaQueryWrapper<Post>().apply(
+                "user_id IN (SELECT following_id FROM user_follow WHERE follower_id = {0})", currentUserId);
     }
 
     /**
@@ -479,10 +454,75 @@ public class CommunityService {
         return count != null ? count : 0;
     }
 
+    public FollowStatsResponse getFollowStats(Long userId) {
+        return new FollowStatsResponse(getFollowingCount(userId), getFollowerCount(userId));
+    }
+
+    public PageResult<FollowUserResponse> searchFollowUsers(Long userId, String query,
+                                                            long pageNum, long pageSize) {
+        String keyword = query.strip();
+        if (keyword.isEmpty()) {
+            return PageResult.of(List.of(), 0, pageNum, pageSize);
+        }
+        if (keyword.length() > 50) {
+            throw new BusinessException(ErrorCode.BUSINESS_ERROR.getCode(), "昵称最多输入 50 个字符");
+        }
+        Page<FollowUserResponse> page = followMapper.searchFollowUsers(
+                new Page<>(pageNum, pageSize), userId, keyword);
+        return PageResult.of(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
+    }
+
+    public PageResult<FollowUserResponse> getFollowUsers(Long userId, boolean fans,
+                                                          long pageNum, long pageSize) {
+        Page<FollowUserResponse> page = followMapper.selectFollowUsers(
+                new Page<>(pageNum, pageSize), userId, fans);
+        return PageResult.of(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
+    }
+
+    private List<PostResponse> toPostResponses(List<Post> posts, Long currentUserId) {
+        if (posts.isEmpty()) {
+            return List.of();
+        }
+        List<Long> authorIds = posts.stream().map(Post::getUserId).distinct().toList();
+        Map<Long, User> authors = userService.getUsersByIds(authorIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+        Set<Long> likedPosts = getLikedPostIds(currentUserId, posts);
+        Set<Long> followedAuthors = getFollowedAuthors(currentUserId, posts);
+        return posts.stream()
+                .map(post -> convertToPostResponse(post, authors.get(post.getUserId()),
+                        likedPosts.contains(post.getId()), followedAuthors.contains(post.getUserId())))
+                .toList();
+    }
+
+    private Set<Long> getLikedPostIds(Long currentUserId, List<Post> posts) {
+        if (currentUserId == null || posts.isEmpty()) {
+            return Set.of();
+        }
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        return postLikeMapper.selectList(new LambdaQueryWrapper<PostLike>()
+                        .select(PostLike::getPostId)
+                        .eq(PostLike::getUserId, currentUserId)
+                        .in(PostLike::getPostId, postIds))
+                .stream().map(PostLike::getPostId).collect(Collectors.toSet());
+    }
+
+    private Set<Long> getFollowedAuthors(Long currentUserId, List<Post> posts) {
+        if (currentUserId == null || posts.isEmpty()) {
+            return Set.of();
+        }
+        List<Long> authorIds = posts.stream().map(Post::getUserId).distinct().toList();
+        return followMapper.selectList(new LambdaQueryWrapper<Follow>()
+                        .select(Follow::getFollowingId)
+                        .eq(Follow::getFollowerId, currentUserId)
+                        .in(Follow::getFollowingId, authorIds))
+                .stream().map(Follow::getFollowingId).collect(Collectors.toSet());
+    }
+
     /**
      * 将Post实体转换为PostResponse DTO
      */
-    private PostResponse convertToPostResponse(Post post, User user, Long currentUserId) {
+    private PostResponse convertToPostResponse(Post post, User user, boolean isLiked,
+                                                boolean isFollowing) {
         // 反序列化照片列表
         List<String> photoUrls = null;
         if (post.getPhotoUrls() != null && !post.getPhotoUrls().isEmpty() && !post.getPhotoUrls().equals("[]")) {
@@ -494,19 +534,11 @@ public class CommunityService {
             }
         }
 
-        Boolean isLiked = false;
-        if (currentUserId != null) {
-            Long likeCount = postLikeMapper.selectCount(new LambdaQueryWrapper<PostLike>()
-                    .eq(PostLike::getPostId, post.getId())
-                    .eq(PostLike::getUserId, currentUserId));
-            isLiked = likeCount != null && likeCount > 0;
-        }
-
         return PostResponse.builder()
                 .id(post.getId())
                 .userId(post.getUserId())
-                .username(user.getUsername())
-                .userAvatar(user.getAvatarUrl())
+                .username(user == null ? null : user.getUsername())
+                .userAvatar(user == null ? null : user.getAvatarUrl())
                 .petId(post.getPetId())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -514,6 +546,7 @@ public class CommunityService {
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .isLiked(isLiked)
+                .isFollowing(isFollowing)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();

@@ -1,0 +1,26 @@
+<import src="./follow-row.wxml" />
+<view class="follow-page">
+  <view class="follow-tabs">
+    <button class="follow-tab {{tab === 'following' ? 'active' : ''}}" data-tab="following" bindtap="onSwitchTab">
+      关注<text wx:if="{{stats}}"> {{stats.followingCount}}</text>
+    </button>
+    <button class="follow-tab {{tab === 'followers' ? 'active' : ''}}" data-tab="followers" bindtap="onSwitchTab">
+      粉丝<text wx:if="{{stats}}"> {{stats.followerCount}}</text>
+    </button>
+  </view>
+
+  <view wx:if="{{rows.length}}" class="follow-list">
+    <template wx:for="{{rows}}" wx:key="id" is="followRow" data="{{item: item, disabled: pendingUserId !== 0}}" />
+  </view>
+
+  <view wx:if="{{loading || loadingMore}}" class="follow-message">加载中…</view>
+  <view wx:elif="{{loadFailed}}" class="follow-state">
+    <view class="state-title">加载失败</view>
+    <button class="follow-action primary" bindtap="retry">重试</button>
+  </view>
+  <view wx:elif="{{!rows.length}}" class="follow-state">
+    <view class="state-title">{{tab === 'following' ? '还没有关注的宠友' : '还没有粉丝'}}</view>
+    <view class="state-copy">{{tab === 'following' ? '去宠友圈发现喜欢的宠友。' : '分享养宠日常，让宠友认识你。'}}</view>
+    <button class="follow-action primary" bindtap="goCommunity">去宠友圈</button>
+  </view>
+</view>

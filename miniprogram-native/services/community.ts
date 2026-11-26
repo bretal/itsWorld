@@ -13,6 +13,7 @@ export interface Post {
   likeCount?: number;
   commentCount?: number;
   isLiked?: boolean;
+  isFollowing?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -55,6 +56,62 @@ export function getComments(postId: number): Promise<Comment[]> {
 }
 
 export type CommunityTab = 'recommend' | 'hot' | 'following';
+
+export type FollowTab = 'following' | 'followers';
+
+export interface FollowUser {
+  id: number;
+  nickName?: string;
+  avatarUrl?: string;
+  bio?: string;
+  isFollowing: boolean;
+  followsMe: boolean;
+}
+
+export interface FollowStats {
+  followingCount: number;
+  followerCount: number;
+}
+
+export function getFollowStats(): Promise<FollowStats> {
+  return request<FollowStats>({ url: '/community/follow/stats' });
+}
+
+export function getFollowUsers(tab: FollowTab, page: number): Promise<PageData<FollowUser>> {
+  return request<PageData<FollowUser>>({
+    url: `/community/${tab}/page`,
+    data: { page, size: 20 },
+  });
+}
+
+export function searchCommunityUsers(keyword: string, page: number): Promise<PageData<FollowUser>> {
+  return request<PageData<FollowUser>>({
+    url: '/community/users/search',
+    data: { keyword, page, size: 20 },
+  });
+}
+
+export function setUserFollowing(userId: number, following: boolean): Promise<void> {
+  return request<void>({
+    url: `/community/follow/${userId}`,
+    method: following ? 'POST' : 'DELETE',
+  });
+}
+
+export function confirmUnfollow(name: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    wx.showModal({
+      title: `取消关注${name}？`,
+      content: '对方的帖子将从关注动态移除。',
+      cancelText: '保留关注',
+      confirmText: '取消关注',
+      confirmColor: '#773ba0',
+      success: (result: { confirm: boolean }) => resolve(result.confirm),
+      fail: () => resolve(false),
+    });
+  });
+}
+
 
 export function getPostPage(
   type: CommunityTab,

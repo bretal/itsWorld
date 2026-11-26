@@ -1,26 +1,28 @@
 <view class="pet-edit-page">
   <view class="avatar-section">
     <view class="avatar-picker" bindtap="chooseAvatar">
-      <image
-        class="avatar-image"
-        src="{{avatarPreviewSrc || avatarUrl || staticAssets['pet-placeholder.png']}}"
-        mode="aspectFill"
-      />
-      <view class="avatar-mask">
-        <text>{{uploading ? '上传中…' : '更换头像'}}</text>
-      </view>
+      <image wx:if="{{avatarPreviewSrc || avatarUrl}}" class="avatar-image"
+        src="{{avatarPreviewSrc || avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="camera-icon" aria-hidden="true"></view>
     </view>
-    <view class="avatar-tip">点击上传宠物头像</view>
+    <view class="avatar-copy">
+      <view class="avatar-title">上传头像</view>
+      <view class="avatar-tip">选填</view>
+    </view>
+    <button class="gold avatar-button" disabled="{{uploading || saving}}" bindtap="chooseAvatar">
+      {{uploading ? '上传中…' : '选择照片'}}
+    </button>
   </view>
 
   <view class="form-card">
+    <view class="form-heading"><text aria-hidden="true">✦</text> 基本信息</view>
     <view class="form-item">
       <text class="form-label">名字 <text class="required">*</text></text>
       <input
         class="form-input"
         data-field="petName"
         value="{{petName}}"
-        placeholder="TA叫什么名字？"
+        placeholder="输入宠物名字"
         placeholder-class="placeholder"
         maxlength="50"
         bindinput="onInput"
@@ -36,7 +38,7 @@
         disabled="{{isEdit}}"
         bindchange="onPetTypeChange"
       >
-        <view class="picker-value">
+        <view class="picker-value {{petTypeIndex === 0 ? 'placeholder' : ''}}">
           {{petTypes[petTypeIndex]}}
           <text class="picker-arrow">›</text>
         </view>
@@ -50,7 +52,7 @@
         class="form-input"
         data-field="breed"
         value="{{breed}}"
-        placeholder="如：金毛、布偶猫"
+        placeholder="如：布偶猫"
         placeholder-class="placeholder"
         maxlength="50"
         bindinput="onInput"
@@ -59,17 +61,12 @@
 
     <view class="form-item">
       <text class="form-label">性别</text>
-      <picker
-        class="form-picker"
-        range="{{genders}}"
-        value="{{genderIndex}}"
-        bindchange="onGenderChange"
-      >
-        <view class="picker-value">
-          {{genders[genderIndex]}}
-          <text class="picker-arrow">›</text>
-        </view>
-      </picker>
+      <view class="gender-options">
+        <button class="gender-button {{gender === 1 ? 'selected' : ''}}"
+          aria-pressed="{{gender === 1}}" data-value="1" bindtap="onGenderChange">公</button>
+        <button class="gender-button {{gender === 2 ? 'selected' : ''}}"
+          aria-pressed="{{gender === 2}}" data-value="2" bindtap="onGenderChange">母</button>
+      </view>
     </view>
 
     <view class="form-item">
@@ -95,44 +92,17 @@
         data-field="weight"
         type="digit"
         value="{{weight}}"
-        placeholder="如：28.5"
+        placeholder="请输入"
         placeholder-class="placeholder"
-        bindinput="onInput"
-      />
-    </view>
-
-    <view class="form-item">
-      <text class="form-label">身高（cm）</text>
-      <input
-        class="form-input"
-        data-field="height"
-        type="digit"
-        value="{{height}}"
-        placeholder="如：60"
-        placeholder-class="placeholder"
-        bindinput="onInput"
-      />
-    </view>
-
-    <view class="form-item form-item-textarea">
-      <text class="form-label">简介</text>
-      <textarea
-        class="form-textarea"
-        data-field="description"
-        value="{{description}}"
-        placeholder="介绍一下TA的性格和小爱好吧"
-        placeholder-class="placeholder"
-        maxlength="200"
-        auto-height
         bindinput="onInput"
       />
     </view>
   </view>
 
   <button
-    class="btn-primary save-btn"
+    class="gold save-btn"
     loading="{{saving}}"
-    disabled="{{saving}}"
+    disabled="{{saving || uploading}}"
     bindtap="onSave"
   >
     {{isEdit ? '保存修改' : '添加宠物'}}

@@ -1,0 +1,24 @@
+page { background: #fff9fc; color: #34263f; }
+.follow-page { padding: 0 28rpx calc(36rpx + env(safe-area-inset-bottom)); }
+.follow-tabs { display: flex; margin: 8rpx 0 18rpx; }
+.follow-tab { position: relative; flex: 1; margin: 0; padding: 23rpx 24rpx; text-align: left; background: transparent; color: #75647e; font-size: 31rpx; line-height: 1.4; }
+.follow-tab::after, .follow-action::after { border: 0; }
+.follow-tab.active { color: #773ba0; font-weight: 700; }
+.follow-tab.active::before { content: ''; position: absolute; left: 24rpx; bottom: 6rpx; width: 42rpx; height: 6rpx; border-radius: 6rpx; background: #a878c5; }
+.follow-list, .follow-state { padding: 0 24rpx; border-radius: 30rpx; background: #fff; }
+.follow-row { display: flex; align-items: center; gap: 20rpx; min-height: 132rpx; }
+.follow-row + .follow-row { border-top: 1rpx solid #eee6f1; }
+.follow-avatar { width: 80rpx; height: 80rpx; flex-shrink: 0; border-radius: 50%; background: #ecdcf7; }
+.follow-initial { display: flex; align-items: center; justify-content: center; color: #714897; font-size: 32rpx; font-weight: 700; }
+.follow-user { flex: 1; min-width: 0; }
+.follow-name, .follow-bio { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.follow-name, .state-title { font-size: 30rpx; font-weight: 700; }
+.follow-bio, .state-copy, .follow-message { color: #75647e; font-size: 24rpx; }
+.follow-bio { margin-top: 7rpx; }
+.follow-action { flex-shrink: 0; min-width: 146rpx; min-height: 64rpx; margin: 0; padding: 10rpx 16rpx; border-radius: 40rpx; background: #f4edf6; color: #6e3d94; font-size: 25rpx; line-height: 44rpx; }
+.follow-action.primary { background: #e9d6f8; }
+.follow-action[disabled] { opacity: .65; }
+.follow-state { margin-top: 20rpx; padding: 44rpx 24rpx; text-align: center; }
+.state-copy { margin-top: 12rpx; }
+.follow-state .follow-action { display: inline-block; width: auto; margin-top: 24rpx; }
+.follow-message { margin-top: 24rpx; text-align: center; }

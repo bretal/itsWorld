@@ -11,6 +11,11 @@ page{background:#fff6f8;color:#2b2631;}
 .user-tag image{width:34rpx;height:34rpx;margin-right:5rpx;}
 .edit-arrow{font-size:40rpx;color:#a293ad;align-self:flex-end;margin-bottom:25rpx;}
 .profile-body{padding:0 28rpx;}
+.follow-stats{display:flex;margin-top:24rpx;padding:12rpx 0;border-radius:26rpx;background:#ffffffdd;}
+.follow-stat{flex:1;display:flex;flex-direction:column;align-items:center;margin:0;padding:8rpx;background:transparent;border-radius:0;color:#6d577d;font-size:25rpx;line-height:1.5;}
+.follow-stat + .follow-stat{border-left:2rpx solid #eee3f2;}
+.follow-stat::after{border:0;}
+.follow-count{color:#67398b;font-size:38rpx;font-weight:750;}
 .stat-grid{display:flex;gap:16rpx;}
 .stat-card{position:relative;display:flex;align-items:center;gap:14rpx;flex:1;min-width:0;height:116rpx;border-radius:28rpx;border:2rpx solid white;padding:15rpx 17rpx;box-shadow:0 7rpx 20rpx #c7a5cf18;overflow:hidden;}
 .stat-card.pets{background:linear-gradient(120deg,#fffaf2,#ffece5);}

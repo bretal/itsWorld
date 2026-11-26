@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "我的宠物",
+  "navigationBarBackgroundColor": "#fcf5ed",
+  "backgroundColor": "#fcf5ed",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark"
 }

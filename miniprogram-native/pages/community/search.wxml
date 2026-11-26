@@ -1,0 +1,26 @@
+<import src="../profile/follow-row.wxml" />
+<view class="follow-page search-page">
+  <view class="search-form">
+    <view class="search-field">
+      <input class="search-input" placeholder="输入宠友昵称" placeholder-class="search-placeholder" confirm-type="search" maxlength="50"
+        value="{{input}}" bindinput="onInput" bindconfirm="submitSearch" disabled="{{pendingUserId !== 0}}" focus />
+      <button wx:if="{{input}}" class="search-clear" aria-label="清空搜索"
+        bindtap="clearSearch" disabled="{{pendingUserId !== 0}}">×</button>
+    </view>
+    <button class="follow-action primary search-submit" bindtap="submitSearch" disabled="{{!input || pendingUserId !== 0}}">搜索</button>
+  </view>
+
+  <view wx:if="{{rows.length}}" class="follow-list">
+    <template wx:for="{{rows}}" wx:key="id" is="followRow" data="{{item: item, disabled: loading || pendingUserId !== 0}}" />
+  </view>
+
+  <view wx:if="{{loading}}" class="follow-message">搜索中…</view>
+  <view wx:elif="{{failedPage}}" class="follow-state">
+    <view class="state-title">搜索失败</view>
+    <button class="follow-action primary" bindtap="retry" disabled="{{pendingUserId !== 0}}">重试</button>
+  </view>
+  <view wx:elif="{{keyword && !rows.length}}" class="follow-state">
+    <view class="state-title">没有找到匹配的宠友</view>
+    <view class="state-copy">试试输入昵称的一部分。</view>
+  </view>
+</view>

@@ -77,18 +77,6 @@ public class Pet implements Serializable {
     private BigDecimal weight;
 
     /**
-     * 当前身高（cm）
-     */
-    @TableField("height_cm")
-    private BigDecimal height;
-
-    /**
-     * 宠物描述
-     */
-    @TableField("bio")
-    private String description;
-
-    /**
      * 是否为当前活跃宠物 (1-是 0-否)
      */
     @TableField("is_active")

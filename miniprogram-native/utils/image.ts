@@ -3,15 +3,25 @@ import { ENV } from '../config/env';
 const imageCache: Record<string, string> = {};
 
 /**
- * 把历史数据里的 localhost MinIO 地址换成当前局域网地址。
+ * 将历史 MinIO 地址映射到当前环境的文件入口。
  */
 export function normalizeMinioUrl(url?: string): string {
   if (!url) {
     return '';
   }
+  if (/[?&]X-Amz-Signature=/i.test(url)) {
+    return url;
+  }
   let normalized = url
     .replace('http://localhost:9000', ENV.minioBaseUrl)
     .replace('http://127.0.0.1:9000', ENV.minioBaseUrl);
+
+  // 旧社区帖子曾保存局域网直连地址。限定社区桶及私有主机，
+  // 避免改写第三方图片或带签名的文件请求。
+  normalized = normalized.replace(
+    /^http:\/\/(?:localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10(?:\.\d{1,3}){3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}):(?:9000|19000)(?=\/itsworld-community\/)/i,
+    ENV.minioBaseUrl,
+  );
 
   // 生产历史数据可能还是带 9000 端口的直连地址；统一改走同域名 /files。
   if (ENV.baseUrl.startsWith('https://lvhaorankk.top')) {

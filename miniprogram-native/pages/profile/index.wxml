@@ -6,6 +6,16 @@
       <view class="user-info"><view class="user-name">{{displayName}}</view><view class="user-tag"><image src="{{staticAssets['member/membership-paw.png']}}" mode="aspectFit"/>宠物家长</view></view>
       <view class="edit-arrow">›</view>
     </view>
+    <view class="follow-stats">
+      <button class="follow-stat" data-tab="following" bindtap="goFollows">
+        <text class="follow-count">{{followingCount == null ? '—' : followingCount}}</text>
+        <text>关注 ›</text>
+      </button>
+      <button class="follow-stat" data-tab="followers" bindtap="goFollows">
+        <text class="follow-count">{{followerCount == null ? '—' : followerCount}}</text>
+        <text>粉丝 ›</text>
+      </button>
+    </view>
   </view>
   <view class="profile-body">
     <view class="stat-grid">

@@ -51,6 +51,8 @@ class AssistantIntegrationTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired ObjectMapper json;
     @Autowired MockMvc mvc;
+    @org.springframework.beans.factory.annotation.Value("${minio.public-endpoint:${minio.endpoint}}") String testMediaBase;
+    @org.springframework.beans.factory.annotation.Value("${minio.bucket.diary}") String testDiaryBucket;
     @MockBean DeepSeekClient client;
     @BeforeEach void setup() throws Exception {
         var migration=new FileSystemResource("../init-scripts/mysql/15-assistant.sql");
@@ -136,6 +138,66 @@ class AssistantIntegrationTest {
         assertEquals("ASK_USER", next.path("status").asText());
         var fallback = pageTasks.create(1L, new AssistantPageTaskService.CreateRequest("plaintext_request_001", session, "记录体重", null));
         assertEquals("ASK_USER", fallback.path("status").asText());
+    }
+
+    @Test void diaryPhotosRequireUploadOrExplicitSkipAndCanBeCancelled() {
+        long session = Long.parseLong(service.create(1L).id());
+        when(client.complete(any(), any(), anyLong())).thenReturn(
+                pageTool("request_photos", "request_photos", "{}"),
+                pageTool("ask_diary", "ask_user", "{\"question\":\"今天发生了什么？\"}"));
+        var task = pageTasks.create(1L, new AssistantPageTaskService.CreateRequest("diary_photos_001", session, "写今天的日记", null));
+        String id = task.path("id").asText();
+        String action = task.path("action").path("id").asText();
+        assertEquals("WAITING_PHOTOS", task.path("status").asText());
+        var result = json.createObjectNode().put("ok", true);
+        result.putObject("state").put("page", "diary").putArray("photoUrls");
+        assertThrows(BusinessException.class, () -> pageTasks.advance(1L, id,
+                new AssistantPageTaskService.StepRequest("diary_empty_001", action, result, null)));
+        result.put("skipped", true);
+        assertEquals("ASK_USER", pageTasks.advance(1L, id,
+                new AssistantPageTaskService.StepRequest("diary_skip_001", action, result, null)).path("status").asText());
+        assertEquals("CANCELLED", pageTasks.cancel(1L, id).path("status").asText());
+    }
+
+    @Test void diaryPhotosOwnershipAndConcurrentSaveAreValidated() throws Exception {
+        jdbc.update("INSERT INTO sys_user(id,username,password_hash,status) VALUES(887767,'diary_task_user','test',1)");
+        jdbc.update("INSERT INTO pet_profile(id,user_id,pet_name,pet_type) VALUES(887767,887767,'日记测试猫','cat')");
+        try {
+            long session = Long.parseLong(service.create(887767L).id());
+            String photo = testMediaBase.replaceAll("/+$", "") + "/" + testDiaryBucket
+                    + "/assistant/887767/20261123/0123456789abcdef0123456789abcdef.jpg";
+            var args = json.createObjectNode().put("petId", "887767").put("date", "2026-11-23")
+                    .put("content", "今天一起散步").put("mood", "happy").put("category", "daily").put("isPublic", 0).put("revision", 3);
+            args.putArray("photoUrls").add(photo);
+            when(client.complete(any(), any(), anyLong())).thenReturn(
+                    pageTool("diary_photos", "request_photos", "{}"), pageTool("diary_save", "submit_diary", args.toString()));
+            var task = pageTasks.create(887767L, new AssistantPageTaskService.CreateRequest("diary_request_001", session, "记录散步日记", 887767L));
+            String id = task.path("id").asText();
+            String photoAction = task.path("action").path("id").asText();
+            var result = json.createObjectNode().put("ok", true).put("uploaded", true);
+            result.putObject("state").put("page", "diary").putArray("photoUrls").add(photo.replace("/887767/", "/999999/"));
+            assertThrows(BusinessException.class, () -> pageTasks.advance(887767L, id,
+                    new AssistantPageTaskService.StepRequest("diary_wrong_owner", photoAction, result, null)));
+            ((com.fasterxml.jackson.databind.node.ObjectNode) result.get("state")).putArray("photoUrls").add(photo);
+            var ready = pageTasks.advance(887767L, id, new AssistantPageTaskService.StepRequest("diary_uploaded_001", photoAction, result, null));
+            String saveAction = ready.path("action").path("id").asText();
+            var request = com.itsworld.diary.dto.DiaryCreateRequest.builder().petId(887767L).diaryDate("2026-11-23")
+                    .content("今天一起散步").mood("happy").category("daily").isPublic(0).photoUrls(List.of(photo)).build();
+            var executor = Executors.newFixedThreadPool(2);
+            try {
+                var first = executor.submit(() -> pageTasks.saveDiary(887767L, id, saveAction, request));
+                var second = executor.submit(() -> pageTasks.saveDiary(887767L, id, saveAction, request));
+                assertEquals(first.get(15, TimeUnit.SECONDS), second.get(15, TimeUnit.SECONDS));
+            } finally { executor.shutdownNow(); }
+            assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM pet_diary WHERE pet_id=887767", Integer.class));
+            assertEquals("COMPLETED", pageTasks.get(887767L, id).path("status").asText());
+            request.setContent("更改正文");
+            assertThrows(BusinessException.class, () -> pageTasks.saveDiary(887767L, id, saveAction, request));
+        } finally {
+            jdbc.update("DELETE FROM pet_diary WHERE pet_id=887767");
+            jdbc.update("DELETE FROM pet_profile WHERE id=887767");
+            jdbc.update("DELETE FROM sys_user WHERE id=887767");
+        }
     }
     @Test void authenticationAndOwnership() throws Exception {
         mvc.perform(get("/api/assistant/sessions")).andExpect(status().isUnauthorized());
@@ -266,7 +328,7 @@ class AssistantIntegrationTest {
         pet.setPetType("cat");
         pet.setBreed("测试品种");
         pet.setBirthDate(java.time.LocalDate.now().minusMonths(7).toString());
-        pet.setDescription("PRIVATE_PROFILE_DESCRIPTION");
+        pet.setAvatarUrl("https://example.invalid/PRIVATE_PET_AVATAR.png");
         var defaults = instructions.settings().published();
         var config = new AssistantInstructionService.Config("TEST_INSTRUCTION", java.util.Map.of(
                 AssistantInstructionService.Scene.SHOP, java.util.Map.of(
@@ -281,7 +343,7 @@ class AssistantIntegrationTest {
             assertTrue(prompt.contains("TEST_INSTRUCTION"));
             assertTrue(prompt.contains("测试品种"));
             assertFalse(prompt.contains("7个月"));
-            assertFalse(prompt.contains("PRIVATE_PROFILE_DESCRIPTION"));
+            assertFalse(prompt.contains("PRIVATE_PET_AVATAR"));
             assertEquals(defaults, instructions.rollback().published());
         } finally {
             jdbc.update("DELETE FROM assistant_instruction_config");

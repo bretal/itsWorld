@@ -356,7 +356,7 @@ Page({
         return;
       }
       if (this.data.photos.length) {
-        wx.showToast({ title: '体重记录请使用文字或语音输入', icon: 'none' });
+        wx.showToast({ title: '请先描述需求，日记照片可在任务中上传', icon: 'none' });
         return;
       }
       if (!this.data.sessionId) {

@@ -2,6 +2,7 @@ import { withStaticImages } from '../../utils/static-images';
 import { clearAuth, getUser, requireLogin } from '../../utils/auth';
 import type { AuthUser } from '../../utils/auth';
 import { getProfile } from '../../services/user';
+import { getFollowStats } from '../../services/community';
 import { listPets } from '../../services/pet';
 import { listDiaries } from '../../services/diary';
 import { resolveImage } from '../../utils/image';
@@ -15,6 +16,8 @@ Page(withStaticImages({
     avatarSrc: '',
     petCount: 0,
     photoCount: 0,
+    followingCount: null as number | null,
+    followerCount: null as number | null,
     petBgSrc: '',
     albumBgSrc: '',
     serviceMenu: [] as any[],
@@ -52,6 +55,9 @@ Page(withStaticImages({
       return;
     }
     this.loadData();
+    getFollowStats()
+      .then((stats) => this.setData(stats))
+      .catch(() => {});
   },
 
   async loadBackgrounds() {
@@ -170,6 +176,11 @@ Page(withStaticImages({
 
   goEditProfile() {
     wx.navigateTo({ url: '/pages/profile/edit' });
+  },
+
+  goFollows(event: { currentTarget: { dataset: { tab: string } } }) {
+    const { tab } = event.currentTarget.dataset;
+    wx.navigateTo({ url: `/pages/profile/follows?tab=${tab}` });
   },
 
   showSettings() {

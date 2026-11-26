@@ -1,4 +1,5 @@
 {
+  "usingComponents": { "agent-progress": "/components/agent-progress/index" },
   "navigationBarTitleText": "记录日记",
   "backgroundTextStyle": "dark",
   "navigationBarBackgroundColor": "#fcebf4",
